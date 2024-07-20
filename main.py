@@ -2,6 +2,14 @@ import contextlib
 import pudb
 import sys
 from enum import Enum
+a = {
+    "module:func_name:func_line" : {
+        "args": {
+            "a" : []
+        },
+        "returns": []
+    }
+}
 
 FUNC_VARIABLES = {}
 PROJECT_NAME="typemedaddy"
@@ -21,18 +29,31 @@ def trace_function(frame, event, arg):
     if event == TraceEvent.CALL:
         module_name =frame.f_code.co_filename
         func_name = frame.f_code.co_name
+        line_number = example_function.__code__.co_firstlineno
+        mod_func_line = f"{module_name}:{func_name}:{line_number}"
+        local_vars = frame.f_locals
         if PROJECT_NAME not in module_name or func_name == "trace":
             return trace_function
-        local_vars = frame.f_locals
-        if module_name not in FUNC_VARIABLES:
-            FUNC_VARIABLES[module_name] = {}
-        if func_name not in FUNC_VARIABLES[module_name]:
-            FUNC_VARIABLES[module_name][func_name] = {}
+        # if module_name not in FUNC_VARIABLES:
+        #     FUNC_VARIABLES[module_name] = {}
+        # if func_name not in FUNC_VARIABLES[module_name]:
+        #     FUNC_VARIABLES[module_name][func_name] = {}
+        if mod_func_line not in FUNC_VARIABLES:
+            FUNC_VARIABLES[mod_func_line] = {"args":{}}
         for k, v in local_vars.items():
-            FUNC_VARIABLES[module_name][func_name][k] = v
-        # print("Function name:", func_name)
-        # print(f"Function module: {module}")
-        # print("Local variables:", local_vars)
+            if k in FUNC_VARIABLES[mod_func_line]["args"]:
+                FUNC_VARIABLES[mod_func_line]["args"][k].append(v)
+            else:
+                FUNC_VARIABLES[mod_func_line]["args"][k] = [v]
+
+    if event == TraceEvent.RETURN:
+        module_name =frame.f_code.co_filename
+        func_name = frame.f_code.co_name
+        line_number = example_function.__code__.co_firstlineno
+        print(module_name)
+        print(line_number)
+        print(func_name)
+        print(f"return value: {arg}")
         
     # print("Global variables:", list(frame.f_globals.keys()))
     return trace_function
