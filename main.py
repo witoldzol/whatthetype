@@ -1,8 +1,8 @@
 import contextlib
-import pudb
 import sys
 from enum import Enum
-a = {
+
+MODEL = {
     "module:func_name:func_line" : {
         "args": {
             "a" : []
@@ -34,10 +34,6 @@ def trace_function(frame, event, arg):
         local_vars = frame.f_locals
         if PROJECT_NAME not in module_name or func_name == "trace":
             return trace_function
-        # if module_name not in FUNC_VARIABLES:
-        #     FUNC_VARIABLES[module_name] = {}
-        # if func_name not in FUNC_VARIABLES[module_name]:
-        #     FUNC_VARIABLES[module_name][func_name] = {}
         if mod_func_line not in FUNC_VARIABLES:
             FUNC_VARIABLES[mod_func_line] = {"args":{}}
         for k, v in local_vars.items():
@@ -54,8 +50,6 @@ def trace_function(frame, event, arg):
         print(line_number)
         print(func_name)
         print(f"return value: {arg}")
-        
-    # print("Global variables:", list(frame.f_globals.keys()))
     return trace_function
 
 def example_function(a, b):
