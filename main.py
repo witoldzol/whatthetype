@@ -1,7 +1,9 @@
 import contextlib
 import sys
 from enum import Enum
+from foo import example_function
 
+FUNC_VARIABLES = {}
 MODEL = {
     "module:func_name:func_line" : {
         "args": {
@@ -11,7 +13,6 @@ MODEL = {
     }
 }
 
-FUNC_VARIABLES = {}
 PROJECT_NAME="typemedaddy"
 
 class TraceEvent(Enum):
@@ -41,8 +42,7 @@ def trace_function(frame, event, arg):
                 FUNC_VARIABLES[mod_func_line]["args"][k].append(v)
             else:
                 FUNC_VARIABLES[mod_func_line]["args"][k] = [v]
-
-    if event == TraceEvent.RETURN:
+    elif event == TraceEvent.RETURN:
         module_name =frame.f_code.co_filename
         func_name = frame.f_code.co_name
         line_number = example_function.__code__.co_firstlineno
@@ -52,15 +52,11 @@ def trace_function(frame, event, arg):
         print(f"return value: {arg}")
     return trace_function
 
-def example_function(a, b):
-    c = a + b
-    return c
-
 @contextlib.contextmanager
 def trace():
     print('tracing on')
     sys.settrace(trace_function)
-    yield
+    yield FUNC_VARIABLES
     print('tracing off')
     sys.settrace(None)
 
