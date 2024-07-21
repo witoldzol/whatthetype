@@ -7,8 +7,8 @@ FUNC_VARIABLES = {}
 MODEL = {
     "module:func_name:func_line": {
         "args": {
-            "a": []
-        }, "return": []
+            "var_name": set('type')
+        }, "return": set('type')
     }
 }
 
