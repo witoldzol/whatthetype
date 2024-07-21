@@ -31,15 +31,15 @@ def test_if_global_context_is_not_polluted_by_previous_test_invocation():
         assert actual[k]["args"] == {'a': {'int'}, 'b': {'int'}, 'foo': {'Foo'}}
         assert actual[k]["return"] == {'int'}
 
-# def test_example_function_with_different_args():
-#     with trace() as actual:
-#         f = Foo()
-#         example_function(1,2, f)
-#         example_function("bob","wow", f)
-#     for k in actual:
-#         print(actual)
-#         assert actual[k]["args"] == {'a': {'int'}, 'b': {'int'}, 'foo': {'Foo'}}
-#         assert actual[k]["return"] == {'int'}
+def test_example_function_with_different_args():
+    with trace() as actual:
+        f = Foo()
+        example_function(1,2, f)
+        example_function("bob","wow", f)
+    for k in actual:
+        print(actual)
+        assert actual[k]["args"] == {'a': {'int', 'str'}, 'b': {'int', 'str'}, 'foo': {'Foo'}}
+        assert actual[k]["return"] == {'int', 'str'}
 
 
 # todo - test same func called with different args
