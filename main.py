@@ -4,7 +4,13 @@ from enum import Enum
 from foo import example_function
 
 FUNC_VARIABLES = {}
-MODEL = {"module:func_name:func_line": {"args": {"a": []}, "return": []}}
+MODEL = {
+    "module:func_name:func_line": {
+        "args": {
+            "a": []
+        }, "return": []
+    }
+}
 
 PROJECT_NAME = "typemedaddy"
 
