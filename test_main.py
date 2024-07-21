@@ -14,7 +14,6 @@ def traverse_dict(d, target, path=None):
 def test_output():
     with trace() as actual:
         example_function(1,2)
-    path = traverse_dict(actual,"args", '')
-    for k in path.split('|'):
-        actual = actual[k]
-    assert {'a': [1, 1], 'b': [2, 2]} == actual
+    for k in actual:
+        assert actual[k]["args"] == {'a': [1], 'b': [2]}
+        assert actual[k]["return"] == [3]
