@@ -1,5 +1,5 @@
 from main import trace
-from foo import example_function
+from foo import example_function, Foo
 
 # helper fun 
 def traverse_dict(d, target, path=None):
@@ -11,9 +11,18 @@ def traverse_dict(d, target, path=None):
             return traverse_dict(v, target, full_key )
     return None
 
-def test_output():
+def test_example_function():
     with trace() as actual:
-        example_function(1,2)
+        f = Foo()
+        example_function(1,2, f)
     for k in actual:
-        assert actual[k]["args"] == {'a': [1], 'b': [2]}
-        assert actual[k]["return"] == [3]
+        print(actual)
+        assert actual[k]["args"] == {'a': ['int'], 'b': ['int'], 'foo': ['Foo']}
+        assert actual[k]["return"] == ['int']
+
+# def test_class_method():
+#     with trace() as actual:
+#         example_function(1,2, f)
+#     for k in actual:
+#         assert actual[k]["args"] == {'a': [1], 'b': [2]}
+#         assert actual[k]["return"] == [3]
