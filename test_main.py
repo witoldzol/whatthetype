@@ -20,9 +20,12 @@ def test_example_function():
         assert actual[k]["args"] == {'a': ['int'], 'b': ['int'], 'foo': ['Foo']}
         assert actual[k]["return"] == ['int']
 
+# todo - test same func called with different args
+
 # def test_class_method():
+#     f = Foo()
 #     with trace() as actual:
-#         example_function(1,2, f)
+#         f.get_foo("bob",9)
 #     for k in actual:
-#         assert actual[k]["args"] == {'a': [1], 'b': [2]}
+#         assert actual[k]["args"] == {'name': ["foo"], 'age': [2]}
 #         assert actual[k]["return"] == [3]

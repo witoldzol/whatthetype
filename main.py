@@ -31,26 +31,31 @@ def trace_function(frame, event, arg):
     func_name = frame.f_code.co_name
     line_number = example_function.__code__.co_firstlineno
     mod_func_line = f"{module_name}:{func_name}:{line_number}"
-    arg_names = frame.f_code.co_varnames[:frame.f_code.co_argcount]
-    # arg_names = frame.f_code.co_varnames[:frame.f_code.co_argcount]
+    function_arg_count = frame.f_code.co_argcount
+    arg_names = frame.f_code.co_varnames[:function_arg_count]
     local_vars = frame.f_locals
     if PROJECT_NAME not in module_name or func_name == "trace":
         return trace_function
     if mod_func_line not in FUNC_VARIABLES:
         FUNC_VARIABLES[mod_func_line] = {"args":{}}
+    print(f"ARG NAMES: {arg_names}")
     if event == TraceEvent.CALL:
-        for k, v in local_vars.items():
-        # for k, v in arg_names:
+        for k in arg_names:
+            if k == 'self':
+                continue
+            var = local_vars[k]
+            var_type = type(var).__name__
             if k in FUNC_VARIABLES[mod_func_line]["args"]:
-                FUNC_VARIABLES[mod_func_line]["args"][k].append(type(v).__name__)
+                FUNC_VARIABLES[mod_func_line]["args"][k].append(var_type)
             else:
-                FUNC_VARIABLES[mod_func_line]["args"][k] = [type(v).__name__]
+                FUNC_VARIABLES[mod_func_line]["args"][k] = [var_type]
     elif event == TraceEvent.RETURN:
         print(f"RETURN : {arg}")
         if "return" in FUNC_VARIABLES[mod_func_line]:
             FUNC_VARIABLES[mod_func_line]["return"].append(type(arg).__name__)
         else:
             FUNC_VARIABLES[mod_func_line]["return"] = [type(arg).__name__]
+    print(f"FUNC_VARIABLES :\n {FUNC_VARIABLES}")
     return trace_function
 
 @contextlib.contextmanager
