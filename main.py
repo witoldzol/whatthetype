@@ -4,30 +4,26 @@ from enum import Enum
 from foo import example_function
 
 FUNC_VARIABLES = {}
-MODEL = {
-    "module:func_name:func_line" : {
-        "args": {
-            "a" : []
-        },
-        "return": []
-    }
-}
+MODEL = {"module:func_name:func_line": {"args": {"a": []}, "return": []}}
 
-PROJECT_NAME="typemedaddy"
+PROJECT_NAME = "typemedaddy"
+
 
 class TraceEvent(Enum):
-    CALL='call' #: Triggered when a function is called.
-    LINE='line' #: Triggered when a new line of code is executed.
-    RETURN='return' #: Triggered when a function is about to return.
-    EXCEPTION='exception' #: Triggered when an exception is raised.
+    CALL = "call"  #: Triggered when a function is called.
+    LINE = "line"  #: Triggered when a new line of code is executed.
+    RETURN = "return"  #: Triggered when a function is about to return.
+    EXCEPTION = "exception"  #: Triggered when an exception is raised.
+
     # if string, compare to value by default
     def __eq__(self, other):
         if isinstance(other, str):
             return self.value == other
         return super().__eq__(other)
 
+
 def trace_function(frame, event, arg):
-    module_name =frame.f_code.co_filename
+    module_name = frame.f_code.co_filename
     func_name = frame.f_code.co_name
     line_number = example_function.__code__.co_firstlineno
     mod_func_line = f"{module_name}:{func_name}:{line_number}"
@@ -37,11 +33,11 @@ def trace_function(frame, event, arg):
     if PROJECT_NAME not in module_name or func_name == "trace":
         return trace_function
     if mod_func_line not in FUNC_VARIABLES:
-        FUNC_VARIABLES[mod_func_line] = {"args":{}}
+        FUNC_VARIABLES[mod_func_line] = {"args": {}}
     print(f"ARG NAMES: {arg_names}")
     if event == TraceEvent.CALL:
         for name in arg_names:
-            if name == 'self':
+            if name == "self":
                 continue
             var = local_vars[name]
             var_type = type(var).__name__
@@ -59,22 +55,25 @@ def trace_function(frame, event, arg):
     print(f"FUNC_VARIABLES :\n {FUNC_VARIABLES}")
     return trace_function
 
+
 @contextlib.contextmanager
 def trace():
     global FUNC_VARIABLES
-    print('========== TRACING ON ==========')
+    print("========== TRACING ON ==========")
     sys.settrace(trace_function)
     try:
         yield FUNC_VARIABLES
     finally:
-        print('========== TRACING OFF ==========')
+        print("========== TRACING OFF ==========")
         sys.settrace(None)
         FUNC_VARIABLES = {}
+
 
 def run():
     with trace():
         result = example_function(1, 2)
         print(FUNC_VARIABLES)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run()
