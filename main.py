@@ -40,15 +40,15 @@ def trace_function(frame, event, arg):
         FUNC_VARIABLES[mod_func_line] = {"args":{}}
     print(f"ARG NAMES: {arg_names}")
     if event == TraceEvent.CALL:
-        for k in arg_names:
-            if k == 'self':
+        for name in arg_names:
+            if name == 'self':
                 continue
-            var = local_vars[k]
+            var = local_vars[name]
             var_type = type(var).__name__
-            if k in FUNC_VARIABLES[mod_func_line]["args"]:
-                FUNC_VARIABLES[mod_func_line]["args"][k].append(var_type)
+            if name in FUNC_VARIABLES[mod_func_line]["args"]:
+                FUNC_VARIABLES[mod_func_line]["args"][name].append(var_type)
             else:
-                FUNC_VARIABLES[mod_func_line]["args"][k] = [var_type]
+                FUNC_VARIABLES[mod_func_line]["args"][name] = [var_type]
     elif event == TraceEvent.RETURN:
         print(f"RETURN : {arg}")
         return_type = type(arg).__name__
