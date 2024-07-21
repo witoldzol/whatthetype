@@ -61,11 +61,15 @@ def trace_function(frame, event, arg):
 
 @contextlib.contextmanager
 def trace():
+    global FUNC_VARIABLES
     print('tracing on')
     sys.settrace(trace_function)
-    yield FUNC_VARIABLES
-    print('tracing off')
-    sys.settrace(None)
+    try:
+        yield FUNC_VARIABLES
+    finally:
+        print('tracing off')
+        sys.settrace(None)
+        FUNC_VARIABLES = {}
 
 def run():
     with trace():
