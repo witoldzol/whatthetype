@@ -51,10 +51,11 @@ def trace_function(frame, event, arg):
                 FUNC_VARIABLES[mod_func_line]["args"][k] = [var_type]
     elif event == TraceEvent.RETURN:
         print(f"RETURN : {arg}")
+        return_type = type(arg).__name__
         if "return" in FUNC_VARIABLES[mod_func_line]:
-            FUNC_VARIABLES[mod_func_line]["return"].append(type(arg).__name__)
+            FUNC_VARIABLES[mod_func_line]["return"].append(return_type)
         else:
-            FUNC_VARIABLES[mod_func_line]["return"] = [type(arg).__name__]
+            FUNC_VARIABLES[mod_func_line]["return"] = [return_type]
     print(f"FUNC_VARIABLES :\n {FUNC_VARIABLES}")
     return trace_function
 
