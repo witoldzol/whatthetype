@@ -18,8 +18,8 @@ def test_example_function():
         print(actual)
         print("="*100)
     for k in actual:
-        assert actual[k]["args"] == {'a': ['int'], 'b': ['int'], 'foo': ['Foo']}
-        assert actual[k]["return"] == ['int']
+        assert actual[k]["args"] == {'a': {'int'}, 'b': {'int'}, 'foo': {'Foo'}}
+        assert actual[k]["return"] == {'int'}
 
 def test_if_global_context_is_not_polluted_by_previous_test_invocation():
     with trace() as actual:
@@ -28,8 +28,8 @@ def test_if_global_context_is_not_polluted_by_previous_test_invocation():
         print(actual)
         print("="*100)
     for k in actual:
-        assert actual[k]["args"] == {'a': ['int'], 'b': ['int'], 'foo': ['Foo']}
-        assert actual[k]["return"] == ['int']
+        assert actual[k]["args"] == {'a': {'int'}, 'b': {'int'}, 'foo': {'Foo'}}
+        assert actual[k]["return"] == {'int'}
 
 # def test_example_function_with_different_args():
 #     with trace() as actual:
@@ -38,8 +38,8 @@ def test_if_global_context_is_not_polluted_by_previous_test_invocation():
 #         example_function("bob","wow", f)
 #     for k in actual:
 #         print(actual)
-#         assert actual[k]["args"] == {'a': ['int'], 'b': ['int'], 'foo': ['Foo']}
-#         assert actual[k]["return"] == ['int']
+#         assert actual[k]["args"] == {'a': {'int'}, 'b': {'int'}, 'foo': {'Foo'}}
+#         assert actual[k]["return"] == {'int'}
 
 
 # todo - test same func called with different args

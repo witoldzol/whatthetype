@@ -46,28 +46,28 @@ def trace_function(frame, event, arg):
             var = local_vars[name]
             var_type = type(var).__name__
             if name in FUNC_VARIABLES[mod_func_line]["args"]:
-                FUNC_VARIABLES[mod_func_line]["args"][name].append(var_type)
+                FUNC_VARIABLES[mod_func_line]["args"][name].add(var_type)
             else:
-                FUNC_VARIABLES[mod_func_line]["args"][name] = [var_type]
+                FUNC_VARIABLES[mod_func_line]["args"][name] = set([var_type])
     elif event == TraceEvent.RETURN:
         print(f"RETURN : {arg}")
         return_type = type(arg).__name__
         if "return" in FUNC_VARIABLES[mod_func_line]:
-            FUNC_VARIABLES[mod_func_line]["return"].append(return_type)
+            FUNC_VARIABLES[mod_func_line]["return"].add(return_type)
         else:
-            FUNC_VARIABLES[mod_func_line]["return"] = [return_type]
+            FUNC_VARIABLES[mod_func_line]["return"] = set([return_type])
     print(f"FUNC_VARIABLES :\n {FUNC_VARIABLES}")
     return trace_function
 
 @contextlib.contextmanager
 def trace():
     global FUNC_VARIABLES
-    print('tracing on')
+    print('========== TRACING ON ==========')
     sys.settrace(trace_function)
     try:
         yield FUNC_VARIABLES
     finally:
-        print('tracing off')
+        print('========== TRACING OFF ==========')
         sys.settrace(None)
         FUNC_VARIABLES = {}
 
