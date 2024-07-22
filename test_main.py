@@ -17,22 +17,24 @@ def test_example_function():
     with trace() as actual:
         f = Foo()
         example_function(1, 2, f)
-        print(actual)
-        print("=" * 100)
     for k in actual:
-        assert actual[k]["args"] == {"a": {"int"}, "b": {"int"}, "foo": {"Foo"}}
-        assert actual[k]["return"] == {"int"}
+        if 'init' in k:
+            assert actual[k]["args"] == {"bar": {"NoneType"}}
+        elif 'get_foo' in k:
+            assert actual[k]["args"] == {"a": {"int"}, "b": {"int"}, "foo": {"Foo"}}
+            assert actual[k]["return"] == {"int"}
 
 
 def test_if_global_context_is_not_polluted_by_previous_test_invocation():
     with trace() as actual:
         f = Foo()
         example_function(1, 2, f)
-        print(actual)
-        print("=" * 100)
     for k in actual:
-        assert actual[k]["args"] == {"a": {"int"}, "b": {"int"}, "foo": {"Foo"}}
-        assert actual[k]["return"] == {"int"}
+        if 'init' in k:
+            assert actual[k]["args"] == {"bar": {"NoneType"}}
+        elif 'get_foo' in k:
+            assert actual[k]["args"] == {"a": {"int"}, "b": {"int"}, "foo": {"Foo"}}
+            assert actual[k]["return"] == {"int"}
 
 
 def test_example_function_with_different_args():
@@ -41,13 +43,15 @@ def test_example_function_with_different_args():
         example_function(1, 2, f)
         example_function("bob", "wow", f)
     for k in actual:
-        print(actual)
-        assert actual[k]["args"] == {
-            "a": {"int", "str"},
-            "b": {"int", "str"},
-            "foo": {"Foo"},
-        }
-        assert actual[k]["return"] == {"int", "str"}
+        if 'init' in k:
+            assert actual[k]["args"] == {"bar": {"NoneType"}}
+        elif 'get_foo' in k:
+            assert actual[k]["args"] == {
+                "a": {"int", "str"},
+                "b": {"int", "str"},
+                "foo": {"Foo"},
+            }
+            assert actual[k]["return"] == {"int", "str"}
 
 
 def test_class_method():
