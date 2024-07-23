@@ -9,3 +9,10 @@ class Foo:
 def example_function(a, b, foo):
     c = a + b
     return c
+
+def function_returning_dict():
+    a = {}
+    a['value'] = 1
+    a['foo'] = {}
+    a['foo']['bar'] = 2
+    return a

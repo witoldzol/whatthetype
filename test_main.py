@@ -1,5 +1,5 @@
 from main import trace
-from foo import example_function, Foo
+from foo import example_function, Foo, function_returning_dict
 
 
 # helper fun
@@ -61,3 +61,10 @@ def test_class_method():
     for k in actual:
         assert actual[k]["args"] == {"name": {"str"}, "age": {"int"}}
         assert actual[k]["return"] == {"str"}
+
+def test_function_returning_dict():
+    with trace() as actual:
+        function_returning_dict()
+    for k in actual:
+        assert actual[k]["args"] == {}
+        assert actual[k]["return"] == {"dict"}
