@@ -1,8 +1,9 @@
 import contextlib
 import sys
 from enum import Enum
-from foo import example_function
+from foo import example_function, function_taking_nested_class
 from foo import Foo
+from nested.inner.bar import Bar
 
 FUNC_VARIABLES = {}
 MODEL = {
@@ -52,9 +53,12 @@ def trace_function(frame, event, arg):
             var = local_vars[name]
             var_type = type(var).__name__
             # don't return type, just value, ( unless it's a class - then capture a name )
+            print("MODULE ======================")
+            print(var.__class__.__module__)
             if is_user_defined_class(var):
                 print("USER CLASS ======================")
                 print("VAR TYPE === ", var_type)
+                #TODO if its class , get the module and name and save that 
                 print(var)
             else:
                 print("not a class ", var_type)
@@ -122,9 +126,12 @@ def trace():
 
 def run():
     with trace():
-        f = Foo("bar")
-        result = example_function(1, 2, f)
+        # f = Foo("bar")
+        # result = example_function(1, 2, f)
+        bar = Bar()
+        bar_name = function_taking_nested_class(bar)
         print(FUNC_VARIABLES)
+
 
 
 if __name__ == "__main__":
