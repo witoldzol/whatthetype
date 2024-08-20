@@ -38,21 +38,23 @@ def trace_function(frame, event, arg):
     line_number = example_function.__code__.co_firstlineno
     mod_func_line = f"{module_name}:{func_name}:{line_number}"
     function_arg_count = frame.f_code.co_argcount
-    arg_names = frame.f_code.co_varnames[:function_arg_count]
+    function_arg_names = frame.f_code.co_varnames[:function_arg_count]
     local_vars = frame.f_locals
     if PROJECT_NAME not in module_name or func_name == "trace":
         return trace_function
+    # setup dictionary
     if mod_func_line not in FUNC_VARIABLES:
         FUNC_VARIABLES[mod_func_line] = {"args": {}}
-    print(f"ARG NAMES: {arg_names}")
     ##### CALL #####
     if event == TraceEvent.CALL:
-        for name in arg_names:
+        for name in function_arg_names:
+            print(f"1) function arg name is : {name}")
             # ignore self references
             if name == "self":
                 continue
             var = local_vars[name]
             var_type = type(var).__name__
+            print(f"2) variable type name is  : {var_type}")
             # don't return type, just value, ( unless it's a class - then capture a name )
             print("MODULE ======================")
             print(var.__class__.__module__)
@@ -91,25 +93,27 @@ def trace_function_bak(frame, event, arg):
         return trace_function
     if mod_func_line not in FUNC_VARIABLES:
         FUNC_VARIABLES[mod_func_line] = {"args": {}}
-    print(f"ARG NAMES: {arg_names}")
+    # FUNCTION CALL with args
     if event == TraceEvent.CALL:
+        # name refers to parameter name defined in function signature
         for name in arg_names:
             if name == "self":
                 continue
             var = local_vars[name]
             var_type = type(var).__name__
+            # if we find this argument for that function, just add more data ( we will use / dedup later )
             if name in FUNC_VARIABLES[mod_func_line]["args"]:
                 FUNC_VARIABLES[mod_func_line]["args"][name].add(var_type)
             else:
+                # otherwise, if we see this arg for the first time, create a new entry
                 FUNC_VARIABLES[mod_func_line]["args"][name] = set([var_type])
+    # FUNCTION RETURN
     elif event == TraceEvent.RETURN:
-        print(f"RETURN : {arg}")
         return_type = type(arg).__name__
         if "return" in FUNC_VARIABLES[mod_func_line]:
             FUNC_VARIABLES[mod_func_line]["return"].add(return_type)
         else:
             FUNC_VARIABLES[mod_func_line]["return"] = set([return_type])
-    print(f"FUNC_VARIABLES :\n {FUNC_VARIABLES}")
     return trace_function
 
 
@@ -130,6 +134,7 @@ if __name__ == "__main__":
     with trace():
         # f = Foo("bar")
         # result = example_function(1, 2, f)
-        bar = Bar()
-        bar_name = function_taking_nested_class(bar)
+        lol = Bar()
+
+        bar_name = function_taking_nested_class(lol)
         print(FUNC_VARIABLES)
