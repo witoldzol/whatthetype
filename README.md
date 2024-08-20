@@ -18,5 +18,5 @@ I decided to get the type information and drop the values, merging step one and 
 
 3) Processing dicts, I've noticed that returnign 'Dict' is not very helpful -> it would be good to get the shape of nested structures.
 Doing so will be 'complicated', and I feel like separating step 1  and 2 would be a wise thing to do.
-But what about classses? Well, we can just record class name, and move on `class:Name` should suffice, and we can deal
+But what about classses? Well, we can just record class name, and move on `CLASS:Name` should suffice, and we can deal
 with that during the second step.

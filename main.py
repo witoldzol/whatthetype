@@ -45,6 +45,7 @@ def trace_function(frame, event, arg):
     if mod_func_line not in FUNC_VARIABLES:
         FUNC_VARIABLES[mod_func_line] = {"args": {}}
     print(f"ARG NAMES: {arg_names}")
+    ##### CALL #####
     if event == TraceEvent.CALL:
         for name in arg_names:
             # ignore self references
@@ -67,6 +68,7 @@ def trace_function(frame, event, arg):
                 FUNC_VARIABLES[mod_func_line]["args"][name].add(var_type)
             else:
                 FUNC_VARIABLES[mod_func_line]["args"][name] = set([var_type])
+    ##### RETURN #####
     elif event == TraceEvent.RETURN:
         print(f"RETURN : {arg}")
         return_type = type(arg).__name__
@@ -124,15 +126,10 @@ def trace():
         FUNC_VARIABLES = {}
 
 
-def run():
+if __name__ == "__main__":
     with trace():
         # f = Foo("bar")
         # result = example_function(1, 2, f)
         bar = Bar()
         bar_name = function_taking_nested_class(bar)
         print(FUNC_VARIABLES)
-
-
-
-if __name__ == "__main__":
-    run()
