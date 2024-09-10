@@ -9,6 +9,8 @@ class Foo:
 
 
 def example_function(a, b, foo):
+    if type(a) is str:
+        a = int(a)
     c = a + b
     return c
 
