@@ -16,7 +16,6 @@ MODEL = {
 
 PROJECT_NAME = "typemedaddy"
 
-
 class TraceEvent(Enum):
     CALL = "call"  #: Triggered when a function is called.
     LINE = "line"  #: Triggered when a new line of code is executed.
@@ -56,16 +55,12 @@ def trace_function(frame, event, arg):
             var_type = type(var).__name__
             print(f"2) variable type name is  : {var_type}")
             # don't return type, just value, ( unless it's a class - then capture a name )
-            print("MODULE ======================")
-            print(var.__class__.__module__)
+            print(f"MODULE ======================> {var.__class__.__module__}")
             if is_user_defined_class(var):
                 print("USER CLASS ======================")
-                print("VAR TYPE === ", var_type)
-                #TODO if its class , get the module and name and save that 
-                print(var)
+                print("VAR TYPE => ", var_type, "\nVAR VALUE ==> ", var)
             else:
                 print("not a class ", var_type)
-
             if name in RESULT[mod_func_line]["args"]:
                 RESULT[mod_func_line]["args"][name].add(var_type)
             else:
