@@ -29,6 +29,8 @@ class TraceEvent(Enum):
         return super().__eq__(other)
 
 def is_user_defined_class(obj):
+    if obj is None:
+        return False
     return isinstance(obj, object) and not isinstance(obj, (int, float, str, list, dict, tuple, set))
 
 def trace_function(frame, event, arg):
@@ -54,17 +56,16 @@ def trace_function(frame, event, arg):
             var = local_vars[name]
             var_type = type(var).__name__
             print(f"2) variable type name is  : {var_type}")
-            # don't return type, just value, ( unless it's a class - then capture a name )
-            print(f"MODULE ======================> {var.__class__.__module__}")
+            # step 1 || 
+            # don't return type, just value, ( unless it's a class - then capture a USER_CLASS|module::name )
+            # we don't care about the types at this point, we want values
+            # step 2 || we can derive variable types ( this way, if a func arg is called with different var types, we can spot that -> this would be most likely a bug or indication of unreliable inputs )
             if is_user_defined_class(var):
-                print("USER CLASS ======================")
-                print("VAR TYPE => ", var_type, "\nVAR VALUE ==> ", var)
-            else:
-                print("not a class ", var_type)
+                var = f"USER_CLASS|{var.__module__}::{var_type}"
             if name in RESULT[mod_func_line]["args"]:
-                RESULT[mod_func_line]["args"][name].add(var_type)
+                RESULT[mod_func_line]["args"][name].add(var)
             else:
-                RESULT[mod_func_line]["args"][name] = set([var_type])
+                RESULT[mod_func_line]["args"][name] = set([var])
     ##### RETURN #####
     elif event == TraceEvent.RETURN:
         print(f"RETURN : {arg}")
@@ -92,8 +93,10 @@ def trace():
 if __name__ == "__main__":
     with trace():
         # f = Foo("bar")
-        # result = example_function(1, 2, f)
+        result = example_function(1, 2, None)
+        result = example_function("1", 2, None)
         lol = Bar()
-
         bar_name = function_taking_nested_class(lol)
+        print("-"*20, ' RESULT ', "-"*20)
         print(RESULT)
+        print("-"*40)
