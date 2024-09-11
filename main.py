@@ -1,5 +1,4 @@
 from random import choice
-import contextlib
 import sys
 from enum import Enum
 from foo import example_function, function_taking_nested_class, example_function_with_third_party_lib
@@ -50,7 +49,7 @@ def trace_function(frame, event, arg):
     ##### CALL #####
     if event == TraceEvent.CALL:
         for name in function_arg_names:
-            print(f"0) {func_name}")
+            print(f"Function name => {func_name}")
             print(f"1) function arg name is : {name}")
             # ignore self references
             if name == "self":
@@ -79,29 +78,18 @@ def trace_function(frame, event, arg):
             RESULT[mod_func_line]["return"] = set([arg])
     return trace_function
 
-@contextlib.contextmanager
-def trace():
-    global RESULT
-    print("========== TRACING ON ==========")
-    sys.settrace(trace_function)
-    try:
-        yield RESULT
-    finally:
-        print("========== TRACING OFF ==========")
-        sys.settrace(None)
-        RESULT = {}
-
-
 if __name__ == "__main__":
-    with trace():
-        # f = Foo("bar")
-        example_function(1, 2, None)
-        example_function("1", 2, None)
-        example_function_with_third_party_lib("1", 2)
-        choice(list(range(1,1000)))
-        lol = Bar()
-        function_taking_nested_class(lol)
-        lol.do_bar(1)
-        print("-"*20, ' RESULT ', "-"*20)
-        print(RESULT)
-        print("-"*40)
+    sys.settrace(trace_function)
+    print("========== TRACING ON ==========")
+    example_function(1, 2, None)
+    example_function("1", 2, None)
+    example_function_with_third_party_lib("1", 2)
+    choice(list(range(1,1000)))
+    lol = Bar()
+    function_taking_nested_class(lol)
+    lol.do_bar(1)
+    sys.settrace(None)
+    print("========== TRACING OFF ==========")
+    print("-"*20, ' RESULT ', "-"*20)
+    print(RESULT)
+    print("-"*40)

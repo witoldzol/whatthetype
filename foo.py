@@ -1,3 +1,4 @@
+# import contextlib
 from random import choice
 from nested.inner.bar import Bar
 
@@ -28,3 +29,15 @@ def function_returning_dict():
 
 def function_taking_nested_class(bar: Bar):
     return bar.name
+
+# @contextlib.contextmanager
+# def trace():
+#     global RESULT
+#     print("========== TRACING ON ==========")
+#     sys.settrace(trace_function)
+#     try:
+#         yield RESULT
+#     finally:
+#         print("========== TRACING OFF ==========")
+#         sys.settrace(None)
+#         RESULT = {}
