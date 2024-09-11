@@ -50,6 +50,7 @@ def trace_function(frame, event, arg):
     ##### CALL #####
     if event == TraceEvent.CALL:
         for name in function_arg_names:
+            print(f"0) {func_name}")
             print(f"1) function arg name is : {name}")
             # ignore self references
             if name == "self":
@@ -57,6 +58,7 @@ def trace_function(frame, event, arg):
             var = local_vars[name]
             var_type = type(var).__name__
             print(f"2) variable type name is  : {var_type}")
+            print(f"----")
             # step 1 || 
             # don't return type, just value, ( unless it's a class - then capture a USER_CLASS|module::name )
             # we don't care about the types at this point, we want values
@@ -98,7 +100,8 @@ if __name__ == "__main__":
         example_function_with_third_party_lib("1", 2)
         choice(list(range(1,1000)))
         lol = Bar()
-        bar_name = function_taking_nested_class(lol)
+        function_taking_nested_class(lol)
+        lol.do_bar(1)
         print("-"*20, ' RESULT ', "-"*20)
         print(RESULT)
         print("-"*40)
