@@ -1,8 +1,8 @@
+from random import choice
 import contextlib
 import sys
 from enum import Enum
-from foo import example_function, function_taking_nested_class
-from foo import Foo
+from foo import example_function, function_taking_nested_class, example_function_with_third_party_lib
 from nested.inner.bar import Bar
 
 RESULT = {}
@@ -36,14 +36,15 @@ def is_user_defined_class(obj):
 def trace_function(frame, event, arg):
     module_name = frame.f_code.co_filename
     func_name = frame.f_code.co_name
+    # fiter out non user defined functions
+    if PROJECT_NAME not in module_name or func_name == "trace":
+        return trace_function
     line_number = example_function.__code__.co_firstlineno
     mod_func_line = f"{module_name}:{func_name}:{line_number}"
     function_arg_count = frame.f_code.co_argcount
     function_arg_names = frame.f_code.co_varnames[:function_arg_count]
     local_vars = frame.f_locals
-    if PROJECT_NAME not in module_name or func_name == "trace":
-        return trace_function
-    # setup dictionary
+    # create module_function_line entry
     if mod_func_line not in RESULT:
         RESULT[mod_func_line] = {"args": {}}
     ##### CALL #####
@@ -69,12 +70,11 @@ def trace_function(frame, event, arg):
     ##### RETURN #####
     elif event == TraceEvent.RETURN:
         print(f"RETURN : {arg}")
-        return_type = type(arg).__name__
+        # return_type = type(arg).__name__
         if "return" in RESULT[mod_func_line]:
-            RESULT[mod_func_line]["return"].add(return_type)
+            RESULT[mod_func_line]["return"].add(arg)
         else:
-            RESULT[mod_func_line]["return"] = set([return_type])
-    print(f"FUNC_VARIABLES :\n {RESULT}")
+            RESULT[mod_func_line]["return"] = set([arg])
     return trace_function
 
 @contextlib.contextmanager
@@ -93,8 +93,10 @@ def trace():
 if __name__ == "__main__":
     with trace():
         # f = Foo("bar")
-        result = example_function(1, 2, None)
-        result = example_function("1", 2, None)
+        example_function(1, 2, None)
+        example_function("1", 2, None)
+        example_function_with_third_party_lib("1", 2)
+        choice(list(range(1,1000)))
         lol = Bar()
         bar_name = function_taking_nested_class(lol)
         print("-"*20, ' RESULT ', "-"*20)

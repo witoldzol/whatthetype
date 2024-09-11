@@ -1,3 +1,4 @@
+from random import choice
 from nested.inner.bar import Bar
 
 class Foo:
@@ -7,6 +8,10 @@ class Foo:
     def get_foo(self, name, age):
         return f"Foo({name}, {age})"
 
+
+def example_function_with_third_party_lib(a,b):
+    r = choice([a,b])
+    return r
 
 def example_function(a, b, foo):
     if type(a) is str:
