@@ -82,11 +82,15 @@ if __name__ == "__main__":
     sys.settrace(trace_function)
     print("========== TRACING ON ==========")
     example_function(1, 2, None)
+    # second type of arg
     example_function("1", 2, None)
+    # third party will not get captured
     example_function_with_third_party_lib("1", 2)
+    # this will not get captured - it's not user function
     choice(list(range(1,1000)))
     lol = Bar()
     function_taking_nested_class(lol)
+    # class method gets captured
     lol.do_bar(1)
     sys.settrace(None)
     print("========== TRACING OFF ==========")
