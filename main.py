@@ -1,7 +1,7 @@
 from random import choice
 import sys
 from enum import Enum
-from foo import example_function, function_taking_nested_class, example_function_with_third_party_lib
+from foo import example_function, function_taking_nested_class, example_function_with_third_party_lib, function_calling_nested_functions
 from nested.inner.bar import Bar
 
 RESULT = {}
@@ -38,7 +38,12 @@ def trace_function(frame, event, arg):
     # fiter out non user defined functions
     if PROJECT_NAME not in module_name or func_name == "trace":
         return trace_function
-    line_number = example_function.__code__.co_firstlineno
+    # a = frame.f_code
+    #
+    # print("^"*20)
+    # print(dir())
+    # print("^"*20)
+    line_number = frame.f_code.co_firstlineno
     mod_func_line = f"{module_name}:{func_name}:{line_number}"
     function_arg_count = frame.f_code.co_argcount
     function_arg_names = frame.f_code.co_varnames[:function_arg_count]
@@ -65,17 +70,17 @@ def trace_function(frame, event, arg):
             if is_user_defined_class(var):
                 var = f"USER_CLASS|{var.__module__}::{var_type}"
             if name in RESULT[mod_func_line]["args"]:
-                RESULT[mod_func_line]["args"][name].add(var)
+                RESULT[mod_func_line]["args"][name].append(var)
             else:
-                RESULT[mod_func_line]["args"][name] = set([var])
+                RESULT[mod_func_line]["args"][name] = [var]
     ##### RETURN #####
     elif event == TraceEvent.RETURN:
         print(f"RETURN : {arg}")
         # return_type = type(arg).__name__
         if "return" in RESULT[mod_func_line]:
-            RESULT[mod_func_line]["return"].add(arg)
+            RESULT[mod_func_line]["return"].append(arg)
         else:
-            RESULT[mod_func_line]["return"] = set([arg])
+            RESULT[mod_func_line]["return"] = [arg]
     return trace_function
 
 if __name__ == "__main__":
@@ -90,10 +95,14 @@ if __name__ == "__main__":
     choice(list(range(1,1000)))
     lol = Bar()
     function_taking_nested_class(lol)
+    function_calling_nested_functions()
     # class method gets captured
     lol.do_bar(1)
     sys.settrace(None)
     print("========== TRACING OFF ==========")
     print("-"*20, ' RESULT ', "-"*20)
     print(RESULT)
-    print("-"*40)
+    print("-"*20)
+    print("STAGE 1 END")
+    print("-"*20)
+    print("STAGE 2 START")

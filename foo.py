@@ -30,6 +30,9 @@ def function_returning_dict():
 def function_taking_nested_class(bar: Bar):
     return bar.name
 
+def function_calling_nested_functions():
+    function_returning_dict()
+
 # @contextlib.contextmanager
 # def trace():
 #     global RESULT
