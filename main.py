@@ -38,11 +38,6 @@ def trace_function(frame, event, arg):
     # fiter out non user defined functions
     if PROJECT_NAME not in module_name or func_name == "trace":
         return trace_function
-    # a = frame.f_code
-    #
-    # print("^"*20)
-    # print(dir())
-    # print("^"*20)
     line_number = frame.f_code.co_firstlineno
     mod_func_line = f"{module_name}:{func_name}:{line_number}"
     function_arg_count = frame.f_code.co_argcount
@@ -83,6 +78,9 @@ def trace_function(frame, event, arg):
             RESULT[mod_func_line]["return"] = [arg]
     return trace_function
 
+def parse_results_to_types(result: dict) -> dict:
+    return {}
+
 if __name__ == "__main__":
     sys.settrace(trace_function)
     print("========== TRACING ON ==========")
@@ -106,3 +104,4 @@ if __name__ == "__main__":
     print("STAGE 1 END")
     print("-"*20)
     print("STAGE 2 START")
+    parse_results_to_types(RESULT)
