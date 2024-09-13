@@ -74,9 +74,15 @@ def test_method_returns_a_class():
             assert actual[k]["args"] == {}
             assert actual[k]["return"] == ["USER_CLASS|foo::Foo"]
 
-# def test_function_returning_dict():
-#     with trace() as actual:
-#         function_returning_dict()
-#     for k in actual:
-#         assert actual[k]["args"] == {}
-#         assert actual[k]["return"] == {"dict"}
+def test_function_returning_dict():
+    with trace() as actual:
+        function_returning_dict()
+    for k in actual:
+        assert actual[k]["args"] == {}
+        assert actual[k]["return"] == {"dict"}
+
+# TODO - 
+# returns dictionary
+# returns set
+# returns list
+# then list of class, list of dicts ... omg
