@@ -2,19 +2,24 @@ import contextlib
 from random import choice
 import sys
 from enum import Enum
-from foo import example_function, function_taking_nested_class, example_function_with_third_party_lib, function_calling_nested_functions
+from foo import (
+    example_function,
+    function_taking_nested_class,
+    example_function_with_third_party_lib,
+    function_calling_nested_functions,
+)
 from nested.inner.bar import Bar
 
 RESULT = {}
 MODEL = {
     "module:func_name:func_line": {
-        "args": {
-            "var_name": set('type')
-        }, "return": set('type')
+        "args": {"var_name": set("type")},
+        "return": set("type"),
     }
 }
 
 PROJECT_NAME = "typemedaddy"
+
 
 class TraceEvent(Enum):
     CALL = "call"  #: Triggered when a function is called.
@@ -28,11 +33,16 @@ class TraceEvent(Enum):
             return self.value == other
         return super().__eq__(other)
 
+
 def is_user_defined_class(obj):
     if obj is None:
         return False
-    return isinstance(obj, object) and not isinstance(obj, (int, float, str, list, dict, tuple, set))
+    return isinstance(obj, object) and not isinstance(
+        obj, (int, float, str, list, dict, tuple, set)
+    )
 
+
+# we use context for easy testing, same with the RESULT yields, for tests only
 @contextlib.contextmanager
 def trace():
     global RESULT
@@ -44,6 +54,7 @@ def trace():
         print("========== TRACING OFF ==========")
         sys.settrace(None)
         RESULT = {}
+
 
 def trace_function(frame, event, arg):
     module_name = frame.f_code.co_filename
@@ -71,7 +82,7 @@ def trace_function(frame, event, arg):
             var_type = type(var).__name__
             print(f"2) variable type name is  : {var_type}")
             print(f"----")
-            # step 1 || 
+            # step 1 ||
             # don't return type, just value, ( unless it's a class - then capture a USER_CLASS|module::name )
             # we don't care about the types at this point, we want values
             # step 2 || we can derive variable types ( this way, if a func arg is called with different var types, we can spot that -> this would be most likely a bug or indication of unreliable inputs )
@@ -91,8 +102,10 @@ def trace_function(frame, event, arg):
             RESULT[mod_func_line]["return"] = [arg]
     return trace_function
 
+
 def parse_results_to_types(result: dict) -> dict:
     return {}
+
 
 if __name__ == "__main__":
     # ===== STAGE 1 START =====
@@ -103,16 +116,16 @@ if __name__ == "__main__":
         # third party will not get captured
         example_function_with_third_party_lib("1", 2)
         # this will not get captured - it's not user function
-        choice(list(range(1,1000)))
+        choice(list(range(1, 1000)))
         lol = Bar()
         function_taking_nested_class(lol)
         function_calling_nested_functions()
         # class method gets captured
         lol.do_bar(1)
-        print("-"*20, ' RESULT ', "-"*20)
+        print("-" * 20, " RESULT ", "-" * 20)
         print(RESULT)
-    print("-"*20)
+    print("-" * 20)
     print("STAGE 1 END")
-    print("-"*20)
+    print("-" * 20)
     # ===== STAGE 2 START =====
     parse_results_to_types(RESULT)
