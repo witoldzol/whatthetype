@@ -63,12 +63,16 @@ def test_class_method():
         assert actual[k]["return"] == ["bob,9"]
 
 
-# def test_method_returns_a_class():
-#     with trace() as actual:
-#         returns_a_class()
-#     for k in actual:
-#         assert actual[k]["args"] == {"name": ["bob"], "age": [9]}
-#         assert actual[k]["return"] == ["bob,9"]
+def test_method_returns_a_class():
+    with trace() as actual:
+        returns_a_class()
+    for k in actual:
+        if 'init' in k:
+            assert actual[k]["args"] == {"bar": [None]}
+            assert actual[k]["return"] == [None]
+        elif 'returns_a_class' in k:
+            assert actual[k]["args"] == {}
+            assert actual[k]["return"] == ["USER_CLASS|foo::Foo"]
 
 # def test_function_returning_dict():
 #     with trace() as actual:

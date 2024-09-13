@@ -37,4 +37,5 @@ def function_calling_nested_functions():
     function_returning_dict()
 
 def returns_a_class():
-    return Foo()
+    f = Foo()
+    return f
