@@ -104,7 +104,6 @@ def test_function_returning_dict():
 
 
 # TODO -
-# returns dictionary
 # returns set
 # returns list
 # then list of class, list of dicts ... omg
