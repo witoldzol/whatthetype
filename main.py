@@ -105,14 +105,15 @@ def trace_function(frame, event, arg):
     return trace_function
 
 
-def parse_results_to_types(result: dict) -> dict:
+def convert_results_to_types(result: dict) -> dict:
     return {}
 
 
 if __name__ == "__main__":
     # ===== STAGE 1 START =====
     with trace():
-        returns_a_class()
+        pass
+        # returns_a_class()
         # example_function(1, 2, None)
         # # second type of arg
         # example_function("1", 2, None)
@@ -125,10 +126,10 @@ if __name__ == "__main__":
         # function_calling_nested_functions()
         # # class method gets captured
         # lol.do_bar(1)
-        print("-" * 20, " RESULT ", "-" * 20)
+        print("-" * 20, " RESULT: ", "-" * 20)
         print(RESULT)
     print("-" * 20)
     print("STAGE 1 END")
     print("-" * 20)
     # ===== STAGE 2 START =====
-    parse_results_to_types(RESULT)
+    convert_results_to_types(RESULT)
