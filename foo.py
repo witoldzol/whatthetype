@@ -27,10 +27,10 @@ def example_function(a, b, foo):
 
 def function_returning_dict():
     return {
-        'foo': {
-            'bar': 2,
+        "foo": {
+            "bar": 2,
         },
-        'value': 1,
+        "value": 1,
     }
 
 
@@ -40,6 +40,7 @@ def function_taking_nested_class(bar: Bar):
 
 def function_calling_nested_functions():
     function_returning_dict()
+
 
 def returns_a_class():
     f = Foo()
