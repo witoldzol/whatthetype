@@ -16,10 +16,9 @@ def example_function_with_third_party_lib(a, b):
 
 
 def example_function(a, b, foo):
-    if type(a) is str:
+    if type(a) is str and type(b) is int:
         a = int(a)
-    c = a + b
-    return c
+    return a + b
 
 
 def function_returning_dict():
