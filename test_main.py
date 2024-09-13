@@ -1,5 +1,6 @@
 from main import trace
 from foo import example_function, Foo, function_returning_dict, returns_a_class
+from main import convert_results_to_types
 
 
 # helper fun
@@ -102,7 +103,16 @@ def test_function_returning_dict():
             }
         ]
 
+# ====== STAGE 2 TESTS -> CONVERT RESULT TO TYPES ======
 
+def test_empty_result():
+    r = convert_results_to_types({})
+    assert r == {}
+
+
+def test_int():
+    r = convert_results_to_types({})
+    assert r == {}
 # TODO -
 # returns set
 # returns list
