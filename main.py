@@ -74,11 +74,11 @@ def trace_function(frame, event, arg):
     ##### CALL #####
     if event == TraceEvent.CALL:
         for name in function_arg_names:
-            print(f"Function name => {func_name}")
-            print(f"1) function arg name is : {name}")
             # ignore self references
             if name == "self":
                 continue
+            print(f"Function name => {func_name}")
+            print(f"1) function arg name is : {name}")
             var = local_vars[name]
             var_type = type(var).__name__
             print(f"2) variable type name is  : {var_type}")
@@ -95,7 +95,6 @@ def trace_function(frame, event, arg):
                 RESULT[mod_func_line]["args"][name] = [var]
     ##### RETURN #####
     elif event == TraceEvent.RETURN:
-        print(f"RETURN : {arg}")
         # return_type = type(arg).__name__
         if is_user_defined_class(arg):
             arg = f"USER_CLASS|{arg.__module__}::{type(arg).__name__}"
