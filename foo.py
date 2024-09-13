@@ -22,11 +22,12 @@ def example_function(a, b, foo):
 
 
 def function_returning_dict():
-    a = {}
-    a["value"] = 1
-    a["foo"] = {}
-    a["foo"]["bar"] = 2
-    return a
+    return {
+        'foo': {
+            'bar': 2,
+        },
+        'value': 1,
+    }
 
 
 def function_taking_nested_class(bar: Bar):

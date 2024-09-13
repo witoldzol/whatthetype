@@ -18,11 +18,15 @@ def test_example_function():
         f = Foo()
         example_function(1, 2, f)
     for k in actual:
-        if 'init' in k:
+        if "init" in k:
             assert actual[k]["args"] == {"bar": [None]}
             assert actual[k]["return"] == [None]
-        elif 'example_function' in k:
-            assert actual[k]["args"] == {"a": [1], "b": [2], "foo": ["USER_CLASS|foo::Foo"]}
+        elif "example_function" in k:
+            assert actual[k]["args"] == {
+                "a": [1],
+                "b": [2],
+                "foo": ["USER_CLASS|foo::Foo"],
+            }
             assert actual[k]["return"] == [3]
 
 
@@ -32,11 +36,15 @@ def test_if_global_context_is_not_polluted_by_previous_test_invocation():
         example_function(1, 2, f)
         example_function(3, 4, None)
     for k in actual:
-        if 'init' in k:
+        if "init" in k:
             assert actual[k]["args"] == {"bar": [None]}
             assert actual[k]["return"] == [None]
-        elif 'example_function' in k:
-            assert actual[k]["args"] == {"a": [1, 3], "b": [2, 4], "foo": ["USER_CLASS|foo::Foo", None]}
+        elif "example_function" in k:
+            assert actual[k]["args"] == {
+                "a": [1, 3],
+                "b": [2, 4],
+                "foo": ["USER_CLASS|foo::Foo", None],
+            }
             assert actual[k]["return"] == [3, 7]
 
 
@@ -46,11 +54,15 @@ def test_example_function_with_different_args():
         example_function(1, 2, f)
         example_function("bob", "wow", f)
     for k in actual:
-        if 'init' in k:
+        if "init" in k:
             assert actual[k]["args"] == {"bar": [None]}
             assert actual[k]["return"] == [None]
-        elif 'example_function' in k:
-            assert actual[k]["args"] == {"a": [1, "bob"], "b": [2, "wow"], "foo": ["USER_CLASS|foo::Foo", "USER_CLASS|foo::Foo"]}
+        elif "example_function" in k:
+            assert actual[k]["args"] == {
+                "a": [1, "bob"],
+                "b": [2, "wow"],
+                "foo": ["USER_CLASS|foo::Foo", "USER_CLASS|foo::Foo"],
+            }
             assert actual[k]["return"] == [3, "bobwow"]
 
 
@@ -67,22 +79,33 @@ def test_method_returns_a_class():
     with trace() as actual:
         returns_a_class()
     for k in actual:
-        if 'init' in k:
+        if "init" in k:
             assert actual[k]["args"] == {"bar": [None]}
             assert actual[k]["return"] == [None]
-        elif 'returns_a_class' in k:
+        elif "returns_a_class" in k:
             assert actual[k]["args"] == {}
             assert actual[k]["return"] == ["USER_CLASS|foo::Foo"]
+
 
 def test_function_returning_dict():
     with trace() as actual:
         function_returning_dict()
+
     for k in actual:
         assert actual[k]["args"] == {}
-        assert actual[k]["return"] == {"dict"}
+        assert actual[k]["return"] == [
+            {
+                "foo": {
+                    "bar": 2,
+                },
+                "value": 1,
+            }
+        ]
 
-# TODO - 
+
+# TODO -
 # returns dictionary
 # returns set
 # returns list
 # then list of class, list of dicts ... omg
+#
