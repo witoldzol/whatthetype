@@ -1,3 +1,4 @@
+import contextlib
 from random import choice
 import sys
 from enum import Enum
@@ -31,6 +32,18 @@ def is_user_defined_class(obj):
     if obj is None:
         return False
     return isinstance(obj, object) and not isinstance(obj, (int, float, str, list, dict, tuple, set))
+
+@contextlib.contextmanager
+def trace():
+    global RESULT
+    print("========== TRACING ON ==========")
+    sys.settrace(trace_function)
+    try:
+        yield RESULT
+    finally:
+        print("========== TRACING OFF ==========")
+        sys.settrace(None)
+        RESULT = {}
 
 def trace_function(frame, event, arg):
     module_name = frame.f_code.co_filename
@@ -82,26 +95,24 @@ def parse_results_to_types(result: dict) -> dict:
     return {}
 
 if __name__ == "__main__":
-    sys.settrace(trace_function)
-    print("========== TRACING ON ==========")
-    example_function(1, 2, None)
-    # second type of arg
-    example_function("1", 2, None)
-    # third party will not get captured
-    example_function_with_third_party_lib("1", 2)
-    # this will not get captured - it's not user function
-    choice(list(range(1,1000)))
-    lol = Bar()
-    function_taking_nested_class(lol)
-    function_calling_nested_functions()
-    # class method gets captured
-    lol.do_bar(1)
-    sys.settrace(None)
-    print("========== TRACING OFF ==========")
-    print("-"*20, ' RESULT ', "-"*20)
-    print(RESULT)
+    # ===== STAGE 1 START =====
+    with trace():
+        example_function(1, 2, None)
+        # second type of arg
+        example_function("1", 2, None)
+        # third party will not get captured
+        example_function_with_third_party_lib("1", 2)
+        # this will not get captured - it's not user function
+        choice(list(range(1,1000)))
+        lol = Bar()
+        function_taking_nested_class(lol)
+        function_calling_nested_functions()
+        # class method gets captured
+        lol.do_bar(1)
+        print("-"*20, ' RESULT ', "-"*20)
+        print(RESULT)
     print("-"*20)
     print("STAGE 1 END")
     print("-"*20)
-    print("STAGE 2 START")
+    # ===== STAGE 2 START =====
     parse_results_to_types(RESULT)
