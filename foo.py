@@ -7,7 +7,7 @@ class Foo:
         self.bar = bar
 
     def get_foo(self, name, age):
-        return f"Foo({name}, {age})"
+        return f"{name},{age}"
 
 
 def example_function_with_third_party_lib(a, b):
@@ -35,3 +35,6 @@ def function_taking_nested_class(bar: Bar):
 
 def function_calling_nested_functions():
     function_returning_dict()
+
+def returns_a_class():
+    return Foo()

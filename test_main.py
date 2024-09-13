@@ -1,5 +1,5 @@
 from main import trace
-from foo import example_function, Foo, function_returning_dict
+from foo import example_function, Foo, function_returning_dict, returns_a_class
 
 
 # helper fun
@@ -53,14 +53,23 @@ def test_example_function_with_different_args():
             assert actual[k]["args"] == {"a": [1, "bob"], "b": [2, "wow"], "foo": ["USER_CLASS|foo::Foo", "USER_CLASS|foo::Foo"]}
             assert actual[k]["return"] == [3, "bobwow"]
 
-# def test_class_method():
-#     f = Foo()
+
+def test_class_method():
+    f = Foo()
+    with trace() as actual:
+        f.get_foo("bob", 9)
+    for k in actual:
+        assert actual[k]["args"] == {"name": ["bob"], "age": [9]}
+        assert actual[k]["return"] == ["bob,9"]
+
+
+# def test_method_returns_a_class():
 #     with trace() as actual:
-#         f.get_foo("bob", 9)
+#         returns_a_class()
 #     for k in actual:
-#         assert actual[k]["args"] == {"name": {"str"}, "age": {"int"}}
-#         assert actual[k]["return"] == {"str"}
-#
+#         assert actual[k]["args"] == {"name": ["bob"], "age": [9]}
+#         assert actual[k]["return"] == ["bob,9"]
+
 # def test_function_returning_dict():
 #     with trace() as actual:
 #         function_returning_dict()
