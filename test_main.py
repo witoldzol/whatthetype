@@ -1,5 +1,5 @@
 from main import trace
-from foo import example_function, Foo, function_returning_dict, returns_a_class
+from foo import example_function, Foo, function_returning_dict, int_function, returns_a_class
 from main import convert_results_to_types
 
 
@@ -91,7 +91,6 @@ def test_method_returns_a_class():
 def test_function_returning_dict():
     with trace() as actual:
         function_returning_dict()
-
     for k in actual:
         assert actual[k]["args"] == {}
         assert actual[k]["return"] == [
@@ -103,6 +102,25 @@ def test_function_returning_dict():
             }
         ]
 
+
+def test_int_function():
+    with trace() as actual:
+        int_function(1)
+    for k in actual:
+        assert actual[k]["args"] == {"i":[1]}
+        assert actual[k]["return"] == [1]
+
+
+# TODO -
+# stage 1
+
+# returns set
+# returns list
+# then list of class, list of dicts ... omg
+
+# stage 2 
+
+
 # ====== STAGE 2 TESTS -> CONVERT RESULT TO TYPES ======
 
 def test_empty_result():
@@ -113,8 +131,3 @@ def test_empty_result():
 def test_int():
     r = convert_results_to_types({})
     assert r == {}
-# TODO -
-# returns set
-# returns list
-# then list of class, list of dicts ... omg
-#
