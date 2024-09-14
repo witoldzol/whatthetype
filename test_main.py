@@ -159,3 +159,21 @@ def test_int():
         }
     }
     assert actual == expected
+
+
+def test_str():
+    step_1_result = {
+        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+            "args": {"i": ['1']},
+            "return": ['1'],
+        }
+    }
+    actual = convert_results_to_types(step_1_result)
+    print(f"{actual=}")
+    expected = {
+        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+            "args": {"i": {'str'}},
+            "return": {'str'},
+        }
+    }
+    assert actual == expected

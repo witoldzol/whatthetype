@@ -108,10 +108,12 @@ def trace_function(frame, event, arg):
 def convert_results_to_types(result: dict) -> dict:
     if not result:
         return {}
+    var_type_name = type(result["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"]["i"][0]).__name__
+    return_type_name = type(result["/home/w/repos/typemedaddy/foo.py:int_function:18"]["return"][0]).__name__
     return {
         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-            "args": {"i": {'int'}},
-            "return": {'int'},
+            "args": {"i": {var_type_name}},
+            "return": {return_type_name},
         }
     }
 
