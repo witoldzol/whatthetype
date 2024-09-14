@@ -143,7 +143,7 @@ MODEL = {
 }
 
 
-def test_int():
+def test_one_function():
     step_1_result = {
         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
             "args": {"a": [1], "b": [2], "c": [3], "d": ["4"]},
@@ -151,11 +151,35 @@ def test_int():
         }
     }
     actual = convert_results_to_types(step_1_result)
-    print(f"{actual=}")
     expected = {
         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-            "args": {"a": ['int'], "b": ['int'], "c": ['int'], "d": ['str']},
-            "return": ['int'],
+            "args": {"a": ["int"], "b": ["int"], "c": ["int"], "d": ["str"]},
+            "return": ["int"],
+        }
+    }
+    assert actual == expected
+
+
+def test_multiple_functions():
+    step_1_result = {
+        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+            "args": {"a": [1], "b": [2], "c": [3], "d": ["4"]},
+            "return": [1],
+        },
+        "/home/w/repos/typemedaddy/bar.py:bar_function:69": {
+            "args": {"a": [1]},
+            "return": [1],
+        },
+    }
+    actual = convert_results_to_types(step_1_result)
+    expected = {
+        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+            "args": {"a": ["int"], "b": ["int"], "c": ["int"], "d": ["str"]},
+            "return": ["int"],
+        },
+        "/home/w/repos/typemedaddy/bar.py:bar_function:69": {
+            "args": {"a": ["int"]},
+            "return": ["int"],
         }
     }
     assert actual == expected
