@@ -112,26 +112,16 @@ def convert_results_to_types(result: dict) -> dict:
     for mod_fund_line in result:
         r[mod_fund_line] = {"args": {}}
         for arg in result[mod_fund_line]["args"]:
-            var_type_name = type(
-                result[mod_fund_line]["args"][arg][0]
-            ).__name__
+            var_type_name = type(result[mod_fund_line]["args"][arg][0]).__name__
             # import pudb; pu.db
             if arg in r[mod_fund_line]["args"]:
-                r[mod_fund_line]["args"][arg].add(
-                    var_type_name
-                )
+                r[mod_fund_line]["args"][arg].add(var_type_name)
             else:
                 r[mod_fund_line]["args"][arg] = list()
-                r[mod_fund_line]["args"][arg].append(
-                    var_type_name
-                )
-        return_type_name = type(
-            result[mod_fund_line]["return"][0]
-        ).__name__
+                r[mod_fund_line]["args"][arg].append(var_type_name)
+        return_type_name = type(result[mod_fund_line]["return"][0]).__name__
         r[mod_fund_line]["return"] = list()
-        r[mod_fund_line]["return"].append(
-            return_type_name
-        )
+        r[mod_fund_line]["return"].append(return_type_name)
     return r
 
 

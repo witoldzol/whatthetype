@@ -180,7 +180,7 @@ def test_multiple_functions():
         "/home/w/repos/typemedaddy/bar.py:bar_function:69": {
             "args": {"a": ["int"]},
             "return": ["int"],
-        }
+        },
     }
     assert actual == expected
 
