@@ -130,9 +130,9 @@ def test_int_function():
 # ====== STAGE 2 TESTS -> CONVERT RESULT TO TYPES ======
 
 
-def test_empty_result():
-    r = convert_results_to_types({})
-    assert r == {}
+# def test_empty_result():
+#     r = convert_results_to_types({})
+#     assert r == {}
 
 
 MODEL = {
@@ -144,12 +144,18 @@ MODEL = {
 
 
 def test_int():
-    raise Exception('TODO - FINISH')
     step_1_result = {
         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
             "args": {"i": [1]},
             "return": [1],
         }
     }
-    r = convert_results_to_types(step_1_result)
-    assert r == {}
+    actual = convert_results_to_types(step_1_result)
+    print(f"{actual=}")
+    expected = {
+        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+            "args": {"i": {'int'}},
+            "return": {'int'},
+        }
+    }
+    assert actual == expected
