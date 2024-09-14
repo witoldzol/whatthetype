@@ -105,23 +105,23 @@ def trace_function(frame, event, arg):
     return trace_function
 
 
-def convert_results_to_types(result: dict) -> dict:
-    if not result:
+def convert_results_to_types(input: dict) -> dict:
+    if not input:
         return {}
     r = {}
-    for mod_fund_line in result:
-        r[mod_fund_line] = {"args": {}}
-        for arg in result[mod_fund_line]["args"]:
-            var_type_name = type(result[mod_fund_line]["args"][arg][0]).__name__
+    for mfl in input: # mfl -> module_function_line
+        r[mfl] = {"args": {}}
+        for arg in input[mfl]["args"]:
+            var_type_name = type(input[mfl]["args"][arg][0]).__name__
             # import pudb; pu.db
-            if arg in r[mod_fund_line]["args"]:
-                r[mod_fund_line]["args"][arg].add(var_type_name)
+            if arg in r[mfl]["args"]:
+                r[mfl]["args"][arg].add(var_type_name)
             else:
-                r[mod_fund_line]["args"][arg] = list()
-                r[mod_fund_line]["args"][arg].append(var_type_name)
-        return_type_name = type(result[mod_fund_line]["return"][0]).__name__
-        r[mod_fund_line]["return"] = list()
-        r[mod_fund_line]["return"].append(return_type_name)
+                r[mfl]["args"][arg] = list()
+                r[mfl]["args"][arg].append(var_type_name)
+        return_type_name = type(input[mfl]["return"][0]).__name__
+        r[mfl]["return"] = list()
+        r[mfl]["return"].append(return_type_name)
     return r
 
 
