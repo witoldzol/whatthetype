@@ -104,6 +104,9 @@ def trace_function(frame, event, arg):
             RESULT[mod_func_line]["return"] = [arg]
     return trace_function
 
+# todo - hardcoded
+def figure_out_content_type(input: list) -> str:
+    return type(input).__name__
 
 # TODO
 # we probably want to throw some warning saying:
@@ -119,12 +122,27 @@ def convert_results_to_types(input: dict) -> dict:
         for arg in input[mfl]["args"]:
             for i in input[mfl]["args"][arg]:
                 var_type_name = type(i).__name__
+                # todo - add collections - dict, set
+                if var_type_name  in ('list'):
+                    list_content_type = figure_out_content_type(i[0]) if i else '' # todo - hardcoded
+                    if  list_content_type:
+                        var_type_name = f"{var_type_name}[{list_content_type}]"
+                    # if list is empty, just return list type, without brackets
+                    else:
+                        var_type_name = f"{var_type_name}"
                 if arg not in r[mfl]["args"]:
                     r[mfl]["args"][arg] = list()
                 r[mfl]["args"][arg].append(var_type_name)
         # ========== RETURN ==========
         for i in input[mfl]["return"]:
             return_type_name = type(i).__name__
+            if return_type_name  in ('list'):
+                list_content_type = figure_out_content_type(i[0]) if i else '' # todo - hardcoded
+                if list_content_type:
+                    return_type_name = f"{return_type_name}[{list_content_type}]"
+                else:
+                    # if list is empty, just return list type, without brackets
+                    return_type_name = f"{return_type_name}"
             if "return" not in r[mfl]:
                 r[mfl]["return"] = list()
             r[mfl]["return"].append(return_type_name)

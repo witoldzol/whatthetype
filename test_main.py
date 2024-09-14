@@ -145,7 +145,8 @@ MODEL = {
 
 # todo - test / implement collections
 # obj, ( list, dict, tuple, set)
-def test_list():
+
+def test_empty_list():
     step_1_result = {
         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
             "args": {"a": [[]]},
@@ -161,6 +162,21 @@ def test_list():
     }
     assert actual == expected
 
+def test_int_list():
+    step_1_result = {
+        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+            "args": {"a": [[1]]},
+            "return": [[1]],
+        }
+    }
+    actual = convert_results_to_types(step_1_result)
+    expected = {
+        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+            "args": {"a": ['list[int]']},
+            "return": ['list[int]'],
+        }
+    }
+    assert actual == expected
 
 def test_one_function():
     step_1_result = {
