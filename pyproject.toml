@@ -1,0 +1,5 @@
+[tool.ruff]
+# Disable the rule that enforces line length (E501)
+# You can customize max line length if needed, but keep it lenient to avoid splitting.
+ignore = ["E501"]
+line-length = 100  # or whatever maximum line length you prefer
