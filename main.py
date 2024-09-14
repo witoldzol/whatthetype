@@ -116,12 +116,12 @@ def convert_results_to_types(result: dict) -> dict:
         if arg in r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"]:
             r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"][arg].add(var_type_name)
         else:
-            r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"][arg] = set()
-            r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"][arg].add(var_type_name)
+            r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"][arg] = list()
+            r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"][arg].append(var_type_name)
 
     return_type_name = type(result["/home/w/repos/typemedaddy/foo.py:int_function:18"]["return"][0]).__name__
-    r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["return"] = set()
-    r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["return"].add(return_type_name)
+    r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["return"] = list()
+    r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["return"].append(return_type_name)
     print(">"*10)
     print(r)
     print(">"*10)

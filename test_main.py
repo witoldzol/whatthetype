@@ -154,8 +154,8 @@ def test_int():
     print(f"{actual=}")
     expected = {
         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-            "args": {"a": {'int'}, "b": {'int'}, "c": {'int'}, "d": {'str'}},
-            "return": {'int'},
+            "args": {"a": ['int'], "b": ['int'], "c": ['int'], "d": ['str']},
+            "return": ['int'],
         }
     }
     assert actual == expected
