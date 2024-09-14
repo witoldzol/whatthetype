@@ -143,17 +143,36 @@ MODEL = {
 }
 
 
+# todo - test / implement collections
+# obj, ( list, dict, tuple, set)
+def test_list():
+    step_1_result = {
+        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+            "args": {"a": [[]]},
+            "return": [[]],
+        }
+    }
+    actual = convert_results_to_types(step_1_result)
+    expected = {
+        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+            "args": {"a": ['list']},
+            "return": ['list'],
+        }
+    }
+    assert actual == expected
+
+
 def test_one_function():
     step_1_result = {
         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-            "args": {"a": [1], "b": [2], "c": [3], "d": ["4"]},
+            "args": {"a": [1], "b": [2.0], "c": [3], "d": ["4"]},
             "return": [1],
         }
     }
     actual = convert_results_to_types(step_1_result)
     expected = {
         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-            "args": {"a": ["int"], "b": ["int"], "c": ["int"], "d": ["str"]},
+            "args": {"a": ["int"], "b": ["float"], "c": ["int"], "d": ["str"]},
             "return": ["int"],
         }
     }
