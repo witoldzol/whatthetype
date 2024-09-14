@@ -146,7 +146,7 @@ MODEL = {
 def test_int():
     step_1_result = {
         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-            "args": {"i": [1], "y": [2], "x": [3]},
+            "args": {"a": [1], "b": [2], "c": [3], "d": ["4"]},
             "return": [1],
         }
     }
@@ -154,7 +154,7 @@ def test_int():
     print(f"{actual=}")
     expected = {
         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-            "args": {"i": {'int'}, "y": {'int'}, "x": {'int'}},
+            "args": {"a": {'int'}, "b": {'int'}, "c": {'int'}, "d": {'str'}},
             "return": {'int'},
         }
     }
