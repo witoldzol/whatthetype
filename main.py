@@ -110,18 +110,20 @@ def convert_results_to_types(input: dict) -> dict:
         return {}
     r = {}
     for mfl in input: # mfl -> module_function_line
+        # ========== ARGS ==========
         r[mfl] = {"args": {}}
         for arg in input[mfl]["args"]:
-            var_type_name = type(input[mfl]["args"][arg][0]).__name__
-            # import pudb; pu.db
-            if arg in r[mfl]["args"]:
-                r[mfl]["args"][arg].add(var_type_name)
-            else:
-                r[mfl]["args"][arg] = list()
+            for i in input[mfl]["args"][arg]:
+                var_type_name = type(i).__name__
+                if arg not in r[mfl]["args"]:
+                    r[mfl]["args"][arg] = list()
                 r[mfl]["args"][arg].append(var_type_name)
-        return_type_name = type(input[mfl]["return"][0]).__name__
-        r[mfl]["return"] = list()
-        r[mfl]["return"].append(return_type_name)
+        # ========== RETURN ==========
+        for i in input[mfl]["return"]:
+            return_type_name = type(i).__name__
+            if "return" not in r[mfl]:
+                r[mfl]["return"] = list()
+            r[mfl]["return"].append(return_type_name)
     return r
 
 
