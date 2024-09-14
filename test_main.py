@@ -130,9 +130,9 @@ def test_int_function():
 # ====== STAGE 2 TESTS -> CONVERT RESULT TO TYPES ======
 
 
-# def test_empty_result():
-#     r = convert_results_to_types({})
-#     assert r == {}
+def test_empty_result():
+    r = convert_results_to_types({})
+    assert r == {}
 
 
 MODEL = {

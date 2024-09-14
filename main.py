@@ -106,6 +106,8 @@ def trace_function(frame, event, arg):
 
 
 def convert_results_to_types(result: dict) -> dict:
+    if not result:
+        return {}
     return {
         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
             "args": {"i": {'int'}},
