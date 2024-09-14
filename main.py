@@ -105,6 +105,10 @@ def trace_function(frame, event, arg):
     return trace_function
 
 
+# TODO
+# we probably want to throw some warning saying:
+# HEY,this func gets different types at various types,
+# maybe you should look into this
 def convert_results_to_types(input: dict) -> dict:
     if not input:
         return {}

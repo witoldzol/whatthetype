@@ -185,10 +185,6 @@ def test_multiple_functions():
     assert actual == expected
 
 
-# TODO
-# we probably want to throw some warning that HEY,
-# this func gets different types at various types,
-# maybe you should look into this
 def test_multiple_type_inputs_for_the_same_param():
     step_1_result = {
         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
