@@ -108,8 +108,24 @@ def trace_function(frame, event, arg):
 def convert_results_to_types(result: dict) -> dict:
     if not result:
         return {}
-    var_type_name = type(result["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"]["i"][0]).__name__
+    r = {}
+    r["/home/w/repos/typemedaddy/foo.py:int_function:18"]= {"args":{}}
+    for arg in result["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"]:
+        var_type_name = type(result["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"][arg][0]).__name__
+        # import pudb; pu.db
+        if arg in r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"]:
+            r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"][arg].add(var_type_name)
+        else:
+            r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"][arg] = set()
+            r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"][arg].add(var_type_name)
+
     return_type_name = type(result["/home/w/repos/typemedaddy/foo.py:int_function:18"]["return"][0]).__name__
+    r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["return"] = set()
+    r["/home/w/repos/typemedaddy/foo.py:int_function:18"]["return"].add(return_type_name)
+    print(">"*10)
+    print(r)
+    print(">"*10)
+    return r
     return {
         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
             "args": {"i": {var_type_name}},
