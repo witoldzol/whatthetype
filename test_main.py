@@ -333,3 +333,15 @@ def test_convert_value_to_type():
     value = [1, None]
     actual = convert_value_to_type(value)
     assert 'list[int|NoneType]' == actual
+
+    value = [[]]
+    actual = convert_value_to_type(value)
+    assert 'list[list]' == actual
+
+    value = [[1]]
+    actual = convert_value_to_type(value)
+    assert 'list[list[int]]' == actual
+
+    value = [1, [1]]
+    actual = convert_value_to_type(value)
+    assert 'list[int|list[int]]' == actual

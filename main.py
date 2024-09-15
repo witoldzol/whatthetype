@@ -114,14 +114,20 @@ def trace_function(frame, event, arg):
 # list[int|str|float]
 # list[list[int|str|float]]
 # list[list|str]
-# ...
+# [[1], [2]] -> list[list[int]]
 def convert_value_to_type(value):
     var_type_name = type(value).__name__
-    if var_type_name  in ('list'): # todo
+    if var_type_name not in ('list', 'set', 'dict'):
+        return var_type_name
+    # if collection, recurse
+    if var_type_name  in ('list', 'set', 'dict'):
         types_found_in_collection = set()
         for v in value:
             t = type(v).__name__
-            types_found_in_collection.add(t)
+            if t in ('list', 'set', 'dict'):
+                types_found_in_collection.add(convert_value_to_type(v))
+            else:
+                types_found_in_collection.add(t)
         if  types_found_in_collection:
             sorted_types = sorted(types_found_in_collection)
             if "NoneType" in sorted_types:
@@ -129,8 +135,6 @@ def convert_value_to_type(value):
                 sorted_types = list(sorted_types)
                 sorted_types.append("NoneType")
             var_type_name = f"{var_type_name}[{'|'.join(sorted_types)}]"
-        else: # if list is empty, just return list type, without brackets
-            var_type_name = f"{var_type_name}"
     return var_type_name 
 
 # TODO
