@@ -104,7 +104,6 @@ def trace_function(frame, event, arg):
             RESULT[mod_func_line]["return"] = [arg]
     return trace_function
 
-# todo - hardcoded
 def figure_out_content_type(input: list) -> str:
     return type(input).__name__
 
@@ -112,7 +111,18 @@ def figure_out_content_type(input: list) -> str:
 # we probably want to throw some warning saying:
 # HEY,this func gets different types at various types,
 # maybe you should look into this
-def convert_results_to_types(input: dict) -> dict:
+# INPUT
+# {
+#   "module_func_line" : {
+#       "args":{
+#           "name_of_argument": [value,value,...], < this is where we need to use recursion
+#           ...,
+#           ....
+#       },
+#       "return": [value, value, ...] < same here, recurse each value
+#   } 
+# }
+def convert_results_to_types(input: dict[str,dict]) -> dict:
     if not input:
         return {}
     r = {}
@@ -122,8 +132,10 @@ def convert_results_to_types(input: dict) -> dict:
         for arg in input[mfl]["args"]:
             for i in input[mfl]["args"][arg]:
                 var_type_name = type(i).__name__
-                # check if collection # todo - add dict, set
-                if var_type_name  in ('list'):
+                # [
+                #     [ 1 ] 
+                # ]
+                if var_type_name  in ('list'): # check if collection # todo - add dict, set
                     list_content_type = figure_out_content_type(i[0]) if i else '' # todo - hardcoded
                     if  list_content_type:
                         var_type_name = f"{var_type_name}[{list_content_type}]"
@@ -134,6 +146,7 @@ def convert_results_to_types(input: dict) -> dict:
                     r[mfl]["args"][arg] = list()
                 r[mfl]["args"][arg].append(var_type_name)
         # ========== RETURN ==========
+        r[mfl]["return"] = []
         for i in input[mfl]["return"]:
             return_type_name = type(i).__name__
             # check if collection # todo - add dict, set
@@ -144,8 +157,6 @@ def convert_results_to_types(input: dict) -> dict:
                 else:
                     # if list is empty, just return list type, without brackets
                     return_type_name = f"{return_type_name}"
-            if "return" not in r[mfl]:
-                r[mfl]["return"] = list()
             r[mfl]["return"].append(return_type_name)
     return r
 

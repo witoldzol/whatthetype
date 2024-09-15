@@ -242,22 +242,37 @@ def test_int_list():
     assert actual == expected
 
 
-# def test_int_nested_list():
+def test_nested_empty_list():
+    step_1_result = {
+        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+            "args": {"a": [[[]]]},
+            "return": [[[]]],
+        }
+    }
+    actual = convert_results_to_types(step_1_result)
+    expected = {
+        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+            "args": {"a": ['list[list]']},
+            "return": ['list[list]'],
+        }
+    }
+    assert actual == expected
+
+# def test_nested_int_list():
 #     step_1_result = {
 #         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-#             "args": {"a": [[1]]},
-#             "return": [[1]],
+#             "args": {"a": [[[1]]]},
+#             "return": [[[1]]],
 #         }
 #     }
 #     actual = convert_results_to_types(step_1_result)
 #     expected = {
 #         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-#             "args": {"a": ['list[int]']},
-#             "return": ['list[int]'],
+#             "args": {"a": ['list[list[int]]']},
+#             "return": ['list[list[int]]'],
 #         }
 #     }
 #     assert actual == expected
-
 
 # what if list has mixed types
 # [1]
