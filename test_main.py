@@ -293,9 +293,23 @@ def test_convert_value_to_type():
     actual = convert_value_to_type(value)
     assert 'NoneType' == actual
 
+    # LIST 
     value = []
     actual = convert_value_to_type(value)
     assert 'list' == actual
 
+    value = [None]
+    actual = convert_value_to_type(value)
+    assert 'list[NoneType]' == actual
 
+    value = [1]
+    actual = convert_value_to_type(value)
+    assert 'list[int]' == actual
 
+    value = ['1']
+    actual = convert_value_to_type(value)
+    assert 'list[str]' == actual
+
+    value = [1.0]
+    actual = convert_value_to_type(value)
+    assert 'list[float]' == actual
