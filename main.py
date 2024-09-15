@@ -106,11 +106,23 @@ def trace_function(frame, event, arg):
 
 
 def convert_value_to_type(value):
-    var_type_name = type(value).__name__
+    var_type_name = type(value).__name__ # dict {"a",1}
+    # base case
     if var_type_name not in ('list', 'set', 'dict'): # todo - add tuples?
         return var_type_name
     # if collection, recurse
-    if var_type_name  in ('list', 'set', 'dict'):
+    if var_type_name  in ('dict'):
+        types_found_in_collection = set()
+        # keys are not hashable, so they will nver be collections
+        for k,v in value.items():
+            key_type = type(k).__name__
+            value_type = type(v).__name__
+            if value_type in ('list', 'set', 'dict'):
+                types_found_in_collection.add(f"{key_type},{convert_value_to_type(v)}")
+            else:
+                types_found_in_collection.add(f"{key_type},{value_type}")
+            var_type_name = f"{var_type_name}[{'|'.join(types_found_in_collection)}]"
+    elif var_type_name  in ('list', 'set'): # todo - add tuples?
         types_found_in_collection = set()
         for v in value:
             t = type(v).__name__
