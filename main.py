@@ -122,38 +122,34 @@ def figure_out_content_type(input: list) -> str:
 #       "return": [value, value, ...] < same here, recurse each value
 #   } 
 # }
+
+def figure_out_the_value_type(value):
+    var_type_name = type(value).__name__
+    if var_type_name  in ('list'):
+        list_content_type = figure_out_content_type(value[0]) if value else '' # todo - hardcoded
+        if  list_content_type:
+            var_type_name = f"{var_type_name}[{list_content_type}]"
+            # if list is empty, just return list type, without brackets
+        else:
+            var_type_name = f"{var_type_name}"
+    return var_type_name 
+
 def convert_results_to_types(input: dict[str,dict]) -> dict:
     if not input:
         return {}
     r = {}
     for mfl in input: # mfl -> module_function_line
         # ========== ARGS ==========
-        r[mfl] = {"args": {}}
+        r[mfl] = {"args": dict()} # init result
         for arg in input[mfl]["args"]:
+            r[mfl]["args"][arg] = list() # init result
             for value in input[mfl]["args"][arg]:
-                var_type_name = type(value).__name__
-                if var_type_name  in ('list'): # check if collection # todo - add dict, set
-                    list_content_type = figure_out_content_type(value[0]) if value else '' # todo - hardcoded
-                    if  list_content_type:
-                        var_type_name = f"{var_type_name}[{list_content_type}]"
-                    # if list is empty, just return list type, without brackets
-                    else:
-                        var_type_name = f"{var_type_name}"
-                if arg not in r[mfl]["args"]:
-                    r[mfl]["args"][arg] = list()
+                var_type_name = figure_out_the_value_type(value)
                 r[mfl]["args"][arg].append(var_type_name)
         # ========== RETURN ==========
-        r[mfl]["return"] = []
+        r[mfl]["return"] = list() # init result
         for value in input[mfl]["return"]:
-            var_type_name = type(value).__name__
-            # check if collection # todo - add dict, set
-            if var_type_name  in ('list'):
-                list_content_type = figure_out_content_type(value[0]) if value else '' # todo - hardcoded
-                if list_content_type:
-                    var_type_name = f"{var_type_name}[{list_content_type}]"
-                else:
-                    # if list is empty, just return list type, without brackets
-                    var_type_name = f"{var_type_name}"
+            var_type_name = figure_out_the_value_type(value)
             r[mfl]["return"].append(var_type_name)
     return r
 
