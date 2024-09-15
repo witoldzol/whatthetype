@@ -142,42 +142,6 @@ MODEL = {
     }
 }
 
-
-# todo - test / implement collections
-# obj, ( list, dict, tuple, set)
-
-def test_empty_list():
-    step_1_result = {
-        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-            "args": {"a": [[]]},
-            "return": [[]],
-        }
-    }
-    actual = convert_results_to_types(step_1_result)
-    expected = {
-        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-            "args": {"a": ['list']},
-            "return": ['list'],
-        }
-    }
-    assert actual == expected
-
-def test_int_list():
-    step_1_result = {
-        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-            "args": {"a": [[1]]},
-            "return": [[1]],
-        }
-    }
-    actual = convert_results_to_types(step_1_result)
-    expected = {
-        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-            "args": {"a": ['list[int]']},
-            "return": ['list[int]'],
-        }
-    }
-    assert actual == expected
-
 def test_one_function():
     step_1_result = {
         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
@@ -243,19 +207,62 @@ def test_multiple_type_inputs_for_the_same_param():
         },
     }
     assert actual == expected
-# def test_str():
+
+
+def test_empty_list():
+    step_1_result = {
+        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+            "args": {"a": [[]]},
+            "return": [[]],
+        }
+    }
+    actual = convert_results_to_types(step_1_result)
+    expected = {
+        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+            "args": {"a": ['list']},
+            "return": ['list'],
+        }
+    }
+    assert actual == expected
+
+def test_int_list():
+    step_1_result = {
+        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+            "args": {"a": [[1]], "b": [[1,2]]},
+            "return": [[1]],
+        }
+    }
+    actual = convert_results_to_types(step_1_result)
+    expected = {
+        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+            "args": {"a": ['list[int]'], "b": ['list[int]']},
+            "return": ['list[int]'],
+        }
+    }
+    assert actual == expected
+
+
+# def test_int_nested_list():
 #     step_1_result = {
 #         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-#             "args": {"i": ['1']},
-#             "return": ['1'],
+#             "args": {"a": [[1]]},
+#             "return": [[1]],
 #         }
 #     }
 #     actual = convert_results_to_types(step_1_result)
-#     print(f"{actual=}")
 #     expected = {
 #         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-#             "args": {"i": {'str'}},
-#             "return": {'str'},
+#             "args": {"a": ['list[int]']},
+#             "return": ['list[int]'],
 #         }
 #     }
 #     assert actual == expected
+
+
+# what if list has mixed types
+# [1]
+# [1,'1']
+# [1,None]
+# a: ['list[int]']
+# how bout we 'collect' types first -> ... what if it's nested?
+# [[[[1]1]1]1]

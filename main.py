@@ -122,7 +122,7 @@ def convert_results_to_types(input: dict) -> dict:
         for arg in input[mfl]["args"]:
             for i in input[mfl]["args"][arg]:
                 var_type_name = type(i).__name__
-                # todo - add collections - dict, set
+                # check if collection # todo - add dict, set
                 if var_type_name  in ('list'):
                     list_content_type = figure_out_content_type(i[0]) if i else '' # todo - hardcoded
                     if  list_content_type:
@@ -136,6 +136,7 @@ def convert_results_to_types(input: dict) -> dict:
         # ========== RETURN ==========
         for i in input[mfl]["return"]:
             return_type_name = type(i).__name__
+            # check if collection # todo - add dict, set
             if return_type_name  in ('list'):
                 list_content_type = figure_out_content_type(i[0]) if i else '' # todo - hardcoded
                 if list_content_type:
