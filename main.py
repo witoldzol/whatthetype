@@ -130,13 +130,10 @@ def convert_results_to_types(input: dict[str,dict]) -> dict:
         # ========== ARGS ==========
         r[mfl] = {"args": {}}
         for arg in input[mfl]["args"]:
-            for i in input[mfl]["args"][arg]:
-                var_type_name = type(i).__name__
-                # [
-                #     [ 1 ] 
-                # ]
+            for value in input[mfl]["args"][arg]:
+                var_type_name = type(value).__name__
                 if var_type_name  in ('list'): # check if collection # todo - add dict, set
-                    list_content_type = figure_out_content_type(i[0]) if i else '' # todo - hardcoded
+                    list_content_type = figure_out_content_type(value[0]) if value else '' # todo - hardcoded
                     if  list_content_type:
                         var_type_name = f"{var_type_name}[{list_content_type}]"
                     # if list is empty, just return list type, without brackets
@@ -147,17 +144,17 @@ def convert_results_to_types(input: dict[str,dict]) -> dict:
                 r[mfl]["args"][arg].append(var_type_name)
         # ========== RETURN ==========
         r[mfl]["return"] = []
-        for i in input[mfl]["return"]:
-            return_type_name = type(i).__name__
+        for value in input[mfl]["return"]:
+            var_type_name = type(value).__name__
             # check if collection # todo - add dict, set
-            if return_type_name  in ('list'):
-                list_content_type = figure_out_content_type(i[0]) if i else '' # todo - hardcoded
+            if var_type_name  in ('list'):
+                list_content_type = figure_out_content_type(value[0]) if value else '' # todo - hardcoded
                 if list_content_type:
-                    return_type_name = f"{return_type_name}[{list_content_type}]"
+                    var_type_name = f"{var_type_name}[{list_content_type}]"
                 else:
                     # if list is empty, just return list type, without brackets
-                    return_type_name = f"{return_type_name}"
-            r[mfl]["return"].append(return_type_name)
+                    var_type_name = f"{var_type_name}"
+            r[mfl]["return"].append(var_type_name)
     return r
 
 
