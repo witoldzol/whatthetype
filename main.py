@@ -123,9 +123,13 @@ def convert_value_to_type(value):
             t = type(v).__name__
             types_found_in_collection.add(t)
         if  types_found_in_collection:
-            var_type_name = f"{var_type_name}[{'|'.join(types_found_in_collection)}]"
-            # if list is empty, just return list type, without brackets
-        else:
+            sorted_types = sorted(types_found_in_collection)
+            if "NoneType" in sorted_types:
+                sorted_types.remove("NoneType")
+                sorted_types = list(sorted_types)
+                sorted_types.append("NoneType")
+            var_type_name = f"{var_type_name}[{'|'.join(sorted_types)}]"
+        else: # if list is empty, just return list type, without brackets
             var_type_name = f"{var_type_name}"
     return var_type_name 
 
