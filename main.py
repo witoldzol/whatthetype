@@ -104,17 +104,7 @@ def trace_function(frame, event, arg):
             RESULT[mod_func_line]["return"] = [arg]
     return trace_function
 
-# value examples
-# list
-# [1, [1], ]
-# output?
-# int, str, float
-# collections
-# list[int], list[str], list[float]
-# list[int|str|float]
-# list[list[int|str|float]]
-# list[list|str]
-# [[1], [2]] -> list[list[int]]
+
 def convert_value_to_type(value):
     var_type_name = type(value).__name__
     if var_type_name not in ('list', 'set', 'dict'): # todo - add tuples?
