@@ -104,14 +104,21 @@ def trace_function(frame, event, arg):
             RESULT[mod_func_line]["return"] = [arg]
     return trace_function
 
-def figure_out_content_type(input: list) -> str:
-    return type(input).__name__
-
-
-def figure_out_the_value_type(value):
+# value examples
+# list
+# [1, [1], ]
+# output?
+# int, str, float
+# collections
+# list[int], list[str], list[float]
+# list[int|str|float]
+# list[list[int|str|float]]
+# list[list|str]
+# ...
+def convert_value_to_type(value):
     var_type_name = type(value).__name__
-    if var_type_name  in ('list'):
-        list_content_type = figure_out_content_type(value[0]) if value else '' # todo - hardcoded
+    if var_type_name  in ('list'): # todo
+        list_content_type = type(value[0]).__name__ if value else '' # todo - hardcoded
         if  list_content_type:
             var_type_name = f"{var_type_name}[{list_content_type}]"
             # if list is empty, just return list type, without brackets
@@ -144,12 +151,12 @@ def convert_results_to_types(input: dict[str,dict]) -> dict:
         for arg in input[mfl]["args"]:
             r[mfl]["args"][arg] = list() # init result
             for value in input[mfl]["args"][arg]:
-                var_type_name = figure_out_the_value_type(value)
+                var_type_name = convert_value_to_type(value)
                 r[mfl]["args"][arg].append(var_type_name)
         # ========== RETURN ==========
         r[mfl]["return"] = list() # init result
         for value in input[mfl]["return"]:
-            var_type_name = figure_out_the_value_type(value)
+            var_type_name = convert_value_to_type(value)
             r[mfl]["return"].append(var_type_name)
     return r
 

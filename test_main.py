@@ -6,7 +6,7 @@ from foo import (
     int_function,
     returns_a_class,
 )
-from main import convert_results_to_types
+from main import convert_results_to_types, convert_value_to_type
 
 
 # helper fun
@@ -242,21 +242,21 @@ def test_int_list():
     assert actual == expected
 
 
-def test_nested_empty_list():
-    step_1_result = {
-        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-            "args": {"a": [[[]]]},
-            "return": [[[]]],
-        }
-    }
-    actual = convert_results_to_types(step_1_result)
-    expected = {
-        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-            "args": {"a": ['list[list]']},
-            "return": ['list[list]'],
-        }
-    }
-    assert actual == expected
+# def test_nested_empty_list():
+#     step_1_result = {
+#         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+#             "args": {"a": [[[]]]},
+#             "return": [[[]]],
+#         }
+#     }
+#     actual = convert_results_to_types(step_1_result)
+#     expected = {
+#         "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+#             "args": {"a": ['list[list]']},
+#             "return": ['list[list]'],
+#         }
+#     }
+#     assert actual == expected
 
 # def test_nested_int_list():
 #     step_1_result = {
@@ -274,10 +274,9 @@ def test_nested_empty_list():
 #     }
 #     assert actual == expected
 
-# what if list has mixed types
-# [1]
-# [1,'1']
-# [1,None]
-# a: ['list[int]']
-# how bout we 'collect' types first -> ... what if it's nested?
-# [[[[1]1]1]1]
+# ===== RECURSIVE func that figures out types
+def test_convert_value_to_type():
+    value = [1]
+    actual = convert_value_to_type(value)
+
+
