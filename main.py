@@ -107,6 +107,18 @@ def trace_function(frame, event, arg):
 def figure_out_content_type(input: list) -> str:
     return type(input).__name__
 
+
+def figure_out_the_value_type(value):
+    var_type_name = type(value).__name__
+    if var_type_name  in ('list'):
+        list_content_type = figure_out_content_type(value[0]) if value else '' # todo - hardcoded
+        if  list_content_type:
+            var_type_name = f"{var_type_name}[{list_content_type}]"
+            # if list is empty, just return list type, without brackets
+        else:
+            var_type_name = f"{var_type_name}"
+    return var_type_name 
+
 # TODO
 # we probably want to throw some warning saying:
 # HEY,this func gets different types at various types,
@@ -122,18 +134,6 @@ def figure_out_content_type(input: list) -> str:
 #       "return": [value, value, ...] < same here, recurse each value
 #   } 
 # }
-
-def figure_out_the_value_type(value):
-    var_type_name = type(value).__name__
-    if var_type_name  in ('list'):
-        list_content_type = figure_out_content_type(value[0]) if value else '' # todo - hardcoded
-        if  list_content_type:
-            var_type_name = f"{var_type_name}[{list_content_type}]"
-            # if list is empty, just return list type, without brackets
-        else:
-            var_type_name = f"{var_type_name}"
-    return var_type_name 
-
 def convert_results_to_types(input: dict[str,dict]) -> dict:
     if not input:
         return {}
