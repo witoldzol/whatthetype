@@ -275,8 +275,27 @@ def test_int_list():
 #     assert actual == expected
 
 # ===== RECURSIVE func that figures out types
+
 def test_convert_value_to_type():
-    value = [1]
+    value = 1
     actual = convert_value_to_type(value)
+    assert 'int' == actual
+
+    value = '1'
+    actual = convert_value_to_type(value)
+    assert 'str' == actual
+
+    value = 1.0
+    actual = convert_value_to_type(value)
+    assert 'float' == actual
+
+    value = None
+    actual = convert_value_to_type(value)
+    assert 'NoneType' == actual
+
+    value = []
+    actual = convert_value_to_type(value)
+    assert 'list' == actual
+
 
 
