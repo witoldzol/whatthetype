@@ -385,3 +385,11 @@ def test_convert_value_to_type():
     value = {"a": 1}
     actual = convert_value_to_type(value)
     assert 'dict[str,int]' == actual
+
+    value = {"a": [1]}
+    actual = convert_value_to_type(value)
+    assert 'dict[str,list[int]]' == actual
+
+    value = {"a": [None,[1]]}
+    actual = convert_value_to_type(value)
+    assert 'dict[str,list[list[int]|NoneType]]' == actual
