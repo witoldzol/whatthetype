@@ -345,3 +345,31 @@ def test_convert_value_to_type():
     value = [1, [1]]
     actual = convert_value_to_type(value)
     assert 'list[int|list[int]]' == actual
+
+    value = [1, [1, [1]]]
+    actual = convert_value_to_type(value)
+    assert 'list[int|list[int|list[int]]]' == actual
+
+    value = [None, [1, [1]]]
+    actual = convert_value_to_type(value)
+    assert 'list[list[int|list[int]]|NoneType]' == actual
+
+    value = set()
+    actual = convert_value_to_type(value)
+    assert 'set' == actual
+
+    value = {1}
+    actual = convert_value_to_type(value)
+    assert 'set[int]' == actual
+
+    value = {1, 'a'}
+    actual = convert_value_to_type(value)
+    assert 'set[int|str]' == actual
+
+    value = [{1, 'a'}]
+    actual = convert_value_to_type(value)
+    assert 'list[set[int|str]]' == actual
+
+    value = [None,[{1, 'a'}]]
+    actual = convert_value_to_type(value)
+    assert 'list[list[set[int|str]]|NoneType]' == actual

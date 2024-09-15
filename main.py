@@ -117,7 +117,7 @@ def trace_function(frame, event, arg):
 # [[1], [2]] -> list[list[int]]
 def convert_value_to_type(value):
     var_type_name = type(value).__name__
-    if var_type_name not in ('list', 'set', 'dict'):
+    if var_type_name not in ('list', 'set', 'dict'): # todo - add tuples?
         return var_type_name
     # if collection, recurse
     if var_type_name  in ('list', 'set', 'dict'):
