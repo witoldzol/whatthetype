@@ -306,10 +306,18 @@ def test_convert_value_to_type():
     actual = convert_value_to_type(value)
     assert 'list[int]' == actual
 
-    value = ['1']
+    value = ['a']
     actual = convert_value_to_type(value)
     assert 'list[str]' == actual
 
     value = [1.0]
     actual = convert_value_to_type(value)
     assert 'list[float]' == actual
+
+    value = [1, 1]
+    actual = convert_value_to_type(value)
+    assert 'list[int]' == actual
+
+    value = [1, 'a']
+    actual = convert_value_to_type(value)
+    assert 'list[int|str]' == actual

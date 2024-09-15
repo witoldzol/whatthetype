@@ -118,9 +118,12 @@ def trace_function(frame, event, arg):
 def convert_value_to_type(value):
     var_type_name = type(value).__name__
     if var_type_name  in ('list'): # todo
-        list_content_type = type(value[0]).__name__ if value else '' # todo - hardcoded
-        if  list_content_type:
-            var_type_name = f"{var_type_name}[{list_content_type}]"
+        types_found_in_collection = set()
+        for v in value:
+            t = type(v).__name__ if value else '' # todo - hardcoded
+            types_found_in_collection.add(t)
+        if  types_found_in_collection:
+            var_type_name = f"{var_type_name}[{'|'.join(types_found_in_collection)}]"
             # if list is empty, just return list type, without brackets
         else:
             var_type_name = f"{var_type_name}"
