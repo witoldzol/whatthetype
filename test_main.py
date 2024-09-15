@@ -321,3 +321,11 @@ def test_convert_value_to_type():
     value = [1, 'a']
     actual = convert_value_to_type(value)
     assert 'list[int|str]' == actual
+
+    value = [1, '']
+    actual = convert_value_to_type(value)
+    assert 'list[int|str]' == actual
+
+    value = [1, None]
+    actual = convert_value_to_type(value)
+    assert 'list[int|NoneType]' == actual

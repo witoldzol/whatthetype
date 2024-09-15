@@ -120,7 +120,7 @@ def convert_value_to_type(value):
     if var_type_name  in ('list'): # todo
         types_found_in_collection = set()
         for v in value:
-            t = type(v).__name__ if value else '' # todo - hardcoded
+            t = type(v).__name__
             types_found_in_collection.add(t)
         if  types_found_in_collection:
             var_type_name = f"{var_type_name}[{'|'.join(types_found_in_collection)}]"
