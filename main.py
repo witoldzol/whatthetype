@@ -104,6 +104,13 @@ def trace_function(frame, event, arg):
             RESULT[mod_func_line]["return"] = [arg]
     return trace_function
 
+def sort_types_none_at_the_end(set_of_types: set) -> list:
+        sorted_types: list = sorted(set_of_types)
+        if "NoneType" in sorted_types:
+            sorted_types.remove("NoneType")
+            sorted_types = sorted_types
+            sorted_types.append("NoneType")
+        return sorted_types
 
 def convert_value_to_type(value):
     var_type_name = type(value).__name__ # dict {"a",1}
@@ -111,7 +118,7 @@ def convert_value_to_type(value):
     if var_type_name not in ('list', 'set', 'dict'): # todo - add tuples?
         return var_type_name
     # if collection, recurse
-    if var_type_name  in ('dict'):
+    if var_type_name  == 'dict':
         types_found_in_collection = set()
         # keys are not hashable, so they will nver be collections
         for k,v in value.items():
@@ -121,7 +128,9 @@ def convert_value_to_type(value):
                 types_found_in_collection.add(f"{key_type},{convert_value_to_type(v)}")
             else:
                 types_found_in_collection.add(f"{key_type},{value_type}")
-            var_type_name = f"{var_type_name}[{'|'.join(types_found_in_collection)}]"
+        if types_found_in_collection:
+            sorted_types = sort_types_none_at_the_end(types_found_in_collection)
+            var_type_name = f"{var_type_name}[{'|'.join(sorted_types)}]"
     elif var_type_name  in ('list', 'set'): # todo - add tuples?
         types_found_in_collection = set()
         for v in value:
@@ -131,11 +140,7 @@ def convert_value_to_type(value):
             else:
                 types_found_in_collection.add(t)
         if  types_found_in_collection:
-            sorted_types = sorted(types_found_in_collection)
-            if "NoneType" in sorted_types:
-                sorted_types.remove("NoneType")
-                sorted_types = list(sorted_types)
-                sorted_types.append("NoneType")
+            sorted_types = sort_types_none_at_the_end(types_found_in_collection)
             var_type_name = f"{var_type_name}[{'|'.join(sorted_types)}]"
     return var_type_name 
 
