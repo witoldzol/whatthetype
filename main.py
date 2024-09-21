@@ -113,29 +113,30 @@ def sort_types_none_at_the_end(set_of_types: set) -> list:
         return sorted_types
 
 def convert_value_to_type(value):
+    COLLECTIONS = ('dict', 'list', 'set', 'tuple')
+    COLLECTIONS_NO_DICT = ('list', 'set', 'tuple')
     var_type_name = type(value).__name__ # dict {"a",1}
     # base case
-    if var_type_name not in ('list', 'set', 'dict'): # todo - add tuples?
+    if var_type_name not in COLLECTIONS:
         return var_type_name
-    # if collection, recurse
     if var_type_name  == 'dict':
         types_found_in_collection = set()
         # keys are not hashable, so they will nver be collections
         for k,v in value.items():
             key_type = type(k).__name__
             value_type = type(v).__name__
-            if value_type in ('list', 'set', 'dict'):
+            if value_type in COLLECTIONS: # keys can't be collections, but values absolutely yes
                 types_found_in_collection.add(f"{key_type},{convert_value_to_type(v)}")
             else:
                 types_found_in_collection.add(f"{key_type},{value_type}")
         if types_found_in_collection:
             sorted_types = sort_types_none_at_the_end(types_found_in_collection)
             var_type_name = f"{var_type_name}[{'|'.join(sorted_types)}]"
-    elif var_type_name  in ('list', 'set'): # todo - add tuples?
+    elif var_type_name  in COLLECTIONS_NO_DICT:
         types_found_in_collection = set()
         for v in value:
             t = type(v).__name__
-            if t in ('list', 'set', 'dict'):
+            if t in COLLECTIONS:
                 types_found_in_collection.add(convert_value_to_type(v))
             else:
                 types_found_in_collection.add(t)

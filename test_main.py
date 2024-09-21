@@ -405,7 +405,27 @@ def test_convert_value_to_type():
     value = {"a": {1}, "b": {'a'}}
     actual = convert_value_to_type(value)
     assert 'dict[str,set[int]|str,set[str]]' == actual
-    #
-    # value = {"a": {None}, "b": {'a'}}
-    # actual = convert_value_to_type(value)
-    # assert 'dict[str,set[int]|str,set[str]]' == actual
+
+    value = {"a": {None}, "b": {'a'}}
+    actual = convert_value_to_type(value)
+    assert 'dict[str,set[NoneType]|str,set[str]]' == actual
+
+    value = {"a": {None, 1}, "b": {'a'}}
+    actual = convert_value_to_type(value)
+    assert 'dict[str,set[int|NoneType]|str,set[str]]' == actual
+
+    value = {None: {None, 1}, "b": {'a'}}
+    actual = convert_value_to_type(value)
+    assert 'dict[NoneType,set[int|NoneType]|str,set[str]]' == actual
+
+    value = {"a": {"b": 1}}
+    actual = convert_value_to_type(value)
+    assert 'dict[str,dict[str,int]]' == actual
+
+    value = {"a": (1,)}
+    actual = convert_value_to_type(value)
+    assert 'dict[str,tuple[int]]' == actual
+
+    value = {"a": ({"b": int},)}
+    actual = convert_value_to_type(value)
+    assert 'dict[str,tuple[dict[str,int]]]' == actual
