@@ -1,4 +1,5 @@
 import contextlib
+from typing import Any
 from random import choice
 import sys
 from enum import Enum
@@ -112,27 +113,27 @@ def sort_types_none_at_the_end(set_of_types: set) -> list:
             sorted_types.append("NoneType")
         return sorted_types
 
-def convert_value_to_type(value):
+def convert_value_to_type(value: Any) -> str:
     COLLECTIONS = ('dict', 'list', 'set', 'tuple')
     COLLECTIONS_NO_DICT = ('list', 'set', 'tuple')
-    var_type_name = type(value).__name__ # dict {"a",1}
+    input_type = type(value).__name__
     # base case
-    if var_type_name not in COLLECTIONS:
-        return var_type_name
-    if var_type_name  == 'dict':
+    if input_type not in COLLECTIONS:
+        return input_type
+    if input_type  == 'dict':
         types_found_in_collection = set()
-        # keys are not hashable, so they will nver be collections
         for k,v in value.items():
             key_type = type(k).__name__
-            value_type = type(v).__name__
-            if value_type in COLLECTIONS: # keys can't be collections, but values absolutely yes
+            dict_value_type = type(v).__name__
+            # collections are not hashable, so they will never be collections
+            if dict_value_type in COLLECTIONS:
                 types_found_in_collection.add(f"{key_type},{convert_value_to_type(v)}")
             else:
-                types_found_in_collection.add(f"{key_type},{value_type}")
+                types_found_in_collection.add(f"{key_type},{dict_value_type}")
         if types_found_in_collection:
             sorted_types = sort_types_none_at_the_end(types_found_in_collection)
-            var_type_name = f"{var_type_name}[{'|'.join(sorted_types)}]"
-    elif var_type_name  in COLLECTIONS_NO_DICT:
+            input_type = f"{input_type}[{'|'.join(sorted_types)}]"
+    elif input_type  in COLLECTIONS_NO_DICT:
         types_found_in_collection = set()
         for v in value:
             t = type(v).__name__
@@ -142,8 +143,8 @@ def convert_value_to_type(value):
                 types_found_in_collection.add(t)
         if  types_found_in_collection:
             sorted_types = sort_types_none_at_the_end(types_found_in_collection)
-            var_type_name = f"{var_type_name}[{'|'.join(sorted_types)}]"
-    return var_type_name 
+            input_type = f"{input_type}[{'|'.join(sorted_types)}]"
+    return input_type 
 
 # TODO
 # we probably want to throw some warning saying:
