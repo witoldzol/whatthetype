@@ -426,6 +426,6 @@ def test_convert_value_to_type():
     actual = convert_value_to_type(value)
     assert 'dict[str,tuple[int]]' == actual
 
-    value = {"a": ({"b": int},)}
+    value = {"a": ({"b": 1},)}
     actual = convert_value_to_type(value)
     assert 'dict[str,tuple[dict[str,int]]]' == actual
