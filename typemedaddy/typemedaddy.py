@@ -16,8 +16,7 @@ MODEL = {
 # this will be used to filter out non local / non user packages
 # so that we don't trace them 
 # in other words - we don't want to trace functions defined in external libraries, just our own code 
-current_folder = os.getcwd()
-PROJECT_NAME = current_folder
+PROJECT_NAME = os.getcwd()
 
 class TraceEvent(Enum):
     CALL = "call"  #: Triggered when a function is called.
