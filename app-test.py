@@ -1,4 +1,4 @@
-import main
+from typemedaddy.typemedaddy import trace
 
 def print_stuff(input):
     print(input)
@@ -10,5 +10,5 @@ def fake_interactive_input():
         print_stuff(item)
 
 if __name__ == "__main__":
-    with main.trace():
+    with trace():
         fake_interactive_input()
