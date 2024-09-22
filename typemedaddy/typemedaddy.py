@@ -1,8 +1,21 @@
+import logging
 import contextlib
 from typing import Any
 import sys
 import os
 from enum import Enum
+import argparse
+
+# set up logger
+parser = argparse.ArgumentParser()
+parser.add_argument("--log", default='WARNING')
+args = parser.parse_args()
+log_level = args.log.upper()
+if log_level in ('DEBUG', 'INFO', 'WARNING', 'ERROR'):
+    logging.basicConfig(level=log_level)
+else:
+    logging.basicConfig(level='WARNING')
+LOG = logging.getLogger(__name__)
 
 RESULT = {}
 MODEL = {
@@ -73,12 +86,12 @@ def trace_function(frame, event, arg):
             # ignore self references
             if name == "self":
                 continue
-            print(f"Function name => {func_name}")
-            print(f"1) function arg name is : {name}")
+            LOG.debug(f"Function name => {func_name}")
+            LOG.debug(f"1) function arg name is : {name}")
             var = local_vars[name]
             var_type = type(var).__name__
-            print(f"2) variable type name is  : {var_type}")
-            print(f"----")
+            LOG.debug(f"2) variable type name is  : {var_type}")
+            LOG.debug(f"----")
             if is_user_defined_class(var):
                 var = f"USER_CLASS|{var.__module__}::{var_type}"
             if name in RESULT[mod_func_line]["args"]:
