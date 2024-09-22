@@ -38,8 +38,6 @@ def is_user_defined_class(obj):
         obj, (int, float, str, list, dict, tuple, set)
     )
 
-import logging
-LOG = logging.getLogger(__name__)
 # we use context for easy testing, same with the RESULT yields, for tests only
 @contextlib.contextmanager
 def trace():
@@ -81,10 +79,6 @@ def trace_function(frame, event, arg):
             var_type = type(var).__name__
             print(f"2) variable type name is  : {var_type}")
             print(f"----")
-            # step 1 ||
-            # don't return type, just value, ( unless it's a class - then capture a USER_CLASS|module::name )
-            # we don't care about the types at this point, we want values
-            # step 2 || we can derive variable types ( this way, if a func arg is called with different var types, we can spot that -> this would be most likely a bug or indication of unreliable inputs )
             if is_user_defined_class(var):
                 var = f"USER_CLASS|{var.__module__}::{var_type}"
             if name in RESULT[mod_func_line]["args"]:
@@ -93,7 +87,6 @@ def trace_function(frame, event, arg):
                 RESULT[mod_func_line]["args"][name] = [var]
     ##### RETURN #####
     elif event == TraceEvent.RETURN:
-        # return_type = type(arg).__name__
         if is_user_defined_class(arg):
             arg = f"USER_CLASS|{arg.__module__}::{type(arg).__name__}"
         if "return" in RESULT[mod_func_line]:
@@ -162,7 +155,8 @@ def convert_results_to_types(input: dict[str,dict]) -> dict:
     if not input:
         return {}
     r = {}
-    for mfl in input: # mfl -> module_function_line
+    # mfl => module_function_line
+    for mfl in input:
         # ========== ARGS ==========
         r[mfl] = {"args": dict()} # init result
         for arg in input[mfl]["args"]:
@@ -171,7 +165,7 @@ def convert_results_to_types(input: dict[str,dict]) -> dict:
                 var_type_name = convert_value_to_type(value)
                 r[mfl]["args"][arg].append(var_type_name)
         # ========== RETURN ==========
-        r[mfl]["return"] = list() # init result
+        r[mfl]["return"] = list()
         for value in input[mfl]["return"]:
             var_type_name = convert_value_to_type(value)
             r[mfl]["return"].append(var_type_name)
