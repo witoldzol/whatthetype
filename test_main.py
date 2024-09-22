@@ -1,4 +1,4 @@
-from main import trace
+from typemedaddy.typemedaddy import trace
 from foo import (
     example_function,
     Foo,
@@ -6,7 +6,7 @@ from foo import (
     int_function,
     returns_a_class,
 )
-from main import convert_results_to_types, convert_value_to_type
+from typemedaddy.typemedaddy import convert_results_to_types, convert_value_to_type
 
 
 # helper fun
