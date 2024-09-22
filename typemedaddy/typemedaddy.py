@@ -1,16 +1,8 @@
 import contextlib
 from typing import Any
-from random import choice
 import sys
+import os
 from enum import Enum
-from foo import (
-    returns_a_class,
-    example_function,
-    function_taking_nested_class,
-    example_function_with_third_party_lib,
-    function_calling_nested_functions,
-)
-from nested.inner.bar import Bar
 
 RESULT = {}
 MODEL = {
@@ -20,8 +12,12 @@ MODEL = {
     }
 }
 
-PROJECT_NAME = "typemedaddy"
-
+# we use `current_folder` to identify local execution dir
+# this will be used to filter out non local / non user packages
+# so that we don't trace them 
+# in other words - we don't want to trace functions defined in external libraries, just our own code 
+current_folder = os.getcwd()
+PROJECT_NAME = current_folder
 
 class TraceEvent(Enum):
     CALL = "call"  #: Triggered when a function is called.
@@ -43,7 +39,8 @@ def is_user_defined_class(obj):
         obj, (int, float, str, list, dict, tuple, set)
     )
 
-
+import logging
+LOG = logging.getLogger(__name__)
 # we use context for easy testing, same with the RESULT yields, for tests only
 @contextlib.contextmanager
 def trace():
@@ -56,6 +53,7 @@ def trace():
         print("========== TRACING OFF ==========")
         sys.settrace(None)
         RESULT = {}
+        print(RESULT)
 
 
 def trace_function(frame, event, arg):
@@ -184,20 +182,6 @@ def convert_results_to_types(input: dict[str,dict]) -> dict:
 if __name__ == "__main__":
     # ===== STAGE 1 START =====
     with trace():
-        pass
-        # returns_a_class()
-        # example_function(1, 2, None)
-        # # second type of arg
-        # example_function("1", 2, None)
-        # # third party will not get captured
-        # example_function_with_third_party_lib("1", 2)
-        # # this will not get captured - it's not user function
-        # choice(list(range(1, 1000)))
-        # lol = Bar()
-        # function_taking_nested_class(lol)
-        # function_calling_nested_functions()
-        # # class method gets captured
-        # lol.do_bar(1)
         print("-" * 20, " RESULT: ", "-" * 20)
         print(RESULT)
     print("-" * 20)
