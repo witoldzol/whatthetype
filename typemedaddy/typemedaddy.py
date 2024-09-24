@@ -5,6 +5,7 @@ import sys
 import os
 from enum import Enum
 import argparse
+from foo import example_function_with_third_party_lib
 
 # set up logger
 parser = argparse.ArgumentParser()
@@ -63,7 +64,6 @@ def trace():
         print("========== TRACING OFF ==========")
         sys.settrace(None)
         RESULT = {}
-        print(RESULT)
 
 
 def trace_function(frame, event, arg):
@@ -187,15 +187,21 @@ def convert_results_to_types(input: dict[str,dict]) -> dict:
 def update_code_with_types(dict) -> None:
     pass
 
+def print_stage_end(n:int) -> None:
+    print("-" * 20)
+    print(f"STAGE {n} END")
+
 if __name__ == "__main__":
     # ===== STAGE 1 - RECORD DATA =====
-    with trace():
+    with trace() as data:
         print("-" * 20, " RESULT: ", "-" * 20)
-        print(RESULT)
-    print("-" * 20)
-    print("STAGE 1 END")
-    print("-" * 20)
+        example_function_with_third_party_lib(1,2)
+    print(f"{data=}")
+    print_stage_end(1)
     # ===== STAGE 2 - ANALYSE TYPES IN DATA =====
     types_data = convert_results_to_types(RESULT)
+    print(types_data)
+    print_stage_end(2)
     # ===== STAGE 3 - UPDATE FILE WITH TYPES =====
     update_code_with_types(types_data)
+    print_stage_end(3)
