@@ -184,14 +184,18 @@ def convert_results_to_types(input: dict[str,dict]) -> dict:
             r[mfl]["return"].append(var_type_name)
     return r
 
+def update_code_with_types(dict) -> None:
+    pass
 
 if __name__ == "__main__":
-    # ===== STAGE 1 START =====
+    # ===== STAGE 1 - RECORD DATA =====
     with trace():
         print("-" * 20, " RESULT: ", "-" * 20)
         print(RESULT)
     print("-" * 20)
     print("STAGE 1 END")
     print("-" * 20)
-    # ===== STAGE 2 START =====
-    convert_results_to_types(RESULT)
+    # ===== STAGE 2 - ANALYSE TYPES IN DATA =====
+    types_data = convert_results_to_types(RESULT)
+    # ===== STAGE 3 - UPDATE FILE WITH TYPES =====
+    update_code_with_types(types_data)
