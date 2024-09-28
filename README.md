@@ -18,3 +18,7 @@ from typemedaddy.typemedaddy import trace
 with trace():
     my_script()
 ```
+# How to run local
+```
+$ python -m typemedaddy.typemedaddy
+```
