@@ -1,5 +1,5 @@
 from random import choice
-from nested.inner.bar import Bar
+from typemedaddy.nested.inner.bar import Bar
 
 
 class Foo:
@@ -9,6 +9,9 @@ class Foo:
     def get_foo(self, name, age):
         return f"{name},{age}"
 
+    def arbitrary_self(lol, name, age):
+        lol.bar = 'lol'
+        return f"{name},{age}"
 
 def example_function_with_third_party_lib(a, b):
     r = choice([a, b])

@@ -1,3 +1,4 @@
+import pprint
 import logging
 import contextlib
 from typing import Any
@@ -5,7 +6,7 @@ import sys
 import os
 from enum import Enum
 import argparse
-from foo import example_function_with_third_party_lib
+from typemedaddy.foo import example_function_with_third_party_lib, Foo
 
 # set up logger
 parser = argparse.ArgumentParser()
@@ -184,24 +185,30 @@ def convert_results_to_types(input: dict[str,dict]) -> dict:
             r[mfl]["return"].append(var_type_name)
     return r
 
-def update_code_with_types(dict) -> None:
-    pass
-
-def print_stage_end(n:int) -> None:
-    print("-" * 20)
-    print(f"STAGE {n} END")
+def update_code_with_types(data: dict) -> None:
+    # get mfl
+    for mfl in data.keys():
+        module, function, line_num = mfl.split(':')
+        with open(module, 'r') as f:
+            for idx,line in enumerate(f):
+                if idx == int(line_num)-1:
+                    old_line = line
+                    line = 'dkfjd'
+                    print('>>>' *10)
+                    print(old_line)
 
 if __name__ == "__main__":
-    # ===== STAGE 1 - RECORD DATA =====
+    print('===== STAGE 1 - RECORD DATA =====')
     with trace() as data:
         print("-" * 20, " RESULT: ", "-" * 20)
         example_function_with_third_party_lib(1,2)
-    print(f"{data=}")
-    print_stage_end(1)
-    # ===== STAGE 2 - ANALYSE TYPES IN DATA =====
-    types_data = convert_results_to_types(RESULT)
-    print(types_data)
-    print_stage_end(2)
-    # ===== STAGE 3 - UPDATE FILE WITH TYPES =====
+        f = Foo()
+        f.arbitrary_self(1,2,)
+    pprint.pprint(data)
+
+    print('===== STAGE 2 - ANALYSE TYPES IN DATA =====')
+    types_data = convert_results_to_types(data)
+    pprint.pprint(types_data)
+
+    print('===== STAGE 3 - UPDATE FILE WITH TYPES =====')
     update_code_with_types(types_data)
-    print_stage_end(3)
