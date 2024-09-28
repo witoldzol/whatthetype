@@ -66,6 +66,8 @@ def trace():
         sys.settrace(None)
         RESULT = {}
 
+def ismethod(name):
+    return name == 'self'
 
 def trace_function(frame, event, arg):
     module_name = frame.f_code.co_filename
@@ -85,16 +87,20 @@ def trace_function(frame, event, arg):
     if event == TraceEvent.CALL:
         for name in function_arg_names:
             # ignore self references
-            if name == "self":
+            if ismethod(name):
                 continue
-            LOG.debug(f"Function name => {func_name}")
-            LOG.debug(f"1) function arg name is : {name}")
-            var = local_vars[name]
-            var_type = type(var).__name__
-            LOG.debug(f"2) variable type name is  : {var_type}")
-            LOG.debug(f"----")
-            if is_user_defined_class(var):
-                var = f"USER_CLASS|{var.__module__}::{var_type}"
+                name == f"SELF_REF|{name}"
+            else:
+                # if name == "self":
+                #     continue
+                LOG.debug(f"1) Function name => {func_name}")
+                LOG.debug(f"2) Function arg name is : {name}")
+                var = local_vars[name]
+                var_type = type(var).__name__
+                LOG.debug(f"3) Variable type name is  : {var_type}")
+                LOG.debug(f"--- end ---")
+                if is_user_defined_class(var):
+                    var = f"USER_CLASS|{var.__module__}::{var_type}"
             if name in RESULT[mod_func_line]["args"]:
                 RESULT[mod_func_line]["args"][name].append(var)
             else:
