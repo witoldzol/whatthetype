@@ -15,7 +15,16 @@ result = {
     }
 }
 ```
-
+# implement replacement algo:
+- get index of start and end of ()
+- extract everything between brackets
+- split by comma
+- check if type exists -> split by ':', if yes, drop it?
+    - if type is 'SELF_OR_CLS', skip, we add nothing, just reinsert arg as it was
+- check if default value exists -> split by '=', if yes, save it somewhere
+- add new types
+- add existing default values
+- insert new stuff + everything that was after end of ')'
 # should we use python 3.12 monitoring api?
 # make sure we presever order of arguments! 
 # CLI: add arguments to run step 1 / 2 / 3 ?
