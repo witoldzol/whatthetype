@@ -201,14 +201,14 @@ if __name__ == "__main__":
     print('===== STAGE 1 - RECORD DATA =====')
     with trace() as data:
         print("-" * 20, " RESULT: ", "-" * 20)
-        example_function_with_third_party_lib(1,2)
+        # example_function_with_third_party_lib(1,2)
         f = Foo()
         f.arbitrary_self(1,2,)
-    pprint.pprint(data)
+    pprint.pprint(data, sort_dicts=False)
 
     print('===== STAGE 2 - ANALYSE TYPES IN DATA =====')
     types_data = convert_results_to_types(data)
-    pprint.pprint(types_data)
+    pprint.pprint(types_data, sort_dicts=False)
 
     print('===== STAGE 3 - UPDATE FILE WITH TYPES =====')
     update_code_with_types(types_data)

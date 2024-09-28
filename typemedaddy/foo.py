@@ -9,8 +9,8 @@ class Foo:
     def get_foo(self, name, age):
         return f"{name},{age}"
 
-    def arbitrary_self(lol, name, age):
-        lol.bar = 'lol'
+    def arbitrary_self(not_self, name, age):
+        not_self.bar = 'lol'
         return f"{name},{age}"
 
 def example_function_with_third_party_lib(a, b):
