@@ -1,6 +1,6 @@
 # identify 'self' & 'cls' aka first arg of class method, and give it 'special' arg,
-so that we can skip it in 3rd step when we are upating function defs!
-or identify if method or free funct using `inspect` module & `ismethod()` or `isfunction()`
+so that we can mark it as `SELF_OR_CLS`
+why? so we can skip in further steps, THIS IS NOT STRICTLY NECESSARY, but it's 'best' for completion sake to capture all args, even self refrences
 ```python
 class Foo():
     def bob(omg, wow):
@@ -20,7 +20,7 @@ result = {
 - extract everything between brackets
 - split by comma
 - check if type exists -> split by ':', if yes, drop it?
-    - if type is 'SELF_OR_CLS', skip, we add nothing, just reinsert arg as it was
+    - if type is 'SELF_OR_CLS', skip, we add nothing, remove the type, just reinsert arg
 - check if default value exists -> split by '=', if yes, save it somewhere
 - add new types
 - add existing default values
@@ -31,3 +31,6 @@ result = {
 # create a warning if an argument in a function takes two or more different types of input
 foo(int|str) : this might be an indication of a bug
 # save step 1 output to a file?
+
+
+## DONE ##
