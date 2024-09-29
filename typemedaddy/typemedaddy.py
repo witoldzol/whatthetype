@@ -7,16 +7,19 @@ import os
 from enum import Enum
 import argparse
 from typemedaddy.foo import example_function_with_third_party_lib, Foo
+from types import FrameType
 
-# set up logger
-parser = argparse.ArgumentParser()
-parser.add_argument("--log", default='WARNING')
-args = parser.parse_args()
-log_level = args.log.upper()
-if log_level in ('DEBUG', 'INFO', 'WARNING', 'ERROR'):
-    logging.basicConfig(level=log_level)
-else:
-    logging.basicConfig(level='WARNING')
+# take logger args, if we are running directly 
+# ( this bit was executing when running tests, so I put it in a conditional)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--log", default='WARNING')
+    args = parser.parse_args()
+    log_level = args.log.upper()
+    if log_level in ('DEBUG', 'INFO', 'WARNING', 'ERROR'):
+        logging.basicConfig(level=log_level)
+    else:
+        logging.basicConfig(level='WARNING')
 LOG = logging.getLogger(__name__)
 
 RESULT = {}
@@ -66,8 +69,10 @@ def trace():
         sys.settrace(None)
         RESULT = {}
 
-def ismethod(name):
-    return name == 'self'
+def is_class_method(func_name: str, frame: FrameType) -> bool:
+    # class methods are not listed in global vars dict
+    return func_name not in frame.f_globals
+
 
 def trace_function(frame, event, arg):
     module_name = frame.f_code.co_filename
@@ -86,21 +91,26 @@ def trace_function(frame, event, arg):
     ##### CALL #####
     if event == TraceEvent.CALL:
         for name in function_arg_names:
-            # ignore self references
-            if ismethod(name):
-                continue
-                name == f"SELF_REF|{name}"
-            else:
-                # if name == "self":
-                #     continue
-                LOG.debug(f"1) Function name => {func_name}")
-                LOG.debug(f"2) Function arg name is : {name}")
-                var = local_vars[name]
-                var_type = type(var).__name__
-                LOG.debug(f"3) Variable type name is  : {var_type}")
-                LOG.debug(f"--- end ---")
-                if is_user_defined_class(var):
-                    var = f"USER_CLASS|{var.__module__}::{var_type}"
+            # we need to figure out if the called function is a 'free' or is a class method
+            # why? 
+            #   because if it's a class method, first arg will be 'self' or 'cls' -> 
+            #   but we can't rely on neme or the arg, because it can be anything
+            # we have access to globals()
+            # if function is a class method, it will NOT be listed in gloals()
+            # so let's just use that as a check  ->
+            #   ( I don't understand internals so this is a quick hack -> let's hope I didn't miss something important ) 
+            # if is_class_method(func_name, frame):
+            #     continue
+            #     name == f"SELF_REF|{name}"
+            # else:
+            LOG.debug(f"1) Function name => {func_name}")
+            LOG.debug(f"2) Function arg name is : {name}")
+            var = local_vars[name]
+            var_type = type(var).__name__
+            LOG.debug(f"3) Variable type name is  : {var_type}")
+            LOG.debug(f"--- end ---")
+            if is_user_defined_class(var):
+                var = f"USER_CLASS|{var.__module__}::{var_type}"
             if name in RESULT[mod_func_line]["args"]:
                 RESULT[mod_func_line]["args"][name].append(var)
             else:
@@ -203,12 +213,13 @@ def update_code_with_types(data: dict) -> None:
                     print('>>>' *10)
                     print(old_line)
 
+
 if __name__ == "__main__":
     print('===== STAGE 1 - RECORD DATA =====')
+    f = Foo()
     with trace() as data:
         print("-" * 20, " RESULT: ", "-" * 20)
         # example_function_with_third_party_lib(1,2)
-        f = Foo()
         f.arbitrary_self(1,2,)
     pprint.pprint(data, sort_dicts=False)
 
