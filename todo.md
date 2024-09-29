@@ -1,20 +1,4 @@
-# identify 'self' & 'cls' aka first arg of class method, and give it 'special' arg,
-so that we can mark it as `SELF_OR_CLS`
-why? so we can skip in further steps, THIS IS NOT STRICTLY NECESSARY, but it's 'best' for completion sake to capture all args, even self refrences
-```python
-class Foo():
-    def bob(omg, wow):
-        return wow
-result = {
-    'module_function_line': {
-        'args': {
-            'omg': ['SELF_OR_CLS'],
-            'wow': ['str']
-        },
-        'return': ['str']
-    }
-}
-```
+# add tests around self ref object
 # implement replacement algo:
 - get index of start and end of ()
 - extract everything between brackets
@@ -34,3 +18,20 @@ foo(int|str) : this might be an indication of a bug
 
 
 ## DONE ##
+# identify 'self' & 'cls' aka first arg of class method, and give it 'special' arg,
+so that we can mark it as `SELF_OR_CLS`
+why? so we can skip in further steps, THIS IS NOT STRICTLY NECESSARY, but it's 'best' for completion sake to capture all args, even self refrences
+```python
+class Foo():
+    def bob(omg, wow):
+        return wow
+result = {
+    'module_function_line': {
+        'args': {
+            'omg': ['SELF_OR_CLS'],
+            'wow': ['str']
+        },
+        'return': ['str']
+    }
+}
+```
