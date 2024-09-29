@@ -14,17 +14,6 @@ from typemedaddy.typemedaddy import (
 
 MODULE_PATH = "typemedaddy.foo"
 
-
-def traverse_dict(d, target, path=None):
-    for k, v in d.items():
-        full_key = f"{path}|{k}" if path else k
-        if k == target:
-            return full_key
-        if isinstance(v, dict):
-            return traverse_dict(v, target, full_key)
-    return None
-
-
 def test_example_function():
     with trace() as actual:
         f = Foo()  # this will trigger def __init__ which will get captured
@@ -204,6 +193,28 @@ def test_multiple_type_inputs_for_the_same_param():
         },
     }
     assert actual == expected
+
+
+def test_conver_self_ref_val_to_self_ref_type():
+    step_1_result = {
+        '/home/w/repos/typemedaddy/typemedaddy/foo.py:arbitrary_self:12': {
+            'args': {'not_self': ['SELF_OR_CLS'],
+                     'name': [1],
+                     'age': [2]},
+            'return': ['1,2']
+        },
+    }
+    actual = convert_results_to_types(step_1_result)
+    expected = {
+        "/home/w/repos/typemedaddy/typemedaddy/foo.py:arbitrary_self:12": {
+            'args': {'not_self': ['SELF_OR_CLS'],
+                     'name': ['int'],
+                     'age': ['int']},
+            'return': ['str']
+        }
+    }
+    assert actual == expected
+
 
 
 def test_empty_list():
