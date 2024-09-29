@@ -22,6 +22,11 @@ if __name__ == "__main__":
         logging.basicConfig(level='WARNING')
 LOG = logging.getLogger(__name__)
 
+# constants
+COLLECTIONS = ('dict', 'list', 'set', 'tuple')
+COLLECTIONS_NO_DICT = ('list', 'set', 'tuple')
+SELF_OR_CLS = 'SELF_OR_CLS'
+
 RESULT = {}
 MODEL = {
     "module:func_name:func_line": {
@@ -70,7 +75,10 @@ def trace():
         RESULT = {}
 
 def is_class_method(func_name: str, frame: FrameType) -> bool:
-    # class methods are not listed in global vars dict
+    # we have access to globals()
+    # if function is a class method, it will NOT be listed in gloals()
+    # so let's just use that as a check  ->
+    #   ( I don't understand internals so this is a quick hack -> let's hope I didn't miss something important ) 
     return func_name not in frame.f_globals
 
 
@@ -88,34 +96,35 @@ def trace_function(frame, event, arg):
     # create module_function_line entry
     if mod_func_line not in RESULT:
         RESULT[mod_func_line] = {"args": {}}
+    ################
     ##### CALL #####
+    ################
     if event == TraceEvent.CALL:
-        for name in function_arg_names:
-            # we need to figure out if the called function is a 'free' or is a class method
-            # why? 
-            #   because if it's a class method, first arg will be 'self' or 'cls' -> 
-            #   but we can't rely on neme or the arg, because it can be anything
-            # we have access to globals()
-            # if function is a class method, it will NOT be listed in gloals()
-            # so let's just use that as a check  ->
-            #   ( I don't understand internals so this is a quick hack -> let's hope I didn't miss something important ) 
-            # if is_class_method(func_name, frame):
-            #     continue
-            #     name == f"SELF_REF|{name}"
-            # else:
-            LOG.debug(f"1) Function name => {func_name}")
-            LOG.debug(f"2) Function arg name is : {name}")
-            var = local_vars[name]
-            var_type = type(var).__name__
-            LOG.debug(f"3) Variable type name is  : {var_type}")
-            LOG.debug(f"--- end ---")
-            if is_user_defined_class(var):
-                var = f"USER_CLASS|{var.__module__}::{var_type}"
-            if name in RESULT[mod_func_line]["args"]:
-                RESULT[mod_func_line]["args"][name].append(var)
+        # we need to figure out if the called function is a 'free' or is a class method
+        # why? 
+        #   because if it's a class method, first arg will be 'self' or 'cls' -> 
+        #   but we can't rely on neme or the arg, because it can be anything
+        for idx, arg_name in enumerate(function_arg_names):
+            # we check index, because self ref object can only be the first arg!
+            # if the arg is not firs, then it cannot be a self or cls
+            if is_class_method(func_name, frame) and idx == 0:
+                var = SELF_OR_CLS
             else:
-                RESULT[mod_func_line]["args"][name] = [var]
+                LOG.debug(f"1) Function name => {func_name}")
+                LOG.debug(f"2) Function arg name is : {arg_name}")
+                var = local_vars[arg_name]
+                var_type = type(var).__name__
+                LOG.debug(f"3) Variable type name is  : {var_type}")
+                LOG.debug(f"--- end ---")
+                if is_user_defined_class(var):
+                    var = f"USER_CLASS|{var.__module__}::{var_type}"
+            if arg_name in RESULT[mod_func_line]["args"]:
+                RESULT[mod_func_line]["args"][arg_name].append(var)
+            else:
+                RESULT[mod_func_line]["args"][arg_name] = [var]
+    ##################
     ##### RETURN #####
+    ##################
     elif event == TraceEvent.RETURN:
         if is_user_defined_class(arg):
             arg = f"USER_CLASS|{arg.__module__}::{type(arg).__name__}"
@@ -134,8 +143,9 @@ def sort_types_none_at_the_end(set_of_types: set) -> list:
         return sorted_types
 
 def convert_value_to_type(value: Any) -> str:
-    COLLECTIONS = ('dict', 'list', 'set', 'tuple')
-    COLLECTIONS_NO_DICT = ('list', 'set', 'tuple')
+    # hardcoded - special case - self reference arg in methods
+    if value == SELF_OR_CLS:
+        return value
     input_type = type(value).__name__
     # base case
     if input_type not in COLLECTIONS:

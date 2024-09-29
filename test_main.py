@@ -5,7 +5,7 @@ from typemedaddy.foo import (
     int_function,
     returns_a_class,
 )
-from typemedaddy.typemedaddy import convert_results_to_types, convert_value_to_type, trace
+from typemedaddy.typemedaddy import convert_results_to_types, convert_value_to_type, trace, SELF_OR_CLS
 
 MODULE_PATH = 'typemedaddy.foo'
 
@@ -26,7 +26,7 @@ def test_example_function():
     for k in actual:
         print(k)
         if "init" in k:
-            assert actual[k]["args"] == {"self": ['SELF_OR_CLS'], "bar": [None]}
+            assert actual[k]["args"] == {"self": [SELF_OR_CLS], "bar": [None]}
             assert actual[k]["return"] == [None]
         elif "example_function" in k:
             assert actual[k]["args"] == {
@@ -44,7 +44,7 @@ def test_if_global_context_is_not_polluted_by_previous_test_invocation():
         example_function(3, 4, None)
     for k in actual:
         if "init" in k:
-            assert actual[k]["args"] == {"self": ['SELF_OR_CLS'],"bar": [None]}
+            assert actual[k]["args"] == {"self": [SELF_OR_CLS],"bar": [None]}
             assert actual[k]["return"] == [None]
         elif "example_function" in k:
             assert actual[k]["args"] == {
@@ -62,7 +62,7 @@ def test_example_function_with_different_args():
         example_function("bob", "wow", f)
     for k in actual:
         if "init" in k:
-            assert actual[k]["args"] == {"self": ['SELF_OR_CLS'], "bar": [None]}
+            assert actual[k]["args"] == {"self": [SELF_OR_CLS], "bar": [None]}
             assert actual[k]["return"] == [None]
         elif "example_function" in k:
             assert actual[k]["args"] == {
@@ -78,7 +78,7 @@ def test_class_method():
     with trace() as actual:
         f.get_foo("bob", 9)
     for k in actual:
-        assert actual[k]["args"] == {"self": ['SELF_OR_CLS'],"name": ["bob"], "age": [9]}
+        assert actual[k]["args"] == {"self": [SELF_OR_CLS],"name": ["bob"], "age": [9]}
         assert actual[k]["return"] == ["bob,9"]
 
 
@@ -87,7 +87,7 @@ def test_method_returns_a_class():
         returns_a_class()
     for k in actual:
         if "init" in k:
-            assert actual[k]["args"] == {"self": ['SELF_OR_CLS'], "bar": [None]}
+            assert actual[k]["args"] == {"self": [SELF_OR_CLS], "bar": [None]}
             assert actual[k]["return"] == [None]
         elif "returns_a_class" in k:
             assert actual[k]["args"] == {}
