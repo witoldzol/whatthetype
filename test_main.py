@@ -308,6 +308,10 @@ def test_convert_value_to_type():
     actual = convert_value_to_type(value)
     assert "list[str]" == actual
 
+    value = SELF_OR_CLS
+    actual = convert_value_to_type(value)
+    assert SELF_OR_CLS == actual
+
     value = [1.0]
     actual = convert_value_to_type(value)
     assert "list[float]" == actual
