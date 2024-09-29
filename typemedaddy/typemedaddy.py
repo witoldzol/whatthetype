@@ -9,23 +9,23 @@ import argparse
 from typemedaddy.foo import example_function_with_third_party_lib, Foo
 from types import FrameType
 
-# take logger args, if we are running directly 
+# take logger args, if we are running directly
 # ( this bit was executing when running tests, so I put it in a conditional)
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--log", default='WARNING')
+    parser.add_argument("--log", default="WARNING")
     args = parser.parse_args()
     log_level = args.log.upper()
-    if log_level in ('DEBUG', 'INFO', 'WARNING', 'ERROR'):
+    if log_level in ("DEBUG", "INFO", "WARNING", "ERROR"):
         logging.basicConfig(level=log_level)
     else:
-        logging.basicConfig(level='WARNING')
+        logging.basicConfig(level="WARNING")
 LOG = logging.getLogger(__name__)
 
 # constants
-COLLECTIONS = ('dict', 'list', 'set', 'tuple')
-COLLECTIONS_NO_DICT = ('list', 'set', 'tuple')
-SELF_OR_CLS = 'SELF_OR_CLS'
+COLLECTIONS = ("dict", "list", "set", "tuple")
+COLLECTIONS_NO_DICT = ("list", "set", "tuple")
+SELF_OR_CLS = "SELF_OR_CLS"
 
 RESULT = {}
 MODEL = {
@@ -37,9 +37,10 @@ MODEL = {
 
 # we use `current_folder` to identify local execution dir
 # this will be used to filter out non local / non user packages
-# so that we don't trace them 
-# in other words - we don't want to trace functions defined in external libraries, just our own code 
+# so that we don't trace them
+# in other words - we don't want to trace functions defined in external libraries, just our own code
 PROJECT_NAME = os.getcwd()
+
 
 class TraceEvent(Enum):
     CALL = "call"  #: Triggered when a function is called.
@@ -61,6 +62,7 @@ def is_user_defined_class(obj):
         obj, (int, float, str, list, dict, tuple, set)
     )
 
+
 # we use context for easy testing, same with the RESULT yields, for tests only
 @contextlib.contextmanager
 def trace():
@@ -74,11 +76,12 @@ def trace():
         sys.settrace(None)
         RESULT = {}
 
+
 def is_class_method(func_name: str, frame: FrameType) -> bool:
     # we have access to globals()
     # if function is a class method, it will NOT be listed in gloals()
     # so let's just use that as a check  ->
-    #   ( I don't understand internals so this is a quick hack -> let's hope I didn't miss something important ) 
+    #   ( I don't understand internals so this is a quick hack -> let's hope I didn't miss something important )
     return func_name not in frame.f_globals
 
 
@@ -101,8 +104,8 @@ def trace_function(frame, event, arg):
     ################
     if event == TraceEvent.CALL:
         # we need to figure out if the called function is a 'free' or is a class method
-        # why? 
-        #   because if it's a class method, first arg will be 'self' or 'cls' -> 
+        # why?
+        #   because if it's a class method, first arg will be 'self' or 'cls' ->
         #   but we can't rely on neme or the arg, because it can be anything
         for idx, arg_name in enumerate(function_arg_names):
             # we check index, because self ref object can only be the first arg!
@@ -134,13 +137,15 @@ def trace_function(frame, event, arg):
             RESULT[mod_func_line]["return"] = [arg]
     return trace_function
 
+
 def sort_types_none_at_the_end(set_of_types: set) -> list:
-        sorted_types: list = sorted(set_of_types)
-        if "NoneType" in sorted_types:
-            sorted_types.remove("NoneType")
-            sorted_types = sorted_types
-            sorted_types.append("NoneType")
-        return sorted_types
+    sorted_types: list = sorted(set_of_types)
+    if "NoneType" in sorted_types:
+        sorted_types.remove("NoneType")
+        sorted_types = sorted_types
+        sorted_types.append("NoneType")
+    return sorted_types
+
 
 def convert_value_to_type(value: Any) -> str:
     # hardcoded - special case - self reference arg in methods
@@ -150,9 +155,9 @@ def convert_value_to_type(value: Any) -> str:
     # base case
     if input_type not in COLLECTIONS:
         return input_type
-    if input_type  == 'dict':
+    if input_type == "dict":
         types_found_in_collection = set()
-        for k,v in value.items():
+        for k, v in value.items():
             key_type = type(k).__name__
             dict_value_type = type(v).__name__
             # collections are not hashable, so they will never be collections
@@ -163,7 +168,7 @@ def convert_value_to_type(value: Any) -> str:
         if types_found_in_collection:
             sorted_types = sort_types_none_at_the_end(types_found_in_collection)
             input_type = f"{input_type}[{'|'.join(sorted_types)}]"
-    elif input_type  in COLLECTIONS_NO_DICT:
+    elif input_type in COLLECTIONS_NO_DICT:
         types_found_in_collection = set()
         for v in value:
             t = type(v).__name__
@@ -171,10 +176,11 @@ def convert_value_to_type(value: Any) -> str:
                 types_found_in_collection.add(convert_value_to_type(v))
             else:
                 types_found_in_collection.add(t)
-        if  types_found_in_collection:
+        if types_found_in_collection:
             sorted_types = sort_types_none_at_the_end(types_found_in_collection)
             input_type = f"{input_type}[{'|'.join(sorted_types)}]"
-    return input_type 
+    return input_type
+
 
 # TODO
 # we probably want to throw some warning saying:
@@ -189,18 +195,18 @@ def convert_value_to_type(value: Any) -> str:
 #           ....
 #       },
 #       "return": [value, value, ...] < same here, recurse each value
-#   } 
+#   }
 # }
-def convert_results_to_types(input: dict[str,dict]) -> dict:
+def convert_results_to_types(input: dict[str, dict]) -> dict:
     if not input:
         return {}
     r = {}
     # mfl => module_function_line
     for mfl in input:
         # ========== ARGS ==========
-        r[mfl] = {"args": dict()} # init result
+        r[mfl] = {"args": dict()}  # init result
         for arg in input[mfl]["args"]:
-            r[mfl]["args"][arg] = list() # init result
+            r[mfl]["args"][arg] = list()  # init result
             for value in input[mfl]["args"][arg]:
                 var_type_name = convert_value_to_type(value)
                 r[mfl]["args"][arg].append(var_type_name)
@@ -211,31 +217,35 @@ def convert_results_to_types(input: dict[str,dict]) -> dict:
             r[mfl]["return"].append(var_type_name)
     return r
 
+
 def update_code_with_types(data: dict) -> None:
     # get mfl
     for mfl in data.keys():
-        module, function, line_num = mfl.split(':')
-        with open(module, 'r') as f:
-            for idx,line in enumerate(f):
-                if idx == int(line_num)-1:
+        module, function, line_num = mfl.split(":")
+        with open(module, "r") as f:
+            for idx, line in enumerate(f):
+                if idx == int(line_num) - 1:
                     old_line = line
-                    line = 'dkfjd'
-                    print('>>>' *10)
+                    line = "dkfjd"
+                    print(">>>" * 10)
                     print(old_line)
 
 
 if __name__ == "__main__":
-    print('===== STAGE 1 - RECORD DATA =====')
+    print("===== STAGE 1 - RECORD DATA =====")
     f = Foo()
     with trace() as data:
         print("-" * 20, " RESULT: ", "-" * 20)
         # example_function_with_third_party_lib(1,2)
-        f.arbitrary_self(1,2,)
+        f.arbitrary_self(
+            1,
+            2,
+        )
     pprint.pprint(data, sort_dicts=False)
 
-    print('===== STAGE 2 - ANALYSE TYPES IN DATA =====')
+    print("===== STAGE 2 - ANALYSE TYPES IN DATA =====")
     types_data = convert_results_to_types(data)
     pprint.pprint(types_data, sort_dicts=False)
 
-    print('===== STAGE 3 - UPDATE FILE WITH TYPES =====')
+    print("===== STAGE 3 - UPDATE FILE WITH TYPES =====")
     update_code_with_types(types_data)
