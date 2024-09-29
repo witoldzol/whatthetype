@@ -1,4 +1,3 @@
-# add tests around self ref object
 # implement replacement algo:
 - get index of start and end of ()
 - extract everything between brackets
@@ -35,3 +34,4 @@ result = {
     }
 }
 ```
+# add tests around self ref object
