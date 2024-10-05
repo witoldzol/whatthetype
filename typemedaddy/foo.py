@@ -9,7 +9,7 @@ class Foo:
     def get_foo(self, name, age):
         return f"{name},{age}"
 
-    def arbitrary_self(not_self, name, age):
+    def arbitrary_self(not_self, name, age=10):
         not_self.bar = 'lol'
         return f"{name},{age}"
 
