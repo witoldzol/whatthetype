@@ -1,13 +1,12 @@
 # implement replacement algo:
-- get index of start and end of ()
-- extract everything between brackets
-- split by comma
-- check if type exists -> split by ':', if yes, drop it?
-    - if type is 'SELF_OR_CLS', skip, we add nothing, remove the type, just reinsert arg
-- check if default value exists -> split by '=', if yes, save it somewhere
-- add new types
-- add existing default values
-- insert new stuff + everything that was after end of ')'
+- split lines into tokens
+- detect start and end of arguments
+- analyze each argument:
+-- does it have a type
+-- does it have a default value?
+-- add type if not there
+- when done, un-tokenize and you have a string representing function !
+## edge case - what about multiline function signatures?
 # should we use python 3.12 monitoring api?
 # make sure we presever order of arguments! 
 # CLI: add arguments to run step 1 / 2 / 3 ?
@@ -16,7 +15,15 @@ foo(int|str) : this might be an indication of a bug
 # save step 1 output to a file?
 
 
+
+
+
+
+
+
+############################################################
 ## DONE ##
+############################################################
 # identify 'self' & 'cls' aka first arg of class method, and give it 'special' arg,
 so that we can mark it as `SELF_OR_CLS`
 why? so we can skip in further steps, THIS IS NOT STRICTLY NECESSARY, but it's 'best' for completion sake to capture all args, even self refrences
