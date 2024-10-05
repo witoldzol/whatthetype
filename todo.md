@@ -1,3 +1,4 @@
+# add test case where we trace same function twice, and verify we don't store duplicate types
 # implement replacement algo:
 - split lines into tokens
 - detect start and end of arguments
