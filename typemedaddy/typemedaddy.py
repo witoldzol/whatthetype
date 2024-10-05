@@ -252,10 +252,27 @@ def update_code_with_types(data: dict) -> None:
                             in_arguments = False
                             print("ARGUMENTS END ->>>>")
                             result.append((token_type, token_val))
-                        # get argument, detect type and default value
+                        # ARGUMENT ( we add type if we have one )
                         elif in_arguments and not type_detected and token_type == NAME:
+                            new_arg = []
                             print(f"ARGUMENT ----> {token_val}")
-                            result.append((token_type, token_val))
+                            # result.append((token_type, token_val))
+                            new_arg.append((token_type, token_val))
+                            # check if we have a type for the argument
+                            # dont worry about pre existing types, we drop them somewhere else
+                            if token_val in data[mfl]["args"]:
+                                print(">>"*100)
+                                print(f"type detected {data[mfl]['args'][token_val]=} ")
+                                for t in data[mfl]['args'][token_val]:
+                                    # skip method self or class method ref
+                                    if t == SELF_OR_CLS:
+                                        continue
+                                    comma_token = (OP, ':')
+                                    type_token = (STRING, t)
+                                    new_arg.append(comma_token)
+                                    new_arg.append(type_token)
+                            result.extend(new_arg)
+
                         # in argument, we detected : which means we have a type
                         elif in_arguments and token_type == OP and token_val == ':':
                             print(f"TYPE DETECTED ")
