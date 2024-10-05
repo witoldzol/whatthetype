@@ -1,5 +1,5 @@
 import io
-from tokenize import tokenize, untokenize, NUMBER, STRING, NAME, OP, generate_tokens
+from tokenize import INDENT, tokenize, untokenize, NUMBER, STRING, NAME, OP, generate_tokens
 import pprint
 import logging
 import contextlib
@@ -235,21 +235,43 @@ def update_code_with_types(data: dict) -> None:
                     # do the magic
                     result = []
                     in_arguments = False
-                    for token_type, token_val,_ ,_ ,_ in tokens:
+                    # untokenize will not handle spacing and indentation if we remove last 3 args
+                    # so we have to handle it manually
+                    indentation = []
+                    for t in tokens:
+                        token_type, token_val,start ,end ,l = t
+                        # start of arguments
                         if token_type == OP and token_val == '(':
                             in_arguments = True
                             print("ARGUMENTS START ->>>>")
-                            result.append((token_type, token_val))
+                            result.append((token_type, token_val,))
+                        # end of arguments
                         elif token_type == OP and token_val == ')':
                             in_arguments = False
                             print("ARGUMENTS END ->>>>")
                             result.append((token_type, token_val))
+                        # get argument, detect type and default value
                         elif in_arguments and token_type == NAME:
                             print(f"ARGUMENT ----> {token_val}")
-                    print(">>>" * 10)
+                            result.append((token_type, token_val))
+                        # handle indentation
+                        elif token_type == INDENT:
+                            print(f"INDEntation detected")
+                            result.append((token_type, token_val))
+                            indentation.append(token_val)
+                        else:
+                            print('adding rest')
+                            result.append((token_type, token_val))
+                    updated_function = untokenize(result)
+                    updated_function_with_indentation = ''.join(indentation) + updated_function
+                    print(">"*10)
+                    print("OLD")
                     print(line)
-                    print(">>>" * 10)
-
+                    print(">"*10)
+                    print("NEW")
+                    print(updated_function)
+                    print(updated_function_with_indentation)
+                    
 
 if __name__ == "__main__":
     print("===== STAGE 1 - RECORD DATA =====")
