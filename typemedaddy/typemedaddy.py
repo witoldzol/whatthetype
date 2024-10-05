@@ -1,3 +1,5 @@
+import io
+from tokenize import tokenize, untokenize, NUMBER, STRING, NAME, OP, generate_tokens
 import pprint
 import logging
 import contextlib
@@ -219,16 +221,34 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
 
 
 def update_code_with_types(data: dict) -> None:
-    # get mfl
     for mfl in data.keys():
-        module, function, line_num = mfl.split(":")
+        new_module = []
+        module, function, line_num = mfl.split(":") # edge case, if file or func has a ':' in a name
         with open(module, "r") as f:
             for idx, line in enumerate(f):
+                # find a line containting the function
                 if idx == int(line_num) - 1:
-                    old_line = line
-                    line = "dkfjd"
+                    # convert line to StringIO
+                    line_io = io.StringIO(line).readline # don't use lambda, generator will be infinite
+                    # get tokens
+                    tokens = generate_tokens(line_io)
+                    # do the magic
+                    result = []
+                    in_arguments = False
+                    for token_type, token_val,_ ,_ ,_ in tokens:
+                        if token_type == OP and token_val == '(':
+                            in_arguments = True
+                            print("ARGUMENTS START ->>>>")
+                            result.append((token_type, token_val))
+                        elif token_type == OP and token_val == ')':
+                            in_arguments = False
+                            print("ARGUMENTS END ->>>>")
+                            result.append((token_type, token_val))
+                        elif in_arguments and token_type == NAME:
+                            print(f"ARGUMENT ----> {token_val}")
                     print(">>>" * 10)
-                    print(old_line)
+                    print(line)
+                    print(">>>" * 10)
 
 
 if __name__ == "__main__":
