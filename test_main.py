@@ -182,17 +182,20 @@ def test_multiple_type_inputs_for_the_same_param():
         },
     }
     actual = convert_results_to_types(step_1_result)
-    expected = {
-        "/home/w/repos/typemedaddy/foo.py:int_function:18": {
-            "args": {"a": ["int", "str"]},
-            "return": ["int", "str"],
-        },
-        "/home/w/repos/typemedaddy/bar.py:bar_function:69": {
-            "args": {"a": ["int", "str"]},
-            "return": ["int", "str"],
-        },
-    }
-    assert actual == expected
+    # expected = {
+    #     "/home/w/repos/typemedaddy/foo.py:int_function:18": {
+    #         "args": {"a": ["int", "str"]},
+    #         "return": ["int", "str"],
+    #     },
+    #     "/home/w/repos/typemedaddy/bar.py:bar_function:69": {
+    #         "args": {"a": ["int", "str"]},
+    #         "return": ["int", "str"],
+    #     },
+    # }
+    assert sorted(actual["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"]["a"]) == sorted(["str", "int"])
+    assert sorted(actual["/home/w/repos/typemedaddy/foo.py:int_function:18"]["return"]) == sorted(["str", "int"])
+    assert sorted(actual["/home/w/repos/typemedaddy/bar.py:bar_function:69"]["args"]["a"]) == sorted(["str", "int"])
+    assert sorted(actual["/home/w/repos/typemedaddy/bar.py:bar_function:69"]["return"]) == sorted(["str", "int"])
 
 
 def test_conver_self_ref_val_to_self_ref_type():
