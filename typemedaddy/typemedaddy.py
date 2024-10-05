@@ -150,13 +150,15 @@ def sort_types_none_at_the_end(set_of_types: set) -> list:
 
 
 def convert_value_to_type(value: Any) -> str:
-    # hardcoded - special case - self reference arg in methods
-    if value == SELF_OR_CLS:
-        return value
+    input_type = type(value).__name__
     input_type = type(value).__name__
     # base case
     if input_type not in COLLECTIONS:
-        return input_type
+        # hardcoded - special case - self reference arg in methods
+        if value == SELF_OR_CLS:
+            return value
+        else:
+            return input_type
     if input_type == "dict":
         types_found_in_collection = set()
         for k, v in value.items():
@@ -208,19 +210,26 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
         # ========== ARGS ==========
         r[mfl] = {"args": dict()}  # init result
         for arg in input[mfl]["args"]:
+            # lets use set to de-dup types
+            s = set()
             r[mfl]["args"][arg] = list()  # init result
             for value in input[mfl]["args"][arg]:
                 var_type_name = convert_value_to_type(value)
-                r[mfl]["args"][arg].append(var_type_name)
+                s.add(var_type_name)
+            r[mfl]["args"][arg] = list(s)
         # ========== RETURN ==========
         r[mfl]["return"] = list()
+        # lets use set to de-dup types
+        s = set()
         for value in input[mfl]["return"]:
             var_type_name = convert_value_to_type(value)
-            r[mfl]["return"].append(var_type_name)
+            s.add(var_type_name)
+        r[mfl]["return"] = list(s)
     return r
 
 
-def update_code_with_types(data: dict) -> None:
+def update_code_with_types(data: dict) -> dict[str, object]:
+    updated_function_declarations = dict()
     for mfl in data.keys():
         new_module = []
         module, function, line_num = mfl.split(":") # edge case, if file or func has a ':' in a name
@@ -228,7 +237,7 @@ def update_code_with_types(data: dict) -> None:
             for idx, line in enumerate(f):
                 # find a line containting the function
                 if idx == int(line_num) - 1:
-                    # convert line to StringIO
+                    # convert line to StringIO - required by tokenizer
                     line_io = io.StringIO(line).readline # don't use lambda, generator will be infinite
                     # get tokens
                     tokens = generate_tokens(line_io)
@@ -240,8 +249,7 @@ def update_code_with_types(data: dict) -> None:
                     indentation = []
                     type_detected = False
                     for t in tokens:
-                        print(t)
-                        token_type, token_val,start ,end ,l = t
+                        token_type, token_val, _, _, _ = t
                         # start of arguments
                         if token_type == OP and token_val == '(':
                             in_arguments = True
@@ -259,18 +267,24 @@ def update_code_with_types(data: dict) -> None:
                             # check if we have a type for the argument
                             # dont worry about pre existing types, we drop them somewhere else
                             if token_val in data[mfl]["args"]:
-                                # add all types
-                                for t in data[mfl]['args'][token_val]:
-                                    # skip method self or class method ref
-                                    if t == SELF_OR_CLS:
-                                        continue
+                                argument_types = data[mfl]['args'][token_val]
+                                # skip method self or class method ref
+                                if argument_types[0] == SELF_OR_CLS:
+                                    continue
+                                # if just one arg, get it out of the array
+                                if len(argument_types) == 1:
                                     colon_token = (OP, ':')
-                                    type_token = (STRING, t)
+                                    type_token = (STRING, argument_types[0])
+                                    updated_arg.append(colon_token)
+                                    updated_arg.append(type_token)
+                                # otherwise, stringify entire array and add as is
+                                else:
+                                    colon_token = (OP, ':')
+                                    type_token = (STRING, str(argument_types))
                                     updated_arg.append(colon_token)
                                     updated_arg.append(type_token)
                             result.extend(updated_arg)
-
-                        # in argument, we detected : which means we have a type
+                        # in argument, we detected a colon (:) which means we have a type
                         elif in_arguments and token_type == OP and token_val == ':':
                             print(f"TYPE DETECTED ")
                             type_detected = True
@@ -294,9 +308,10 @@ def update_code_with_types(data: dict) -> None:
                     print(">"*10)
                     print("NEW")
                     print(updated_function_with_indentation)
+                    updated_function_declarations[mfl] = updated_function_with_indentation
                     print("DATA ->>>>")
                     print(data)
-                    
+    return updated_function_declarations
 
 if __name__ == "__main__":
     print("===== STAGE 1 - RECORD DATA =====")
@@ -308,9 +323,18 @@ if __name__ == "__main__":
             1,
             2,
         )
+        f.arbitrary_self(
+            1,
+            2,
+        )
+        f.arbitrary_self(
+            '1',
+            '2',
+        )
     pprint.pprint(data, sort_dicts=False)
 
     print("===== STAGE 2 - ANALYSE TYPES IN DATA =====")
+    print(f"DATA AFTER 1st STAGE ----> {data}")
     types_data = convert_results_to_types(data)
     pprint.pprint(types_data, sort_dicts=False)
 
