@@ -238,7 +238,9 @@ def update_code_with_types(data: dict) -> None:
                     # untokenize will not handle spacing and indentation if we remove last 3 args
                     # so we have to handle it manually
                     indentation = []
+                    type_detected = False
                     for t in tokens:
+                        print(t)
                         token_type, token_val,start ,end ,l = t
                         # start of arguments
                         if token_type == OP and token_val == '(':
@@ -251,16 +253,24 @@ def update_code_with_types(data: dict) -> None:
                             print("ARGUMENTS END ->>>>")
                             result.append((token_type, token_val))
                         # get argument, detect type and default value
-                        elif in_arguments and token_type == NAME:
+                        elif in_arguments and not type_detected and token_type == NAME:
                             print(f"ARGUMENT ----> {token_val}")
                             result.append((token_type, token_val))
+                        # in argument, we detected : which means we have a type
+                        elif in_arguments and token_type == OP and token_val == ':':
+                            print(f"TYPE DETECTED ")
+                            type_detected = True
+                            # result.append((token_type, token_val))
+                        elif in_arguments and type_detected and token_type == NAME:
+                            print(f"DROPPING OLD TYPE")
+                            type_detected = False
                         # handle indentation
                         elif token_type == INDENT:
-                            print(f"INDEntation detected")
+                            print(f"INDENTATION detected")
                             result.append((token_type, token_val))
                             indentation.append(token_val)
                         else:
-                            print('adding rest')
+                            print('OTHER tokens')
                             result.append((token_type, token_val))
                     updated_function = untokenize(result)
                     updated_function_with_indentation = ''.join(indentation) + updated_function
@@ -269,8 +279,9 @@ def update_code_with_types(data: dict) -> None:
                     print(line)
                     print(">"*10)
                     print("NEW")
-                    print(updated_function)
                     print(updated_function_with_indentation)
+                    print("DATA ->>>>")
+                    print(data)
                     
 
 if __name__ == "__main__":
