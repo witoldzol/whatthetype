@@ -11,6 +11,7 @@ from typemedaddy.typemedaddy import (
     convert_value_to_type,
     trace,
     SELF_OR_CLS,
+    update_code_with_types,
 )
 
 MODULE_PATH = "typemedaddy.foo"
@@ -478,3 +479,6 @@ def test_integration_test():
                                                                                      'return': ['int', 'str']}}
     assert expected == step_2_output
     ##### STEP 3 #####
+    step_3_output = update_code_with_types(step_2_output)
+    print("### integration ### \n"*3)
+    print(step_3_output)
