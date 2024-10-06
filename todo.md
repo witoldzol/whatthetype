@@ -1,3 +1,5 @@
+# fix union of types
+# put None at the end if union of types
 # implement replacement algo:
 - split lines into tokens
 - detect start and end of arguments
@@ -44,3 +46,4 @@ result = {
 ```
 # add tests around self ref object
 # add test case where we trace same function twice, and verify we don't store duplicate types
+# convert 'NoneType' to 'None' ( step 2 or 3 ????)

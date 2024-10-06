@@ -142,16 +142,20 @@ def trace_function(frame, event, arg):
 
 def sort_types_none_at_the_end(set_of_types: set) -> list:
     sorted_types: list = sorted(set_of_types)
-    if "NoneType" in sorted_types:
-        sorted_types.remove("NoneType")
+    if "None" in sorted_types:
+        sorted_types.remove("None")
         sorted_types = sorted_types
-        sorted_types.append("NoneType")
+        sorted_types.append("None")
     return sorted_types
 
+def get_value_type(val: Any) -> str:
+    if val == None:
+        return  'None'
+    else:
+        return type(val).__name__
 
 def convert_value_to_type(value: Any) -> str:
-    input_type = type(value).__name__
-    input_type = type(value).__name__
+    input_type = get_value_type(value)
     # base case
     if input_type not in COLLECTIONS:
         # hardcoded - special case - self reference arg in methods
@@ -162,8 +166,8 @@ def convert_value_to_type(value: Any) -> str:
     if input_type == "dict":
         types_found_in_collection = set()
         for k, v in value.items():
-            key_type = type(k).__name__
-            dict_value_type = type(v).__name__
+            key_type = get_value_type(k)
+            dict_value_type = get_value_type(v)
             # collections are not hashable, so they will never be collections
             if dict_value_type in COLLECTIONS:
                 types_found_in_collection.add(f"{key_type},{convert_value_to_type(v)}")
@@ -175,7 +179,7 @@ def convert_value_to_type(value: Any) -> str:
     elif input_type in COLLECTIONS_NO_DICT:
         types_found_in_collection = set()
         for v in value:
-            t = type(v).__name__
+            t = get_value_type(v)
             if t in COLLECTIONS:
                 types_found_in_collection.add(convert_value_to_type(v))
             else:
