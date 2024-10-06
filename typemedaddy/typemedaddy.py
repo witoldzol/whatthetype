@@ -204,28 +204,30 @@ def convert_value_to_type(value: Any) -> str:
 def convert_results_to_types(input: dict[str, dict]) -> dict:
     if not input:
         return {}
-    r = {}
+    result = {}
     # mfl => module_function_line
     for mfl in input:
         # ========== ARGS ==========
-        r[mfl] = {"args": dict()}  # init result
+        result[mfl] = {"args": dict()}  # init result
         for arg in input[mfl]["args"]:
             # lets use set to de-dup types
             s = set()
-            r[mfl]["args"][arg] = list()  # init result
+            result[mfl]["args"][arg] = list()  # init result
             for value in input[mfl]["args"][arg]:
                 var_type_name = convert_value_to_type(value)
                 s.add(var_type_name)
-            r[mfl]["args"][arg] = list(s)
+            # we sort ste output, to get deterministic results -> set has random ordering
+            result[mfl]["args"][arg] = sorted(list(s))
         # ========== RETURN ==========
-        r[mfl]["return"] = list()
+        result[mfl]["return"] = list()
         # lets use set to de-dup types
         s = set()
         for value in input[mfl]["return"]:
             var_type_name = convert_value_to_type(value)
             s.add(var_type_name)
-        r[mfl]["return"] = list(s)
-    return r
+            # we sort ste output, to get deterministic results -> set has random ordering
+        result[mfl]["return"] = sorted(list(s))
+    return result
 
 
 def update_code_with_types(data: dict) -> dict[str, object]:
