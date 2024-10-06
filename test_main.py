@@ -1,3 +1,4 @@
+from pprint import pprint
 from typemedaddy.foo import (
     example_function,
     Foo,
@@ -445,3 +446,35 @@ def test_convert_value_to_type():
     value = {"a": ({"b": 1},)}
     actual = convert_value_to_type(value)
     assert "dict[str,tuple[dict[str,int]]]" == actual
+
+
+
+def test_integration_test():
+    with trace() as step_1_output:
+        f = Foo()
+        example_function(1, 2, f)
+        example_function(3, 4, None)
+        example_function('a', 'b', None)
+    for k in step_1_output:
+        if "init" in k:
+            assert step_1_output[k]["args"] == {"self": [SELF_OR_CLS], "bar": [None]}
+            assert step_1_output[k]["return"] == [None]
+        elif "example_function" in k:
+            assert step_1_output[k]["args"] == {
+                "a": [1, 3, 'a'],
+                "b": [2, 4, 'b'],
+                "foo": [f"USER_CLASS|{MODULE_PATH}::Foo", None, None],
+            }
+            assert step_1_output[k]["return"] == [3, 7, 'ab']
+    ##### STEP 2 #####
+    step_2_output = convert_results_to_types(step_1_output)
+    expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': {'args': {'self': ['SELF_OR_CLS'],
+                                                                                     'bar': ['NoneType']},
+                                                                            'return': ['NoneType']},
+                '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': {'args': {'a': ['int', 'str'],
+                                                                                              'b': ['int', 'str'],
+                                                                                              'foo': ['NoneType',
+                                                                                                      'str']},
+                                                                                     'return': ['int', 'str']}}
+    assert expected == step_2_output
+    ##### STEP 3 #####
