@@ -229,7 +229,6 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
         result[mfl]["return"] = sorted(list(s))
     return result
 
-
 def update_code_with_types(data: dict) -> dict[str, object]:
     updated_function_declarations = dict()
     for mfl in data.keys():
@@ -243,6 +242,17 @@ def update_code_with_types(data: dict) -> dict[str, object]:
                     line_io = io.StringIO(line).readline # don't use lambda, generator will be infinite
                     # get tokens
                     tokens = generate_tokens(line_io)
+                    """ sample tokenizer output [ first line full, rest truncated ]
+                    TokenInfo(type=5 (INDENT), string='    ', start=(1, 0), end=(1, 4), line="    def arbitrary_self(not_self, name: str = 'default_val', age=10):\n")
+                    TokenInfo(type=1 (NAME), string='def', _, _, _ ...
+                    TokenInfo(type=1 (NAME), string='arbitrary_self', _, _, _ ...
+                    TokenInfo(type=55 (OP), string='(', _, _, _ ...
+                    TokenInfo(type=1 (NAME), string='not_self', _, _, _ ...
+                    TokenInfo(type=55 (OP), string=',', _, _, _ ...
+                    TokenInfo(type=1 (NAME), string='name', _, _, _ ...
+                    TokenInfo(type=55 (OP), string=':', _, _, _ ...
+                    ...
+                    """
                     # do the magic
                     result = []
                     in_arguments = False
@@ -251,6 +261,7 @@ def update_code_with_types(data: dict) -> dict[str, object]:
                     indentation = []
                     type_detected = False
                     for t in tokens:
+                        # we care only about first 2 values, type is a number mapped in an ENUM
                         token_type, token_val, _, _, _ = t
                         # start of arguments
                         if token_type == OP and token_val == '(':
@@ -262,30 +273,34 @@ def update_code_with_types(data: dict) -> dict[str, object]:
                             in_arguments = False
                             print("ARGUMENTS END ->>>>")
                             result.append((token_type, token_val))
+                        ##########
                         # ARGUMENT ( we add type if we have one )
+                        ##########
+                            # todo - detect if default value
                         elif in_arguments and not type_detected and token_type == NAME:
                             print(f"ARGUMENT ----> {token_val}")
-                            updated_arg = [(token_type, token_val)]
+                            updated_arg_tokens = [(token_type, token_val)]
                             # check if we have a type for the argument
                             # dont worry about pre existing types, we drop them somewhere else
-                            if token_val in data[mfl]["args"]:
-                                argument_types = data[mfl]['args'][token_val]
+                            types_detected_for_agument = data[mfl]["args"]
+                            if token_val in types_detected_for_agument:
+                                arg_types = types_detected_for_agument[token_val]
                                 # skip method self or class method ref
-                                if argument_types[0] == SELF_OR_CLS:
-                                    continue
+                                if arg_types[0] == SELF_OR_CLS:
+                                    pass
                                 # if just one arg, get it out of the array
-                                if len(argument_types) == 1:
+                                elif len(arg_types) == 1:
                                     colon_token = (OP, ':')
-                                    type_token = (STRING, argument_types[0])
-                                    updated_arg.append(colon_token)
-                                    updated_arg.append(type_token)
+                                    type_token = (STRING, arg_types[0])
+                                    updated_arg_tokens.append(colon_token)
+                                    updated_arg_tokens.append(type_token)
                                 # otherwise, stringify entire array and add as is
                                 else:
                                     colon_token = (OP, ':')
-                                    type_token = (STRING, str(argument_types))
-                                    updated_arg.append(colon_token)
-                                    updated_arg.append(type_token)
-                            result.extend(updated_arg)
+                                    type_token = (STRING, str(arg_types))
+                                    updated_arg_tokens.append(colon_token)
+                                    updated_arg_tokens.append(type_token)
+                            result.extend(updated_arg_tokens)
                         # in argument, we detected a colon (:) which means we have a type
                         elif in_arguments and token_type == OP and token_val == ':':
                             print(f"TYPE DETECTED ")
