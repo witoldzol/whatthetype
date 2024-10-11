@@ -222,7 +222,7 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
             for value in input[mfl]["args"][arg]:
                 var_type_name = convert_value_to_type(value)
                 s.add(var_type_name)
-            # we sort ste output, to get deterministic results -> set has random ordering
+            # we sort the output, to get deterministic results -> set has random ordering
             result[mfl]["args"][arg] = sorted(list(s))
         # ========== RETURN ==========
         result[mfl]["return"] = list()
@@ -231,7 +231,7 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
         for value in input[mfl]["return"]:
             var_type_name = convert_value_to_type(value)
             s.add(var_type_name)
-            # we sort ste output, to get deterministic results -> set has random ordering
+            # we sort the output, to get deterministic results -> set has random ordering
         result[mfl]["return"] = sorted(list(s))
     return result
 
