@@ -149,6 +149,8 @@ def sort_types_none_at_the_end(set_of_types: set) -> list:
     return sorted_types
 
 def get_value_type(val: Any) -> str:
+    # type(None) -> NoneType, which we don't really want, because type hint 
+    # system uses None string, not NoneType
     if val == None:
         return  'None'
     else:
