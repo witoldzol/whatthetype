@@ -219,10 +219,12 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
             # lets use set to de-dup types
             s = set()
             result[mfl]["args"][arg] = list()  # init result
+            # iterate over function's every arguemnt, and it's values
             for value in input[mfl]["args"][arg]:
                 var_type_name = convert_value_to_type(value)
                 s.add(var_type_name)
             # we sort the output, to get deterministic results -> set has random ordering
+            # TODO this returns array of types, which we will have to collapse again?
             result[mfl]["args"][arg] = sorted(list(s))
         # ========== RETURN ==========
         result[mfl]["return"] = list()

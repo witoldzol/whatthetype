@@ -1,4 +1,15 @@
 # fix union of types
+```python
+value = {"a": {None}, "b": {"a"}}
+actual = convert_value_to_type(value)
+assert "dict[str,set[str|None]]" == actual
+```
+# in step 2 end, unify results array
+at the moment convert_results_to_types will return an array of types per function argument
+we defo want to 'unify' those results into one, so that step 3 can just update with one arg?
+OR, we add a new step
+BECAUSE if we have an array of multiple results, that's an easy way to identify an arg that takes in multple 
+DIFFERENT types ( which is probably an BUG or potential issue )
 # put None at the end if union of types
 # implement replacement algo:
 - split lines into tokens

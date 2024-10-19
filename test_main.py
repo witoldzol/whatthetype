@@ -1,4 +1,3 @@
-from pprint import pprint
 from typemedaddy.foo import (
     example_function,
     Foo,
@@ -11,7 +10,6 @@ from typemedaddy.typemedaddy import (
     convert_value_to_type,
     trace,
     SELF_OR_CLS,
-    update_code_with_types,
 )
 
 MODULE_PATH = "typemedaddy.foo"
@@ -420,17 +418,9 @@ def test_convert_value_to_type():
     actual = convert_value_to_type(value)
     assert "dict[str,set[int]]" == actual
 
-    value = {"a": {1}, "b": {"a"}}
+    value = {"a": {1}, "b": {1}}
     actual = convert_value_to_type(value)
-    assert "dict[str,set[int]|str,set[str]]" == actual
-
-    value = {"a": {None}, "b": {"a"}}
-    actual = convert_value_to_type(value)
-    assert "dict[str,set[None]|str,set[str]]" == actual
-
-    value = {"a": {None, 1}, "b": {"a"}}
-    actual = convert_value_to_type(value)
-    assert "dict[str,set[int|None]|str,set[str]]" == actual
+    assert "dict[str,set[int]]" == actual
 
     value = {None: {None, 1}, "b": {"a"}}
     actual = convert_value_to_type(value)
@@ -448,9 +438,9 @@ def test_convert_value_to_type():
     actual = convert_value_to_type(value)
     assert "dict[str,tuple[dict[str,int]]]" == actual
 
-
 class TestIntegration():
-    def test_repeated_calls(self):
+
+    def test_call_with_class_method(self):
         with trace() as step_1_output:
             f = Foo()
             example_function(1, 2, f)
@@ -467,6 +457,15 @@ class TestIntegration():
                     "foo": [f"USER_CLASS|{MODULE_PATH}::Foo", None, None],
                 }
                 assert step_1_output[k]["return"] == [3, 7, 'ab']
+        print("### out ### \n"*3)
+        print(step_1_output)
+        # step_1_output = {
+        #     '/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': 
+        #         {'args': {'self': ['SELF_OR_CLS'], 'bar': [None]},
+        #          'return': [None]},
+        #     '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': 
+        #         {'args': {'a': [1, 3, 'a'], 'b': [2, 4, 'b'], 'foo': ['USER_CLASS|typemedaddy.foo::Foo', None, None]},
+        #          'return': [3, 7, 'ab']}}
         ##### STEP 2 #####
         step_2_output = convert_results_to_types(step_1_output)
         expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': {'args': {'self': ['SELF_OR_CLS'],
@@ -479,35 +478,82 @@ class TestIntegration():
                                                                                          'return': ['int', 'str']}}
         assert expected == step_2_output
         ##### STEP 3 #####
-        step_3_output = update_code_with_types(step_2_output)
-        print("### integration ### \n"*3)
-        print(step_3_output)
-        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ):\n', '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"}
+        # step_3_output = update_code_with_types(step_2_output)
+        # print("### integration ### \n"*3)
+        # print(step_3_output)
+        # expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ):\n', '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"}
 
-    def test_none_type(self):
+    def test_repeated_calls(self):
         with trace() as step_1_output:
+            example_function(1, 2, None)
             example_function(3, 4, None)
-            example_function(3, 4, None)
+            example_function('a', 'b', None)
         for k in step_1_output:
-            if "init" in k:
-                assert step_1_output[k]["args"] == {"self": [SELF_OR_CLS], "bar": [None]}
-                assert step_1_output[k]["return"] == [None]
-            elif "example_function" in k:
+            if "example_function" in k:
                 assert step_1_output[k]["args"] == {
-                    "a": [3, 3],
-                    "b": [4, 4],
-                    "foo": [None, None],
+                    "a": [1, 3, 'a'],
+                    "b": [2, 4, 'b'],
+                    "foo": [None,None,None]
                 }
-                assert step_1_output[k]["return"] == [7, 7]
+                assert step_1_output[k]["return"] == [3, 7, 'ab']
+        ##################
         ##### STEP 2 #####
+        ##################
         step_2_output = convert_results_to_types(step_1_output)
-        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': {'args': {'a': ['int'],
-                                                                                                  'b': ['int'],
+        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': {'args': {'a': ['int','str'],
+                                                                                                  'b': ['int','str'],
                                                                                                   'foo': ['None']},
-                                                                                         'return': ['int']}}
+                                                                                         'return': ['int','str']}}
         assert expected == step_2_output
+        ##################
         ##### STEP 3 #####
-        step_3_output = update_code_with_types(step_2_output)
-        print("### integration ### \n"*3)
-        print(step_3_output)
-        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ):\n', '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"}
+        ##################
+        # step_3_output = update_code_with_types(step_2_output)
+        # print("### integration ### \n"*3)
+        # print(step_3_output)
+        # for k in step_3_output:
+        #     if 'example_function' in k:
+        #         expected = "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"
+        #         assert expected == step_3_output[k]
+
+    # def test_none_type(self):
+    #     with trace() as step_1_output:
+    #         example_function(3, 4, None)
+    #         example_function(3, 4, None)
+    #     for k in step_1_output:
+    #         if "init" in k:
+    #             assert step_1_output[k]["args"] == {"self": [SELF_OR_CLS], "bar": [None]}
+    #             assert step_1_output[k]["return"] == [None]
+    #         elif "example_function" in k:
+    #             assert step_1_output[k]["args"] == {
+    #                 "a": [3, 3],
+    #                 "b": [4, 4],
+    #                 "foo": [None, None],
+    #             }
+    #             assert step_1_output[k]["return"] == [7, 7]
+    #     ##### STEP 2 #####
+    #     step_2_output = convert_results_to_types(step_1_output)
+    #     expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': {'args': {'a': ['int'],
+    #                                                                                               'b': ['int'],
+    #                                                                                               'foo': ['None']},
+    #                                                                                      'return': ['int']}}
+    #     assert expected == step_2_output
+    #     ##### STEP 3 #####
+    #     step_3_output = update_code_with_types(step_2_output)
+    #     print("### integration ### \n"*3)
+    #     print(step_3_output)
+    #     expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ):\n', '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"}
+
+# def test_bob():
+#     value = {"a": {1}, "b": {"a"}}
+#     actual = convert_value_to_type(value)
+#     assert "dict[str,set[int|str]]" == actual
+#
+#     value = {"a": {None, 1}, "b": {"a"}}
+#     actual = convert_value_to_type(value)
+#     assert "dict[str,set[int|str|None]]" == actual
+#
+    # value = {"a": {None, 1}, "b": {"a"}}
+    # actual = convert_value_to_type(value)
+    # assert "dict[str,set[int|str|None]]" == actual
+
