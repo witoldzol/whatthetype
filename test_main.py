@@ -291,23 +291,57 @@ def test_nested_int_list():
 def test_convert_value_to_type2():
     value = 1
     actual = convert_value_to_type2(value)
-    assert ("simple", ["int"]) == actual
+    assert ("simple", "int") == actual
 
     value = 'a'
     actual = convert_value_to_type2(value)
-    assert ("simple", ["str"]) == actual
+    assert ("simple", "str") == actual
 
     value = 1.0
     actual = convert_value_to_type2(value)
-    assert ("simple", ["float"]) == actual
+    assert ("simple", "float") == actual
 
     value = None
     actual = convert_value_to_type2(value)
-    assert ("simple", ["None"]) == actual
+    assert ("simple", "None") == actual
 
+    # list
     value = []
     actual = convert_value_to_type2(value)
-    assert ("list", []) == actual
+    assert ("list", '') == actual
+
+    value = [1]
+    actual = convert_value_to_type2(value)
+    assert ("list", "int") == actual
+
+    value = [1, 1]
+    actual = convert_value_to_type2(value)
+    assert ("list", "int") == actual
+
+    value = [1, 'a']
+    actual = convert_value_to_type2(value)
+    assert ("list", "int|str") == actual
+
+    value = [{1},{2}]
+    actual = convert_value_to_type2(value)
+    assert ("list", "set[int]") == actual
+
+    value = [{1},{'a'}]
+    actual = convert_value_to_type2(value)
+    assert ("list", "set[int|str]") == actual
+
+    # dict
+    value = {}
+    actual = convert_value_to_type2(value)
+    assert ("dict", '') == actual
+
+    value = set()
+    actual = convert_value_to_type2(value)
+    assert ("set", '') == actual
+
+    value = ()
+    actual = convert_value_to_type2(value)
+    assert ("tuple", '') == actual
 
 def test_convert_value_to_type():
     value = 1

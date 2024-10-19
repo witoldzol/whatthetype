@@ -190,9 +190,9 @@ def convert_value_to_type2(value: Any) -> tuple[Literal["dict", "tuple", "list",
     if input_type not in COLLECTIONS:
         # hardcoded - special case - self reference arg in methods
         if value == SELF_OR_CLS:
-            return ('self', [value])
+            return ('self', value)
         else:
-            return ('simple', [input_type])
+            return ('simple', input_type)
     if input_type == "dict":
         types_found_in_collection = set()
         for k, v in value.items():
@@ -205,11 +205,10 @@ def convert_value_to_type2(value: Any) -> tuple[Literal["dict", "tuple", "list",
                 types_found_in_collection.add(f"{key_type},{dict_value_type}")
         if types_found_in_collection:
             sorted_types = sort_types_none_at_the_end(types_found_in_collection)
-            # input_type = f"{input_type}[{'|'.join(sorted_types)}]"
-            input_type = (input_type, sorted_types)
-            # f"{input_type}[{'|'.join(sorted_types)}]"
+            union_of_sorted_types = union_types(sorted_types)
+            input_type = (input_type, union_of_sorted_types)
         else:
-            input_type = (input_type, [])
+            input_type = (input_type, '')
     elif input_type in COLLECTIONS_NO_DICT:
         types_found_in_collection = set()
         for v in value:
@@ -220,9 +219,10 @@ def convert_value_to_type2(value: Any) -> tuple[Literal["dict", "tuple", "list",
                 types_found_in_collection.add(t)
         if types_found_in_collection:
             sorted_types = sort_types_none_at_the_end(types_found_in_collection)
-            input_type = (input_type, sorted_types)
+            union_of_sorted_types = union_types(sorted_types)
+            input_type = (input_type, union_of_sorted_types)
         else:
-            input_type = (input_type, [])
+            input_type = (input_type, '')
     else:
         raise Exception(f'Unexpected type : {input_type}')
     return input_type
@@ -248,7 +248,6 @@ def convert_value_to_type(value: Any) -> str:
                 types_found_in_collection.add(f"{key_type},{dict_value_type}")
         if types_found_in_collection:
             sorted_types = sort_types_none_at_the_end(types_found_in_collection)
-            pop_top_type(sorted_types)
             input_type = f"{input_type}[{'|'.join(sorted_types)}]"
     elif input_type in COLLECTIONS_NO_DICT:
         types_found_in_collection = set()
