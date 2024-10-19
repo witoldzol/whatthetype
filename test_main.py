@@ -8,6 +8,7 @@ from typemedaddy.foo import (
 from typemedaddy.typemedaddy import (
     convert_results_to_types,
     convert_value_to_type,
+    convert_value_to_type2,
     trace,
     SELF_OR_CLS,
 )
@@ -287,6 +288,26 @@ def test_nested_int_list():
     }
     assert actual == expected
 
+def test_convert_value_to_type2():
+    value = 1
+    actual = convert_value_to_type2(value)
+    assert ("simple", ["int"]) == actual
+
+    value = 'a'
+    actual = convert_value_to_type2(value)
+    assert ("simple", ["str"]) == actual
+
+    value = 1.0
+    actual = convert_value_to_type2(value)
+    assert ("simple", ["float"]) == actual
+
+    value = None
+    actual = convert_value_to_type2(value)
+    assert ("simple", ["None"]) == actual
+
+    value = []
+    actual = convert_value_to_type2(value)
+    assert ("list", []) == actual
 
 def test_convert_value_to_type():
     value = 1
@@ -544,16 +565,20 @@ class TestIntegration():
     #     print(step_3_output)
     #     expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ):\n', '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"}
 
-# def test_bob():
-#     value = {"a": {1}, "b": {"a"}}
-#     actual = convert_value_to_type(value)
-#     assert "dict[str,set[int|str]]" == actual
-#
-#     value = {"a": {None, 1}, "b": {"a"}}
-#     actual = convert_value_to_type(value)
-#     assert "dict[str,set[int|str|None]]" == actual
-#
+def test_bob():
+    value = {"a": {1}, "b": {"a"}}
+    actual = convert_value_to_type(value)
+    assert "dict[str,set[int|str]]" == actual
+
+    # value = {"a": {None, 1}, "b": {"a"}}
+    # actual = convert_value_to_type(value)
+    # assert "dict[str,set[int|str|None]]" == actual
+    #
     # value = {"a": {None, 1}, "b": {"a"}}
     # actual = convert_value_to_type(value)
     # assert "dict[str,set[int|str|None]]" == actual
 
+# def test_unify_types():
+#     input = ['set[int]','set[str]']
+#     a = unify_types(input)
+#     e = ['set[int|str]']
