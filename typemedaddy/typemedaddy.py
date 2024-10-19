@@ -157,10 +157,34 @@ def get_value_type(val: Any) -> str:
     else:
         return type(val).__name__
 
-# def unify_types(types: list[str]) -> list[str]:
-#     pass
-#
-def convert_value_to_type2(value: Any) -> tuple[Literal["dict", "tuple", "list", "set", "self", "simple"], list]:
+def union_types(types: list[str|tuple[str,str]]) -> str:
+    if sys.version_info.minor > 9:
+        temp_dict = {}
+        for x in types:
+            # if simple, shallow type
+            if type(x) == str:
+                temp_dict[x] = x
+            # if tuple - ie, complex or nested type
+            else:
+                outer, inner = x
+                if outer in temp_dict:
+                    temp_dict[outer].add(inner)
+                else:
+                    temp_dict[outer] = {inner}
+        result = []
+        for k,v in temp_dict.items():
+            if k not in COLLECTIONS:
+                result.append(k)
+            else:
+                # rembmer to sort the set!
+                # todo move None to end
+                sorted_joined_types = '|'.join(sorted(v))
+                result.append(f"{k}[{sorted_joined_types}]")
+        return '|'.join(result)
+    else:
+        raise Exception('This union is supported only by python 3.10+')
+
+def convert_value_to_type2(value: Any) -> tuple[Literal["dict", "tuple", "list", "set", "self", "simple"], str]:
     input_type = get_value_type(value)
     # base case
     if input_type not in COLLECTIONS:
