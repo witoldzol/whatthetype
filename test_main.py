@@ -356,7 +356,7 @@ def test_convert_value_to_type():
 
     value = [1, [1]]
     actual = convert_value_to_type(value)
-    assert ("list", "list[int]|int") == actual
+    assert ("list", "int|list[int]") == actual
 
     value = [{1},{2}]
     actual = convert_value_to_type(value)
@@ -388,9 +388,10 @@ def test_convert_value_to_type():
     assert ("tuple", '') == actual
 
 def test_union_types():
-    a = union_types([('list','')])
-    e = 'list'
-    assert e == a
+    value = [1, None]
+    actual = convert_value_to_type(value)
+    assert ("list", "int|None") == actual
+
 
 def bob():
 
