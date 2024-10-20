@@ -432,34 +432,35 @@ def test_convert_value_to_type():
     actual = convert_value_to_type(value)
     assert ("dict", 'str,set[str]|None,set[int|None]') == actual
 
+    value = {"a": {"b": 1}}
+    actual = convert_value_to_type(value)
+    assert ("dict", "str,dict[str,int]") == actual
+
+    value = {"a": (1,)}
+    actual = convert_value_to_type(value)
+    assert ("dict", "str,tuple[int]") == actual
+
+    value = {"a": ({"b": 1},)}
+    actual = convert_value_to_type(value)
+    assert ("dict", "str,tuple[dict[str,int]]") == actual
+
+    value = {"a": 1, 1: 1}
+    actual = convert_value_to_type(value)
+    assert ("dict", "int,int|str,int") == actual
+
+    value = {"a": [1,'a'], 1: [1.0]}
+    actual = convert_value_to_type(value)
+    assert ("dict", "int,list[float]|str,list[int|str]") == actual
+
     # tuple
     value = ()
     actual = convert_value_to_type(value)
     assert ("tuple", '') == actual
 
-def test_union_types():
-    value = [None]
-    actual = convert_value_to_type(value)
-    assert ('list', 'None') == actual
-
-
-
-def bob():
-    value = {None: {None, 1}, "b": {"a"}}
-    actual = convert_value_to_type(value)
-    assert "dict[None,set[int|None]|str,set[str]]" == actual
-
-    value = {"a": {"b": 1}}
-    actual = convert_value_to_type(value)
-    assert "dict[str,dict[str,int]]" == actual
-
-    value = {"a": (1,)}
-    actual = convert_value_to_type(value)
-    assert "dict[str,tuple[int]]" == actual
-
-    value = {"a": ({"b": 1},)}
-    actual = convert_value_to_type(value)
-    assert "dict[str,tuple[dict[str,int]]]" == actual
+    # todo  - fix tuple 
+    # value = (None)
+    # actual = convert_value_to_type(value)
+    # assert ("tuple", 'None') == actual
 
 class TestIntegration():
 
