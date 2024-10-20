@@ -141,12 +141,15 @@ def trace_function(frame, event, arg):
     return trace_function
 
 
-def sort_types_none_at_the_end(set_of_types: set) -> list:
+def sort_types_none_at_the_end(set_of_types: set[str]) -> list:
+    temp = set()
+    for x in list(set_of_types)[:]:
+        if "None" in x:
+            temp.add(x)
+            set_of_types.remove(x)
     sorted_types: list = sorted(set_of_types)
-    if "None" in sorted_types:
-        sorted_types.remove("None")
-        sorted_types = sorted_types
-        sorted_types.append("None")
+    for y in temp:
+        sorted_types.append(y)
     return sorted_types
 
 def get_value_type(val: Any) -> str:

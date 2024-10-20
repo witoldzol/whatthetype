@@ -370,6 +370,31 @@ def test_convert_value_to_type():
     actual = convert_value_to_type(value)
     assert ('self', SELF_OR_CLS) == actual
 
+    value = [1, None]
+    actual = convert_value_to_type(value)
+    assert ("list", "int|None") == actual
+
+    value = [None, [{1, 'a'}]]
+    actual = convert_value_to_type(value)
+    assert ("list", "list[set[int|str]]|None") == actual
+
+    # set
+    value = set()
+    actual = convert_value_to_type(value)
+    assert ("set", '') == actual
+
+    value = {1}
+    actual = convert_value_to_type(value)
+    assert ("set", 'int') == actual
+
+    value = {1, 'a'}
+    actual = convert_value_to_type(value)
+    assert ("set", 'int|str') == actual
+
+    value = {None, 1, 'a'}
+    actual = convert_value_to_type(value)
+    assert ("set", 'int|str|None') == actual
+
     # dict
     value = {}
     actual = convert_value_to_type(value)
@@ -379,82 +404,47 @@ def test_convert_value_to_type():
     actual = convert_value_to_type(value)
     assert ("dict", 'str,int') == actual
 
-    value = set()
+    value = {None: None}
     actual = convert_value_to_type(value)
-    assert ("set", '') == actual
+    assert ("dict", 'None,None') == actual
 
+    value = {'a': [1]}
+    actual = convert_value_to_type(value)
+    assert ("dict", 'str,list[int]') == actual
+
+    value = {'a': [1], 'b': ['a']}
+    actual = convert_value_to_type(value)
+    assert ("dict", 'str,list[int|str]') == actual
+
+    value = {"a": [None, [1]]}
+    actual = convert_value_to_type(value)
+    assert ("dict", 'str,list[list[int]|None]') == actual
+
+    value = {"a": {1}}
+    actual = convert_value_to_type(value)
+    assert ("dict", 'str,set[int]') == actual
+
+    value = {"a": {1}, 'b': {2}}
+    actual = convert_value_to_type(value)
+    assert ("dict", 'str,set[int]') == actual
+
+    value = {None: {None, 1}, 'b': {'a'}}
+    actual = convert_value_to_type(value)
+    assert ("dict", 'str,set[str]|None,set[int|None]') == actual
+
+    # tuple
     value = ()
     actual = convert_value_to_type(value)
     assert ("tuple", '') == actual
 
 def test_union_types():
-    value = [1, None]
+    value = [None]
     actual = convert_value_to_type(value)
-    assert ("list", "int|None") == actual
+    assert ('list', 'None') == actual
+
 
 
 def bob():
-
-    value = [1, [1, [1]]]
-    actual = convert_value_to_type(value)
-    assert "list[int|list[int|list[int]]]" == actual
-
-    value = [None, [1, [1]]]
-    actual = convert_value_to_type(value)
-    assert "list[list[int|list[int]]|None]" == actual
-
-    value = set()
-    actual = convert_value_to_type(value)
-    assert "set" == actual
-
-    value = {1}
-    actual = convert_value_to_type(value)
-    assert "set[int]" == actual
-
-    value = {1, "a"}
-    actual = convert_value_to_type(value)
-    assert "set[int|str]" == actual
-
-    value = [{1, "a"}]
-    actual = convert_value_to_type(value)
-    assert "list[set[int|str]]" == actual
-
-    value = [None, [{1, "a"}]]
-    actual = convert_value_to_type(value)
-    assert "list[list[set[int|str]]|None]" == actual
-
-    value = {}
-    actual = convert_value_to_type(value)
-    assert "dict" == actual
-
-    value = {None: None}
-    actual = convert_value_to_type(value)
-    assert "dict[None,None]" == actual
-
-    value = {"a": 1}
-    actual = convert_value_to_type(value)
-    assert "dict[str,int]" == actual
-
-    value = {"a": [1]}
-    actual = convert_value_to_type(value)
-    assert "dict[str,list[int]]" == actual
-
-    value = {"a": [None, [1]]}
-    actual = convert_value_to_type(value)
-    assert "dict[str,list[list[int]|None]]" == actual
-
-    value = {"a": {1}}
-    actual = convert_value_to_type(value)
-    assert "dict[str,set[int]]" == actual
-
-    value = {"a": {1}, "b": {2}}
-    actual = convert_value_to_type(value)
-    assert "dict[str,set[int]]" == actual
-
-    value = {"a": {1}, "b": {1}}
-    actual = convert_value_to_type(value)
-    assert "dict[str,set[int]]" == actual
-
     value = {None: {None, 1}, "b": {"a"}}
     actual = convert_value_to_type(value)
     assert "dict[None,set[int|None]|str,set[str]]" == actual
