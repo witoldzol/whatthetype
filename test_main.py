@@ -314,13 +314,49 @@ def test_convert_value_to_type():
     actual = convert_value_to_type(value)
     assert ("list", "int") == actual
 
+    value = [1.0]
+    actual = convert_value_to_type(value)
+    assert ("list", "float") == actual
+
+    value = ['a']
+    actual = convert_value_to_type(value)
+    assert ("list", "str") == actual
+
+    value = [None]
+    actual = convert_value_to_type(value)
+    assert ('list', 'None') == actual
+
     value = [1, 1]
     actual = convert_value_to_type(value)
     assert ("list", "int") == actual
 
+    value = [1, None]
+    actual = convert_value_to_type(value)
+    assert ("list", "int|None") == actual
+
     value = [1, 'a']
     actual = convert_value_to_type(value)
     assert ("list", "int|str") == actual
+
+    value = [1, ""]
+    actual = convert_value_to_type(value)
+    assert ("list", "int|str") == actual
+
+    value = [1, "a", 1.0]
+    actual = convert_value_to_type(value)
+    assert ("list", "float|int|str") == actual
+
+    value = [[]]
+    actual = convert_value_to_type(value)
+    assert ("list", "list") == actual
+
+    value = [[1]]
+    actual = convert_value_to_type(value)
+    assert ("list", "list[int]") == actual
+
+    value = [1, [1]]
+    actual = convert_value_to_type(value)
+    assert ("list", "list[int]|int") == actual
 
     value = [{1},{2}]
     actual = convert_value_to_type(value)
@@ -329,6 +365,10 @@ def test_convert_value_to_type():
     value = [{1},{'a'}]
     actual = convert_value_to_type(value)
     assert ("list", "set[int|str]") == actual
+
+    value = SELF_OR_CLS
+    actual = convert_value_to_type(value)
+    assert ('self', SELF_OR_CLS) == actual
 
     # dict
     value = {}
@@ -347,89 +387,12 @@ def test_convert_value_to_type():
     actual = convert_value_to_type(value)
     assert ("tuple", '') == actual
 
-def test_a():
-    value = {'a': []}
-    actual = convert_value_to_type(value)
-    assert ("dict", 'str,list') == actual
-
 def test_union_types():
     a = union_types([('list','')])
     e = 'list'
     assert e == a
 
-def test_convert_value_to_type():
-    value = 1
-    actual = convert_value_to_type(value)
-    assert "int" == actual
-
-    value = "1"
-    actual = convert_value_to_type(value)
-    assert "str" == actual
-
-    value = 1.0
-    actual = convert_value_to_type(value)
-    assert "float" == actual
-
-    value = None
-    actual = convert_value_to_type(value)
-    assert "None" == actual
-
-    # LIST
-    value = []
-    actual = convert_value_to_type(value)
-    assert "list" == actual
-
-    value = [None]
-    actual = convert_value_to_type(value)
-    assert "list[None]" == actual
-
-    value = [1]
-    actual = convert_value_to_type(value)
-    assert "list[int]" == actual
-
-    value = ["a"]
-    actual = convert_value_to_type(value)
-    assert "list[str]" == actual
-
-    value = SELF_OR_CLS
-    actual = convert_value_to_type(value)
-    assert SELF_OR_CLS == actual
-
-    value = [1.0]
-    actual = convert_value_to_type(value)
-    assert "list[float]" == actual
-
-    value = [1, 1]
-    actual = convert_value_to_type(value)
-    assert "list[int]" == actual
-
-    value = [1, "a"]
-    actual = convert_value_to_type(value)
-    assert "list[int|str]" == actual
-
-    value = [1, "a", 1.0]
-    actual = convert_value_to_type(value)
-    assert "list[float|int|str]" == actual
-
-    value = [1, ""]
-    actual = convert_value_to_type(value)
-    assert "list[int|str]" == actual
-
-    value = [1, None]
-    actual = convert_value_to_type(value)
-    assert "list[int|None]" == actual
-
-    value = [[]]
-    actual = convert_value_to_type(value)
-    assert "list[list]" == actual
-
-    value = [[1]]
-    actual = convert_value_to_type(value)
-    assert "list[list[int]]" == actual
-
-    value = [1, [1]]
-    actual = convert_value_to_type(value)
-    assert "list[int|list[int]]" == actual
+def bob():
 
     value = [1, [1, [1]]]
     actual = convert_value_to_type(value)
