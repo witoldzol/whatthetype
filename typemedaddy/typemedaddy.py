@@ -182,7 +182,16 @@ def union_types(types: list[str|tuple[str,str]]) -> str:
                 result.append(f"{k}[{sorted_joined_types}]")
         return '|'.join(result)
     else:
+def union_dict_types(types: dict[str,set[tuple[str,str]]]) -> str:
+    if not sys.version_info.minor > 9:
         raise Exception('This union is supported only by python 3.10+')
+    temp_set = set()
+    for k,v in types.items():
+        sorted_types = sort_types_none_at_the_end(v)
+        union_of_sorted_types = f"{k},{union_types(sorted_types)}"
+        temp_set.add(union_of_sorted_types)
+    sorted_set = sorted(temp_set)
+    return union_types(sorted_set)
 
 def convert_value_to_type2(value: Any) -> tuple[Literal["dict", "tuple", "list", "set", "self", "simple"], str]:
     input_type = get_value_type(value)
