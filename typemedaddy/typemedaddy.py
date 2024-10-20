@@ -160,6 +160,7 @@ def get_value_type(val: Any) -> str:
 def union_types(types: list[str|tuple[str,str]]) -> str:
     if not sys.version_info.minor > 9:
         raise Exception('This union is supported only by python 3.10+')
+    # we use dict to 'merge' same types into same buckets
     temp_dict = {}
     for x in types:
         # if simple, shallow type
@@ -182,19 +183,18 @@ def union_types(types: list[str|tuple[str,str]]) -> str:
                     temp_dict[SELF_OR_CLS] = {} #todo - test this 
                 else:
                     temp_dict[outer] = {inner}
-    result = []
+    result = set()
     for k,v in temp_dict.items():
         if k not in COLLECTIONS:
-            result.append(k)
+            result.add(k)
         else:
             # rembmer to sort the set!
-            # todo move None to end
             sorted_joined_types = '|'.join(sorted(v))
             if sorted_joined_types:
-                result.append(f"{k}[{sorted_joined_types}]")
+                result.add(f"{k}[{sorted_joined_types}]")
             else:
-                result.append(k)
-    return '|'.join(result)
+                result.add(k)
+    return '|'.join(sort_types_none_at_the_end(result))
 
 def union_dict_types(types: dict[str,set[tuple[str,str]]]) -> str:
     if not sys.version_info.minor > 9:
