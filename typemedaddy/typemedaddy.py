@@ -245,42 +245,6 @@ def convert_value_to_type(value: Any) -> tuple[Literal["dict", "tuple", "list", 
         raise Exception(f'Unexpected type : {input_type}')
     return input_type
 
-# def convert_value_to_type(value: Any) -> str:
-#     input_type = get_value_type(value)
-#     # base case
-#     if input_type not in COLLECTIONS:
-#         # hardcoded - special case - self reference arg in methods
-#         if value == SELF_OR_CLS:
-#             return value
-#         else:
-#             return input_type
-#     if input_type == "dict":
-#         types_found_in_collection = set()
-#         for k, v in value.items():
-#             key_type = get_value_type(k)
-#             dict_value_type = get_value_type(v)
-#             # collections are not hashable, so they will never be collections
-#             if dict_value_type in COLLECTIONS:
-#                 types_found_in_collection.add(f"{key_type},{convert_value_to_type(v)}")
-#             else:
-#                 types_found_in_collection.add(f"{key_type},{dict_value_type}")
-#         if types_found_in_collection:
-#             sorted_types = sort_types_none_at_the_end(types_found_in_collection)
-#             input_type = f"{input_type}[{'|'.join(sorted_types)}]"
-#     elif input_type in COLLECTIONS_NO_DICT:
-#         types_found_in_collection = set()
-#         for v in value:
-#             t = get_value_type(v)
-#             if t in COLLECTIONS:
-#                 types_found_in_collection.add(convert_value_to_type(v))
-#             else:
-#                 types_found_in_collection.add(t)
-#         if types_found_in_collection:
-#             sorted_types = sort_types_none_at_the_end(types_found_in_collection)
-#             input_type = f"{input_type}[{'|'.join(sorted_types)}]"
-#     return input_type
-
-
 # TODO
 # we probably want to throw some warning saying:
 # HEY,this func gets different types at various types,
