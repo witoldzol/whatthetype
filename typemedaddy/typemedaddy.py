@@ -171,11 +171,15 @@ def union_types(types: list[str|tuple[str,str]]) -> str:
             if outer in temp_dict:
                 if outer == 'simple':
                     temp_dict[inner].add(inner)
+                elif outer == 'self':
+                    temp_dict[SELF_OR_CLS].add()#todo - test this 
                 else:
                     temp_dict[outer].add(inner)
             else:
                 if outer == 'simple':
                     temp_dict[inner] = {inner}
+                elif outer == 'self':
+                    temp_dict[SELF_OR_CLS] = {} #todo - test this 
                 else:
                     temp_dict[outer] = {inner}
     result = []
