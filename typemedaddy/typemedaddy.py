@@ -165,13 +165,19 @@ def union_types(types: list[str|tuple[str,str]]) -> str:
         # if simple, shallow type
         if type(x) == str:
             temp_dict[x] = x
-        # if tuple - ie, complex or nested type
+        # if tuple - ie, complex or nested type complex / simple type
         else:
             outer, inner = x
             if outer in temp_dict:
-                temp_dict[outer].add(inner)
+                if outer == 'simple':
+                    temp_dict[inner].add(inner)
+                else:
+                    temp_dict[outer].add(inner)
             else:
-                temp_dict[outer] = {inner}
+                if outer == 'simple':
+                    temp_dict[inner] = {inner}
+                else:
+                    temp_dict[outer] = {inner}
     result = []
     for k,v in temp_dict.items():
         if k not in COLLECTIONS:
@@ -274,7 +280,7 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
             result[mfl]["args"][arg] = list()  # init result
             # iterate over function's every arguemnt, and it's values
             for value in input[mfl]["args"][arg]:
-                var_type_name = convert_value_to_type(value)
+                var_type_name = union_types([convert_value_to_type(value)])
                 s.add(var_type_name)
             # we sort the output, to get deterministic results -> set has random ordering
             # TODO this returns array of types, which we will have to collapse again?
@@ -284,7 +290,7 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
         # lets use set to de-dup types
         s = set()
         for value in input[mfl]["return"]:
-            var_type_name = convert_value_to_type(value)
+            var_type_name = union_types([convert_value_to_type(value)])
             s.add(var_type_name)
             # we sort the output, to get deterministic results -> set has random ordering
         result[mfl]["return"] = sorted(list(s))
