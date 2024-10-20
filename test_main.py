@@ -8,8 +8,8 @@ from typemedaddy.foo import (
 from typemedaddy.typemedaddy import (
     convert_results_to_types,
     convert_value_to_type,
-    convert_value_to_type2,
     trace,
+    union_types,
     SELF_OR_CLS,
 )
 
@@ -288,60 +288,74 @@ def test_nested_int_list():
     }
     assert actual == expected
 
-def test_convert_value_to_type2():
+def test_convert_value_to_type():
     value = 1
-    actual = convert_value_to_type2(value)
+    actual = convert_value_to_type(value)
     assert ("simple", "int") == actual
 
     value = 'a'
-    actual = convert_value_to_type2(value)
+    actual = convert_value_to_type(value)
     assert ("simple", "str") == actual
 
     value = 1.0
-    actual = convert_value_to_type2(value)
+    actual = convert_value_to_type(value)
     assert ("simple", "float") == actual
 
     value = None
-    actual = convert_value_to_type2(value)
+    actual = convert_value_to_type(value)
     assert ("simple", "None") == actual
 
     # list
     value = []
-    actual = convert_value_to_type2(value)
+    actual = convert_value_to_type(value)
     assert ("list", '') == actual
 
     value = [1]
-    actual = convert_value_to_type2(value)
+    actual = convert_value_to_type(value)
     assert ("list", "int") == actual
 
     value = [1, 1]
-    actual = convert_value_to_type2(value)
+    actual = convert_value_to_type(value)
     assert ("list", "int") == actual
 
     value = [1, 'a']
-    actual = convert_value_to_type2(value)
+    actual = convert_value_to_type(value)
     assert ("list", "int|str") == actual
 
     value = [{1},{2}]
-    actual = convert_value_to_type2(value)
+    actual = convert_value_to_type(value)
     assert ("list", "set[int]") == actual
 
     value = [{1},{'a'}]
-    actual = convert_value_to_type2(value)
+    actual = convert_value_to_type(value)
     assert ("list", "set[int|str]") == actual
 
     # dict
     value = {}
-    actual = convert_value_to_type2(value)
+    actual = convert_value_to_type(value)
     assert ("dict", '') == actual
 
+    value = {'a': 1}
+    actual = convert_value_to_type(value)
+    assert ("dict", 'str,int') == actual
+
     value = set()
-    actual = convert_value_to_type2(value)
+    actual = convert_value_to_type(value)
     assert ("set", '') == actual
 
     value = ()
-    actual = convert_value_to_type2(value)
+    actual = convert_value_to_type(value)
     assert ("tuple", '') == actual
+
+def test_a():
+    value = {'a': []}
+    actual = convert_value_to_type(value)
+    assert ("dict", 'str,list') == actual
+
+def test_union_types():
+    a = union_types([('list','')])
+    e = 'list'
+    assert e == a
 
 def test_convert_value_to_type():
     value = 1
@@ -602,7 +616,7 @@ class TestIntegration():
 def test_bob():
     value = {"a": {1}, "b": {"a"}}
     actual = convert_value_to_type(value)
-    assert "dict[str,set[int|str]]" == actual
+    assert ('dict', 'str,set[int|str]') == actual
 
     # value = {"a": {None, 1}, "b": {"a"}}
     # actual = convert_value_to_type(value)
