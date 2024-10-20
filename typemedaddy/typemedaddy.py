@@ -220,18 +220,10 @@ def convert_value_to_type(value: Any) -> tuple[Literal["dict", "tuple", "list", 
         temp_dict = {}
         for k, v in value.items():
             key_type = get_value_type(k)
-            dict_value_type = get_value_type(v)
-            # collections are not hashable, so they will never be collections
-            if dict_value_type in COLLECTIONS:
-                if key_type in temp_dict:
-                    temp_dict[key_type].add(convert_value_to_type(v))
-                else:
-                    temp_dict[key_type] = {convert_value_to_type(v)}
+            if key_type in temp_dict:
+                temp_dict[key_type].add(convert_value_to_type(v))
             else:
-                if key_type in temp_dict:
-                    temp_dict[key_type].add(dict_value_type)
-                else:
-                    temp_dict[key_type] = {dict_value_type}
+                temp_dict[key_type] = {convert_value_to_type(v)}
         if temp_dict:
             union_of_sorted_types = union_dict_types(temp_dict)
             input_type = (input_type, union_of_sorted_types)
@@ -240,11 +232,7 @@ def convert_value_to_type(value: Any) -> tuple[Literal["dict", "tuple", "list", 
     elif input_type in COLLECTIONS_NO_DICT:
         types_found_in_collection = set()
         for v in value:
-            t = get_value_type(v)
-            if t in COLLECTIONS:
-                types_found_in_collection.add(convert_value_to_type(v))
-            else:
-                types_found_in_collection.add(t)
+            types_found_in_collection.add(convert_value_to_type(v))
         if types_found_in_collection:
             sorted_types = sort_types_none_at_the_end(types_found_in_collection)
             union_of_sorted_types = union_types(sorted_types)
