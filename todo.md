@@ -1,8 +1,20 @@
 # fix union of types
+## expectations
 ```python
 value = {"a": {None}, "b": {"a"}}
 actual = convert_value_to_type(value)
 assert "dict[str,set[str|None]]" == actual
+```
+## reality
+```python
+value = {"a": {1}, "b": {"a"}}
+actual = convert_value_to_type(value)
+assert "dict[str,set[int|str]]" == actual
+AssertionError: assert 'dict[str,set[int|str]]' == 'dict[str,set...str,set[str]]'
+
+  - dict[str,set[int]|str,set[str]]
+  ?                 - --------
+  + dict[str,set[int|str]]
 ```
 # in step 2 end, unify results array
 at the moment convert_results_to_types will return an array of types per function argument
