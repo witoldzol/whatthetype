@@ -1,28 +1,9 @@
-# fix union of types
-## expectations
-```python
-value = {"a": {None}, "b": {"a"}}
-actual = convert_value_to_type(value)
-assert "dict[str,set[str|None]]" == actual
-```
-## reality
-```python
-value = {"a": {1}, "b": {"a"}}
-actual = convert_value_to_type(value)
-assert "dict[str,set[int|str]]" == actual
-AssertionError: assert 'dict[str,set[int|str]]' == 'dict[str,set...str,set[str]]'
-
-  - dict[str,set[int]|str,set[str]]
-  ?                 - --------
-  + dict[str,set[int|str]]
-```
 # in step 2 end, unify results array
 at the moment convert_results_to_types will return an array of types per function argument
 we defo want to 'unify' those results into one, so that step 3 can just update with one arg?
 OR, we add a new step
 BECAUSE if we have an array of multiple results, that's an easy way to identify an arg that takes in multple 
 DIFFERENT types ( which is probably an BUG or potential issue )
-# put None at the end if union of types
 # implement replacement algo:
 - split lines into tokens
 - detect start and end of arguments
@@ -70,3 +51,33 @@ result = {
 # add tests around self ref object
 # add test case where we trace same function twice, and verify we don't store duplicate types
 # convert 'NoneType' to 'None' ( step 2 or 3 ????)
+# fix union of types
+## expectations
+```python
+value = {"a": {None}, "b": {"a"}}
+actual = convert_value_to_type(value)
+assert "dict[str,set[str|None]]" == actual
+```
+## reality
+```python
+value = {"a": {1}, "b": {"a"}}
+actual = convert_value_to_type(value)
+assert "dict[str,set[int|str]]" == actual
+AssertionError: assert 'dict[str,set[int|str]]' == 'dict[str,set...str,set[str]]'
+
+  - dict[str,set[int]|str,set[str]]
+  ?                 - --------
+  + dict[str,set[int|str]]
+```
+## what about 
+value = [{1},{'a'}] ??
+should it be list[set[int|str]] ? or list[set[int]|set[str]] ??
+## final decision
+I will leave it as
+pyright didn't complain about either:
+```python
+l = [{1}, {'a'}]
+def foo(l: list[set[int|str]]) -> int:
+def foo(l: list[set[int]|set[str]]) -> int:
+```
+# put None at the end if union of types
