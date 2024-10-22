@@ -1,3 +1,6 @@
+# tests *args and **kwargs
+looks like tracing *args results in args that have no name...which makes sense
+how will we handle that?
 # in step 2 end, unify results array
 at the moment convert_results_to_types will return an array of types per function argument
 we defo want to 'unify' those results into one, so that step 3 can just update with one arg?
