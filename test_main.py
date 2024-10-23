@@ -1,9 +1,11 @@
+import pytest
 from typemedaddy.foo import (
     example_function,
     Foo,
     function_returning_dict,
     int_function,
     returns_a_class,
+    func_that_takes_any_args
 )
 from typemedaddy.typemedaddy import (
     convert_results_to_types,
@@ -530,7 +532,7 @@ class TestIntegration():
         for k in step_1_output:
             if "example_function" in k:
                 assert step_1_output[k]["args"] == {
-                    "a": [1, 3, 'a'],
+                    "a": [1, 3, 'a' ],
                     "b": [2, 4, 'b'],
                     "foo": [None,None,None]
                 }
@@ -553,7 +555,12 @@ class TestIntegration():
         # for k in step_3_output:
         #     if 'example_function' in k:
         #         expected = "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"
-        #         assert expected == step_3_output[k]
+
+    # TODO this is a nice-to-do feature where we handle *args,**kwargs
+    @pytest.mark.skip
+    def test_args_kwargs(self):
+        with trace() as step_1_output:
+            func_that_takes_any_args([{1},{'a'}], bar='foo')
 
     def test_none_type(self):
         with trace() as step_1_output:
