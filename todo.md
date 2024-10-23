@@ -1,6 +1,3 @@
-# tests *args and **kwargs
-looks like tracing *args results in args that have no name...which makes sense
-how will we handle that?
 # in step 2 end, unify results array
 at the moment convert_results_to_types will return an array of types per function argument
 we defo want to 'unify' those results into one, so that step 3 can just update with one arg?
@@ -24,11 +21,15 @@ DIFFERENT types ( which is probably an BUG or potential issue )
 foo(int|str) : this might be an indication of a bug
 # save step 1 output to a file?
 
-
-
-
-
-
+==============================================================================================
+======================================== NICE TO DO ? ========================================
+==============================================================================================
+# handle *args and **kwargs
+- args and kwargs can be called whatever you want, so it's the same issue as with 'self' ref
+- both stand alone functions and class methods can have *args 
+- do we care? Not yet!
+looks like tracing *args results in args that have no name...which makes sense
+how will we handle that?
 
 
 ############################################################
