@@ -273,7 +273,9 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
     result = {}
     # mfl => module_function_line
     for mfl in input:
+        # ==========================
         # ========== ARGS ==========
+        # ==========================
         result[mfl] = {"args": dict()}  # init result
         for arg in input[mfl]["args"]:
             # lets use set to de-dup types
@@ -286,7 +288,9 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
             # we sort the output, to get deterministic results -> set has random ordering
             # TODO this returns array of types, which we will have to collapse again?
             result[mfl]["args"][arg] = sorted(s)
+        # ============================
         # ========== RETURN ==========
+        # ============================
         result[mfl]["return"] = list()
         # lets use set to de-dup types
         s = set()
@@ -398,6 +402,17 @@ def update_code_with_types(data: dict) -> dict[str, object]:
                     print(data)
     return updated_function_declarations
 
+def detect_multiple_arg_types(stage_2_results: dict) -> str:
+    warnings = []
+    for mfl, type_info in stage_2_results.items():
+        for arg, arg_types in type_info['args'].items():
+            if len(arg_types) > 1:
+                warnings.append(f"{mfl} - argument: {arg} - has {len(arg_types)} types: {arg_types}")
+        return_types = type_info['return']
+        if len(return_types) > 1:
+            warnings.append(f"{mfl} - return argument has {len(return_types)} types: {return_types}")
+    return '\n'.join(warnings)
+
 if __name__ == "__main__":
     print("===== STAGE 1 - RECORD DATA =====")
     f = Foo()
@@ -406,7 +421,6 @@ if __name__ == "__main__":
         # example_function_with_third_party_lib(1,2)
         f.arbitrary_self(
             1,
-            2,
         )
         f.arbitrary_self(
             1,
@@ -421,7 +435,10 @@ if __name__ == "__main__":
     print("===== STAGE 2 - ANALYSE TYPES IN DATA =====")
     print(f"DATA AFTER 1st STAGE ----> {data}")
     types_data = convert_results_to_types(data)
+    warnings = detect_multiple_arg_types(types_data)
+    if warnings:
+        print(warnings)
     pprint.pprint(types_data, sort_dicts=False)
-
+    unified_types_data = unify_types_in_final_result(types_data)
     print("===== STAGE 3 - UPDATE FILE WITH TYPES =====")
     update_code_with_types(types_data)
