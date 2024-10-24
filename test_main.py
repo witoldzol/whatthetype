@@ -504,7 +504,7 @@ class TestIntegration():
         #     '/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': 
         #         {'args': {'self': ['SELF_OR_CLS'], 'bar': [None]},
         #          'return': [None]},
-        #     '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': 
+        #     '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': 
         #         {'args': {'a': [1, 3, 'a'], 'b': [2, 4, 'b'], 'foo': ['USER_CLASS|typemedaddy.foo::Foo', None, None]},
         #          'return': [3, 7, 'ab']}}
         ##### STEP 2 #####
@@ -512,7 +512,7 @@ class TestIntegration():
         expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': {'args': {'self': ['SELF_OR_CLS'],
                                                                                          'bar': ['None']},
                                                                                 'return': ['None']},
-                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': {'args': {'a': ['int', 'str'],
+                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': {'args': {'a': ['int', 'str'],
                                                                                                   'b': ['int', 'str'],
                                                                                                   'foo': ['None',
                                                                                                           'str']},
@@ -522,7 +522,7 @@ class TestIntegration():
         # step_3_output = update_code_with_types(step_2_output)
         # print("### integration ### \n"*3)
         # print(step_3_output)
-        # expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ):\n', '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"}
+        # expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ):\n', '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"}
 
     def test_repeated_calls(self):
         with trace() as step_1_output:
@@ -541,7 +541,7 @@ class TestIntegration():
         ##### STEP 2 #####
         ##################
         step_2_output = convert_results_to_types(step_1_output)
-        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': {'args': {'a': ['int','str'],
+        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': {'args': {'a': ['int','str'],
                                                                                                   'b': ['int','str'],
                                                                                                   'foo': ['None']},
                                                                                          'return': ['int','str']}}
@@ -579,7 +579,7 @@ class TestIntegration():
                 assert step_1_output[k]["return"] == [7, 7]
         ##### STEP 2 #####
         step_2_output = convert_results_to_types(step_1_output)
-        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': {'args': {'a': ['int'],
+        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': {'args': {'a': ['int'],
                                                                                                   'b': ['int'],
                                                                                                   'foo': ['None']},
                                                                                          'return': ['int']}}
@@ -588,4 +588,4 @@ class TestIntegration():
         # step_3_output = update_code_with_types(step_2_output)
         # print("### integration ### \n"*3)
         # print(step_3_output)
-        # expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ):\n', '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:25': "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"}
+        # expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ):\n', '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"}
