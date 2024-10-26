@@ -386,7 +386,7 @@ def update_code_with_types(data: dict) -> dict[str, object]:
                             type_detected = False
                             result.append((token_type, token_val))
                         # RETURN VALUE
-                        elif in_arguments == False: # specifically False, not None
+                        elif in_arguments == False: # specifically False, not None, this means we just finished arguments and start return
                             if token_type == OP:
                                 if token_val == ':':
                                     # this is a start, so no pre - existing type

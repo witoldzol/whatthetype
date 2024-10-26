@@ -1,11 +1,5 @@
 # implement replacement algo:
-- split lines into tokens
-- detect start and end of arguments
-- analyze each argument:
--- does it have a type
 -- does it have a default value?
--- add type if not there
-- when done, un-tokenize and you have a string representing function !
 ## edge case - what about multiline function signatures?
 # should we deduplicate inputs from step 1? the data set will grow crazy big, and it will make step 2 work much harder ( although, we do have dedup in step 2...)
 # should we use python 3.12 monitoring api?
