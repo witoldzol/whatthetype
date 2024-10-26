@@ -523,7 +523,7 @@ class TestIntegration():
         #     '/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6':
         #         {'args': {'self': ['SELF_OR_CLS'], 'bar': [None]},
         #          'return': [None]},
-        #     '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28':
+        #     '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27':
         #         {'args': {'a': [1, 3, 'a'], 'b': [2, 4, 'b'], 'foo': ['USER_CLASS|typemedaddy.foo::Foo', None, None]},
         #          'return': [3, 7, 'ab']}}
         ##### STEP 2 #####
@@ -531,7 +531,7 @@ class TestIntegration():
         expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': {'args': {'self': ['SELF_OR_CLS'],
                                                                                          'bar': ['None']},
                                                                                 'return': ['None']},
-                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': {'args': {'a': ['int', 'str'],
+                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': {'args': {'a': ['int', 'str'],
                                                                                                   'b': ['int', 'str'],
                                                                                                   'foo': ['None',
                                                                                                           'str']},
@@ -542,15 +542,15 @@ class TestIntegration():
         ##### STEP 4 - final unify #####
         step_4_output = unify_types_in_final_result(step_2_output)
         expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': {'args': {'self': 'SELF_OR_CLS', 'bar': 'None'}, 'return': 'None'},
-                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': {'args': {'a': 'int|str',
+                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': {'args': {'a': 'int|str',
                                                                                                   'b': 'int|str',
                                                                                                   'foo': 'str|None'},
                                                                                          'return': 'int|str'}}
         assert expected == step_4_output
         #### STEP 5 - update code #####
         step_5_output = update_code_with_types(step_4_output)
-        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ) -> None:\n',
-                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': 'def example_function (a :int|str,b :int|str,foo :str|None) -> int|str:\n'}
+        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ) -> None:',
+                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': 'def example_function (a :int|str,b :int|str,foo :str|None)->int|str :'}
         assert expected == step_5_output
 
     # TODO this is a nice-to-do feature where we handle *args,**kwargs
@@ -579,11 +579,11 @@ class TestIntegration():
                 assert step_1_output[k]["return"] == [7, 7]
         ##### STEP 2 #####
         step_2_output = convert_results_to_types(step_1_output)
-        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': {'args': {'a': ['int'],
+        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': {'args': {'a': ['int'],
                                                                                                   'b': ['int'],
                                                                                                   'foo': ['None']},
                                                                                          'return': ['int']},
-                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:takes_func_returns_func:57': {'args': {'callback': ['Callable', 'int'], },
+                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:takes_func_returns_func:56': {'args': {'callback': ['Callable', 'int'], },
                                                                                                 'return': ['Callable', 'int'], },
                     }
         assert expected == step_2_output
@@ -591,4 +591,4 @@ class TestIntegration():
         # step_3_output = update_code_with_types(step_2_output)
         # print("### integration ### \n"*3)
         # print(step_3_output)
-        # expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ):\n', '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"}
+        # expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ):\n', '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"}
