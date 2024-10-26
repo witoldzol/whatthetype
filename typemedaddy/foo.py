@@ -3,7 +3,7 @@ from typing import Callable
 from typemedaddy.nested.inner.bar import Bar
 
 class Foo:
-    def __init__(self, bar: Bar = None):
+    def __init__(self, bar: Bar=None):
         self.bar = bar
 
     def get_foo(self, name, age):
@@ -55,3 +55,6 @@ def returns_a_class():
 
 def takes_func_returns_func(callback):
     return callback
+
+def takes_class(f: Foo):
+    return 1
