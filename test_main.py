@@ -5,7 +5,8 @@ from typemedaddy.foo import (
     function_returning_dict,
     int_function,
     returns_a_class,
-    func_that_takes_any_args
+    func_that_takes_any_args,
+    takes_func_returns_func
 )
 from typemedaddy.typemedaddy import (
     convert_results_to_types,
@@ -15,6 +16,7 @@ from typemedaddy.typemedaddy import (
 )
 
 MODULE_PATH = "typemedaddy.foo"
+
 
 def test_example_function():
     with trace() as actual:
@@ -75,7 +77,8 @@ def test_class_method():
     with trace() as actual:
         f.get_foo("bob", 9)
     for k in actual:
-        assert actual[k]["args"] == {"self": [SELF_OR_CLS], "name": ["bob"], "age": [9]}
+        assert actual[k]["args"] == {
+            "self": [SELF_OR_CLS], "name": ["bob"], "age": [9]}
         assert actual[k]["return"] == ["bob,9"]
 
 
@@ -194,10 +197,14 @@ def test_multiple_type_inputs_for_the_same_param():
     #         "return": ["int", "str"],
     #     },
     # }
-    assert sorted(actual["/home/w/repos/typemedaddy/foo.py:int_function:18"]["args"]["a"]) == sorted(["str", "int"])
-    assert sorted(actual["/home/w/repos/typemedaddy/foo.py:int_function:18"]["return"]) == sorted(["str", "int"])
-    assert sorted(actual["/home/w/repos/typemedaddy/bar.py:bar_function:69"]["args"]["a"]) == sorted(["str", "int"])
-    assert sorted(actual["/home/w/repos/typemedaddy/bar.py:bar_function:69"]["return"]) == sorted(["str", "int"])
+    assert sorted(actual["/home/w/repos/typemedaddy/foo.py:int_function:18"]
+                  ["args"]["a"]) == sorted(["str", "int"])
+    assert sorted(actual["/home/w/repos/typemedaddy/foo.py:int_function:18"]
+                  ["return"]) == sorted(["str", "int"])
+    assert sorted(actual["/home/w/repos/typemedaddy/bar.py:bar_function:69"]
+                  ["args"]["a"]) == sorted(["str", "int"])
+    assert sorted(actual["/home/w/repos/typemedaddy/bar.py:bar_function:69"]
+                  ["return"]) == sorted(["str", "int"])
 
 
 def test_conver_self_ref_val_to_self_ref_type():
@@ -219,7 +226,6 @@ def test_conver_self_ref_val_to_self_ref_type():
         }
     }
     assert actual == expected
-
 
 
 def test_empty_list():
@@ -288,6 +294,7 @@ def test_nested_int_list():
         }
     }
     assert actual == expected
+
 
 def test_convert_value_to_type():
     value = 1
@@ -359,11 +366,11 @@ def test_convert_value_to_type():
     actual = convert_value_to_type(value)
     assert ("list", "int|list[int]") == actual
 
-    value = [{1},{2}]
+    value = [{1}, {2}]
     actual = convert_value_to_type(value)
     assert ("list", "set[int]") == actual
 
-    value = [{1},{'a'}]
+    value = [{1}, {'a'}]
     actual = convert_value_to_type(value)
     assert ("list", "set[int|str]") == actual
 
@@ -449,7 +456,7 @@ def test_convert_value_to_type():
     actual = convert_value_to_type(value)
     assert ("dict", "int,int|str,int") == actual
 
-    value = {"a": [1,'a'], 1: [1.0]}
+    value = {"a": [1, 'a'], 1: [1.0]}
     actual = convert_value_to_type(value)
     assert ("dict", "int,list[float]|str,list[int|str]") == actual
 
@@ -470,13 +477,22 @@ def test_convert_value_to_type():
     actual = convert_value_to_type(value)
     assert ("tuple", 'list[int]|None') == actual
 
-    value = (None, [[1,'a']])
+    value = (None, [[1, 'a']])
     actual = convert_value_to_type(value)
     assert ("tuple", 'list[list[int|str]]|None') == actual
 
     value = (None, (None,))
     actual = convert_value_to_type(value)
     assert ("tuple", 'tuple[None]|None') == actual
+
+    # Callback
+    def value(): return None
+    actual = convert_value_to_type(value)
+    assert ("simple", 'Callable') == actual
+
+    def value(x): return x + 1
+    actual = convert_value_to_type(value)
+    assert ("simple", 'Callable') == actual
 
 
 class TestIntegration():
@@ -489,7 +505,8 @@ class TestIntegration():
             example_function('a', 'b', None)
         for k in step_1_output:
             if "init" in k:
-                assert step_1_output[k]["args"] == {"self": [SELF_OR_CLS], "bar": [None]}
+                assert step_1_output[k]["args"] == {
+                    "self": [SELF_OR_CLS], "bar": [None]}
                 assert step_1_output[k]["return"] == [None]
             elif "example_function" in k:
                 assert step_1_output[k]["args"] == {
@@ -501,10 +518,10 @@ class TestIntegration():
         print("### out ### \n"*3)
         print(step_1_output)
         # step_1_output = {
-        #     '/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': 
+        #     '/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6':
         #         {'args': {'self': ['SELF_OR_CLS'], 'bar': [None]},
         #          'return': [None]},
-        #     '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': 
+        #     '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28':
         #         {'args': {'a': [1, 3, 'a'], 'b': [2, 4, 'b'], 'foo': ['USER_CLASS|typemedaddy.foo::Foo', None, None]},
         #          'return': [3, 7, 'ab']}}
         ##### STEP 2 #####
@@ -524,51 +541,21 @@ class TestIntegration():
         # print(step_3_output)
         # expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ):\n', '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"}
 
-    def test_repeated_calls(self):
-        with trace() as step_1_output:
-            example_function(1, 2, None)
-            example_function(3, 4, None)
-            example_function('a', 'b', None)
-        for k in step_1_output:
-            if "example_function" in k:
-                assert step_1_output[k]["args"] == {
-                    "a": [1, 3, 'a' ],
-                    "b": [2, 4, 'b'],
-                    "foo": [None,None,None]
-                }
-                assert step_1_output[k]["return"] == [3, 7, 'ab']
-        ##################
-        ##### STEP 2 #####
-        ##################
-        step_2_output = convert_results_to_types(step_1_output)
-        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': {'args': {'a': ['int','str'],
-                                                                                                  'b': ['int','str'],
-                                                                                                  'foo': ['None']},
-                                                                                         'return': ['int','str']}}
-        assert expected == step_2_output
-        ##################
-        ##### STEP 3 #####
-        ##################
-        # step_3_output = update_code_with_types(step_2_output)
-        # print("### integration ### \n"*3)
-        # print(step_3_output)
-        # for k in step_3_output:
-        #     if 'example_function' in k:
-        #         expected = "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"
-
     # TODO this is a nice-to-do feature where we handle *args,**kwargs
     @pytest.mark.skip
     def test_args_kwargs(self):
         with trace() as step_1_output:
-            func_that_takes_any_args([{1},{'a'}], bar='foo')
+            func_that_takes_any_args([{1}, {'a'}], bar='foo')
 
-    def test_none_type(self):
+    def test_none_type_and_lambda(self):
         with trace() as step_1_output:
             example_function(3, 4, None)
             example_function(3, 4, None)
+            takes_func_returns_func(lambda: None)
         for k in step_1_output:
             if "init" in k:
-                assert step_1_output[k]["args"] == {"self": [SELF_OR_CLS], "bar": [None]}
+                assert step_1_output[k]["args"] == {
+                    "self": [SELF_OR_CLS], "bar": [None]}
                 assert step_1_output[k]["return"] == [None]
             elif "example_function" in k:
                 assert step_1_output[k]["args"] == {
@@ -582,7 +569,10 @@ class TestIntegration():
         expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': {'args': {'a': ['int'],
                                                                                                   'b': ['int'],
                                                                                                   'foo': ['None']},
-                                                                                         'return': ['int']}}
+                                                                                         'return': ['int']},
+                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:takes_func_returns_func:57': {'args': {'callback': ['Callable'], },
+                                                                                                'return': ['Callable'], },
+                    }
         assert expected == step_2_output
         ##### STEP 3 #####
         # step_3_output = update_code_with_types(step_2_output)
