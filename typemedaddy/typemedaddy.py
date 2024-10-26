@@ -307,13 +307,15 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
 
 def update_code_with_types(data: dict) -> dict[str, object]:
     updated_function_declarations = dict()
-    for mfl in data.keys():
+    for mfl in data:
         new_module = []
-        module, function, line_num = mfl.split(":") # edge case, if file or func has a ':' in a name
+        if mfl.count(":") > 2:
+            raise Exception("Detected too many separators! Perhaps function name contains a colon?")
+        module, function, line_num = mfl.split(":")
         with open(module, "r") as f:
             for idx, line in enumerate(f):
                 # find a line containting the function
-                if idx == int(line_num) - 1:
+                if idx == int(line_num) - 1: # todo - test multiline function declaration
                     # convert line to StringIO - required by tokenizer
                     line_io = io.StringIO(line).readline # don't use lambda, generator will be infinite
                     # get tokens
@@ -360,20 +362,14 @@ def update_code_with_types(data: dict) -> dict[str, object]:
                             # dont worry about pre existing types, we drop them somewhere else
                             types_detected_for_agument = data[mfl]["args"]
                             if token_val in types_detected_for_agument:
-                                arg_types = types_detected_for_agument[token_val]
+                                arg_type = types_detected_for_agument[token_val]
+                                assert type(arg_type) == str
                                 # skip method self or class method ref
-                                if arg_types[0] == SELF_OR_CLS:
+                                if arg_type == SELF_OR_CLS:
                                     pass
-                                # if just one arg, get it out of the array
-                                elif len(arg_types) == 1:
-                                    colon_token = (OP, ':')
-                                    type_token = (STRING, arg_types[0])
-                                    updated_arg_tokens.append(colon_token)
-                                    updated_arg_tokens.append(type_token)
-                                # otherwise, stringify entire array and add as is
                                 else:
                                     colon_token = (OP, ':')
-                                    type_token = (STRING, str(arg_types))
+                                    type_token = (STRING, arg_type)
                                     updated_arg_tokens.append(colon_token)
                                     updated_arg_tokens.append(type_token)
                             result.extend(updated_arg_tokens)
