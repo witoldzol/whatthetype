@@ -420,11 +420,11 @@ def detect_multiple_arg_types(stage_2_results: dict) -> str:
 def unify_types_in_final_result(stage_2_results: dict) -> dict:
     for _, type_info in stage_2_results.items():
         for arg, arg_types in type_info['args'].items():
-            if len(arg_types) > 1:
-                type_info['args'][arg] = '|'.join(arg_types)
+            assert type(arg_types) == list
+            type_info['args'][arg] = '|'.join(arg_types)
         return_types = type_info['return']
-        if len(return_types) > 1:
-            type_info['return'] = '|'.join(return_types)
+        assert type(return_types) == list
+        type_info['return'] = '|'.join(return_types)
     return stage_2_results
 
 if __name__ == "__main__":
