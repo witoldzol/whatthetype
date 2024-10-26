@@ -21,7 +21,7 @@ def example_function_with_third_party_lib(a, b):
     return r
 
 
-def int_function(i: int) -> int:
+def int_function(i):
     return i
 
 
