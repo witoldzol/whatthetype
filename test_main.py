@@ -552,6 +552,7 @@ class TestIntegration():
             example_function(3, 4, None)
             example_function(3, 4, None)
             takes_func_returns_func(lambda: None)
+            takes_func_returns_func(1)
         for k in step_1_output:
             if "init" in k:
                 assert step_1_output[k]["args"] == {
@@ -570,8 +571,8 @@ class TestIntegration():
                                                                                                   'b': ['int'],
                                                                                                   'foo': ['None']},
                                                                                          'return': ['int']},
-                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:takes_func_returns_func:57': {'args': {'callback': ['Callable'], },
-                                                                                                'return': ['Callable'], },
+                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:takes_func_returns_func:57': {'args': {'callback': ['Callable', 'int'], },
+                                                                                                'return': ['Callable', 'int'], },
                     }
         assert expected == step_2_output
         ##### STEP 3 #####
