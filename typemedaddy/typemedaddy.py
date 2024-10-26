@@ -333,7 +333,7 @@ def update_code_with_types(data: dict) -> dict[str, object]:
                     """
                     # do the magic
                     result = []
-                    in_arguments = False
+                    in_arguments = None
                     # untokenize will not handle spacing and indentation if we remove last 3 args
                     # so we have to handle it manually
                     indentation = []
@@ -354,7 +354,7 @@ def update_code_with_types(data: dict) -> dict[str, object]:
                         ##########
                         # ARGUMENT ( we add type if we have one )
                         ##########
-                            # todo - detect if default value
+                            # todo - detect if default value ex: def foo(bar='lol)
                         elif in_arguments and not type_detected and token_type == NAME:
                             print(f"ARGUMENT ----> {token_val}")
                             updated_arg_tokens = [(token_type, token_val)]
@@ -385,6 +385,22 @@ def update_code_with_types(data: dict) -> dict[str, object]:
                             print(f"END of types for argument")
                             type_detected = False
                             result.append((token_type, token_val))
+                        # RETURN VALUE
+                        elif in_arguments == False: # specifically False, not None
+                            if token_type == OP:
+                                if token_val == ':':
+                                    # this is a start, so no pre - existing type
+                                    # check if we have a return type for this function 
+                                    if data[mfl]["return"]:
+                                        tokens = []
+                                        tokens.append((OP, '->'))
+                                        tokens.append((NAME, data[mfl]["return"]))
+                                        tokens.append((OP, ':'))
+                                        result.extend(tokens)
+                                        break # we are done, bail
+                                    else:
+                                        result.append((OP, ":")) # no type found, add : and bail
+                                        break
                         # handle indentation
                         elif token_type == INDENT:
                             print(f"INDENTATION detected")
@@ -447,10 +463,11 @@ if __name__ == "__main__":
         #     '2',
         # )
         # takes_func_returns_func(int_function)
-        f = Foo()
-        example_function(1, 2, f)
-        example_function(3, 4, None)
-        example_function('a', 'b', None)
+        # f = Foo()
+        # example_function(1, 2, f)
+        # example_function(3, 4, None)
+        # example_function('a', 'b', None)
+        int_function(1)
     pprint.pprint(data, sort_dicts=False)
 
     print("===== STAGE 2 - ANALYSE TYPES IN DATA =====")

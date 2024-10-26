@@ -21,11 +21,10 @@ def example_function_with_third_party_lib(a, b):
     return r
 
 
-def int_function(i):
+def int_function(i) -> int:
     return i
 
-
-def example_function(a: float|bool, b, foo):
+def example_function(a: float|bool, b, foo) -> int:
     if type(a) is str and type(b) is int:
         a = int(a)
     return a + b
