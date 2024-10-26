@@ -86,3 +86,12 @@ OR, we add a new step
 BECAUSE if we have an array of multiple results, that's an easy way to identify an arg that takes in multple 
 DIFFERENT types ( which is probably an BUG or potential issue )
 # test collables as args and as return types
+# in step 5 - when you detect a pre existing type, there can be MULTIPLE of them - test & handle this case
+at the moment we are dropping first detected type
+```bash
+OLD
+def example_function(a: float|bool, b, foo):
+>>>>>>>>>>
+NEW
+def example_function (a :int|str|bool ,b :int|str,foo :str|None):
+```

@@ -375,12 +375,16 @@ def update_code_with_types(data: dict) -> dict[str, object]:
                             result.extend(updated_arg_tokens)
                         # in argument, we detected a colon (:) which means we have a type
                         elif in_arguments and token_type == OP and token_val == ':':
-                            print(f"TYPE DETECTED ")
+                            print(f"TYPE DETECTED, DROPPING COLON")
                             type_detected = True
-                            # result.append((token_type, token_val))
                         elif in_arguments and type_detected and token_type == NAME:
                             print(f"DROPPING OLD TYPE")
+                        elif in_arguments and type_detected and token_type == OP and token_val == '|':
+                            print(f"DROPPING PIPE")
+                        elif in_arguments and type_detected and token_type == OP and token_val == ',':
+                            print(f"END of types for argument")
                             type_detected = False
+                            result.append((token_type, token_val))
                         # handle indentation
                         elif token_type == INDENT:
                             print(f"INDENTATION detected")

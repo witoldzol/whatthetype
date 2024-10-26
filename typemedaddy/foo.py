@@ -25,7 +25,7 @@ def int_function(i):
     return i
 
 
-def example_function(a, b, foo):
+def example_function(a: float|bool, b, foo):
     if type(a) is str and type(b) is int:
         a = int(a)
     return a + b
