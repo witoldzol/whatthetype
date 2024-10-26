@@ -54,5 +54,5 @@ def returns_a_class():
     f = Foo()
     return f
 
-def takes_func_returns_func(callback: Callable) -> Callable:
+def takes_func_returns_func(callback):
     return callback
