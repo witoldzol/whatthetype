@@ -496,6 +496,11 @@ def test_convert_value_to_type():
     actual = convert_value_to_type(value)
     assert ("simple", 'Callable') == actual
 
+    # class
+    value = Foo()
+    actual = convert_value_to_type(value)
+    assert ("simple", 'Foo') == actual
+
 
 class TestIntegration():
 
