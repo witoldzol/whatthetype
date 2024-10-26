@@ -8,7 +8,7 @@ import sys
 import os
 from enum import Enum
 import argparse
-from typemedaddy.foo import example_function_with_third_party_lib, Foo, takes_func_returns_func, int_function
+from typemedaddy.foo import example_function_with_third_party_lib, Foo, takes_func_returns_func, int_function, example_function
 from types import FrameType, FunctionType
 from typing import Literal
 
@@ -444,16 +444,22 @@ if __name__ == "__main__":
         #     '1',
         #     '2',
         # )
-        takes_func_returns_func(int_function)
+        # takes_func_returns_func(int_function)
+        f = Foo()
+        example_function(1, 2, f)
+        example_function(3, 4, None)
+        example_function('a', 'b', None)
     pprint.pprint(data, sort_dicts=False)
 
     print("===== STAGE 2 - ANALYSE TYPES IN DATA =====")
     print(f"DATA AFTER 1st STAGE ----> {data}")
     types_data = convert_results_to_types(data)
+    print("===== STAGE 4 - DETECT MULIPLE ARG TYPS =====")
     warnings = detect_multiple_arg_types(types_data)
     if warnings:
         print(warnings)
     pprint.pprint(types_data, sort_dicts=False)
+    print("===== STAGE 5 - UNIFY ALL TYPES =====")
     unified_types_data = unify_types_in_final_result(types_data)
-    print("===== STAGE 3 - UPDATE FILE WITH TYPES =====")
+    print("===== STAGE 6 - UPDATE FILE WITH TYPES =====")
     update_code_with_types(types_data)
