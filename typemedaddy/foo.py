@@ -1,4 +1,5 @@
 from random import choice
+from typing import Callable
 from typemedaddy.nested.inner.bar import Bar
 
 
@@ -53,3 +54,6 @@ def function_calling_nested_functions():
 def returns_a_class():
     f = Foo()
     return f
+
+def takes_func_returns_func(callback: Callable) -> Callable:
+    return callback
