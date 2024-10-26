@@ -8,8 +8,8 @@ import sys
 import os
 from enum import Enum
 import argparse
-from typemedaddy.foo import example_function_with_third_party_lib, Foo
-from types import FrameType
+from typemedaddy.foo import example_function_with_third_party_lib, Foo, takes_func_returns_func, int_function
+from types import FrameType, FunctionType
 from typing import Literal
 
 # take logger args, if we are running directly
@@ -58,11 +58,12 @@ class TraceEvent(Enum):
         return super().__eq__(other)
 
 
-def is_user_defined_class(obj):
+def is_class(obj):
+    # we filter non-user calls upstream, so we should only get user defined classes at this stage
     if obj is None:
         return False
     return isinstance(obj, object) and not isinstance(
-        obj, (int, float, str, list, dict, tuple, set)
+        obj, (int, float, str, list, dict, tuple, set, FunctionType)
     )
 
 
@@ -122,7 +123,8 @@ def trace_function(frame, event, arg):
                 var_type = type(var).__name__
                 LOG.debug(f"3) Variable type name is  : {var_type}")
                 LOG.debug(f"--- end ---")
-                if is_user_defined_class(var):
+                # SPECIAL CASE - CLASS
+                if is_class(var):
                     var = f"USER_CLASS|{var.__module__}::{var_type}"
             if arg_name in RESULT[mod_func_line]["args"]:
                 RESULT[mod_func_line]["args"][arg_name].append(var)
@@ -132,7 +134,7 @@ def trace_function(frame, event, arg):
     ##### RETURN #####
     ##################
     elif event == TraceEvent.RETURN:
-        if is_user_defined_class(arg):
+        if is_class(arg):
             arg = f"USER_CLASS|{arg.__module__}::{type(arg).__name__}"
         if "return" in RESULT[mod_func_line]:
             RESULT[mod_func_line]["return"].append(arg)
@@ -429,17 +431,18 @@ if __name__ == "__main__":
     with trace() as data:
         print("-" * 20, " RESULT: ", "-" * 20)
         # example_function_with_third_party_lib(1,2)
-        f.arbitrary_self(
-            1,
-        )
-        f.arbitrary_self(
-            1,
-            2,
-        )
-        f.arbitrary_self(
-            '1',
-            '2',
-        )
+        # f.arbitrary_self(
+        #     1,
+        # )
+        # f.arbitrary_self(
+        #     1,
+        #     2,
+        # )
+        # f.arbitrary_self(
+        #     '1',
+        #     '2',
+        # )
+        takes_func_returns_func(int_function)
     pprint.pprint(data, sort_dicts=False)
 
     print("===== STAGE 2 - ANALYSE TYPES IN DATA =====")

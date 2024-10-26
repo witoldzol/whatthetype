@@ -2,7 +2,6 @@ from random import choice
 from typing import Callable
 from typemedaddy.nested.inner.bar import Bar
 
-
 class Foo:
     def __init__(self, bar: Bar = None):
         self.bar = bar
