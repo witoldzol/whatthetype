@@ -1,3 +1,4 @@
+# test collables as args and as return types
 # implement replacement algo:
 - split lines into tokens
 - detect start and end of arguments
