@@ -13,7 +13,8 @@ from typemedaddy.typemedaddy import (
     convert_value_to_type,
     trace,
     SELF_OR_CLS,
-    update_code_with_types
+    update_code_with_types,
+    unify_types_in_final_result
 )
 
 MODULE_PATH = "typemedaddy.foo"
@@ -536,11 +537,20 @@ class TestIntegration():
                                                                                                           'str']},
                                                                                          'return': ['int', 'str']}}
         assert expected == step_2_output
-        ##### STEP 3 #####
-        step_3_output = update_code_with_types(step_2_output)
-        print("### integration ### \n"*3)
-        print(step_3_output)
-        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ):\n', '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"}
+        ##### STEP 4 #####
+        step_4_output = unify_types_in_final_result(step_2_output)
+        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': {'args': {'self': 'SELF_OR_CLS', 'bar': 'None'}, 'return': 'None'},
+                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': {'args': {'a': 'int|str',
+                                                                                                  'b': 'int|str',
+                                                                                                  'foo': 'str|None'},
+                                                                                         'return': 'int|str'}}
+        assert expected == step_4_output
+
+        ##### STEP 5 #####
+        # step_5_output = update_code_with_types(step_2_output)
+        # print("### integration ### \n"*3)
+        # print(step_3_output)
+        # expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ):\n', '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:28': "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"}
         # assert expected == step_3_output
 
     # TODO this is a nice-to-do feature where we handle *args,**kwargs

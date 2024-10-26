@@ -143,7 +143,7 @@ def trace_function(frame, event, arg):
     return trace_function
 
 
-def sort_types_none_at_the_end(set_of_types: set[str]) -> list:
+def sort_types_none_at_the_end(set_of_types: set[str]|list[str]) -> list:
     is_none = False
     temp = set()
     for x in list(set_of_types)[:]:
@@ -421,10 +421,12 @@ def unify_types_in_final_result(stage_2_results: dict) -> dict:
     for _, type_info in stage_2_results.items():
         for arg, arg_types in type_info['args'].items():
             assert type(arg_types) == list
-            type_info['args'][arg] = '|'.join(arg_types)
+            sorted_args = sort_types_none_at_the_end(arg_types)
+            type_info['args'][arg] = '|'.join(sorted_args)
         return_types = type_info['return']
         assert type(return_types) == list
-        type_info['return'] = '|'.join(return_types)
+        sorted_return = sort_types_none_at_the_end(return_types)
+        type_info['return'] = '|'.join(sorted_return)
     return stage_2_results
 
 if __name__ == "__main__":
