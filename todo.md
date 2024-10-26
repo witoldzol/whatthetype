@@ -1,5 +1,5 @@
-# implement replacement algo:
--- does it have a default value?
+# deal with user classes types
+# how are we going to add imports if we added new class type ?
 ## edge case - what about multiline function signatures?
 # should we deduplicate inputs from step 1? the data set will grow crazy big, and it will make step 2 work much harder ( although, we do have dedup in step 2...)
 # should we use python 3.12 monitoring api?
@@ -89,3 +89,4 @@ def example_function(a: float|bool, b, foo):
 NEW
 def example_function (a :int|str|bool ,b :int|str,foo :str|None):
 ```
+# implement replacement algo
