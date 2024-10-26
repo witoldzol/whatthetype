@@ -226,6 +226,8 @@ def convert_value_to_type(value: Any) -> tuple[Literal["dict", "tuple", "list", 
         if value == SELF_OR_CLS:
             return ('self', value)
         else:
+            if input_type == 'function':
+                return ('simple', 'Callable')
             return ('simple', input_type)
     if input_type == "dict":
         temp_dict = {}
