@@ -455,6 +455,18 @@ def reformat_code(function_signatures: dict[str,object]) -> dict[str,object]:
         result[mfl] = fix_code(code)
     return result
 
+def update_files_with_new_signatures(function_signatures: dict[str, object], in_place=False, backup_file_suffix=None) -> list[str]:
+    for mfl, f_signature in function_signatures.items():
+        module, function, line = mfl.split(':')
+        # read lines
+        with open(module,'r') as f:
+            lines = f.readlines()
+        # update ( 0 indexed )
+        lines[int(line) - 1] = str(f_signature)
+        # write lines
+        with open(module,'w') as f:
+            f.writelines(lines)
+
 if __name__ == "__main__":
     print("===== STAGE 1 - RECORD DATA =====")
     f = Foo()
@@ -497,3 +509,5 @@ if __name__ == "__main__":
     updated_function_signatures = update_code_with_types(types_data)
     print("===== STAGE 7 - reformat updated code =====")
     reformat_code(updated_function_signatures)
+    print("===== STAGE 7 - reformat updated code =====")
+    update_files_with_new_signatures(updated_function_signatures, in_place=True, backup_file_suffix=None )
