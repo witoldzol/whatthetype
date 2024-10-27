@@ -8,7 +8,7 @@ import sys
 import os
 from enum import Enum
 import argparse
-from typemedaddy.foo import example_function_with_third_party_lib, Foo, takes_func_returns_func, int_function, example_function
+from typemedaddy.foo import example_function_with_third_party_lib, Foo, takes_func_returns_func, int_function, example_function, takes_class
 from types import FrameType, FunctionType
 from typing import Literal
 
@@ -29,7 +29,6 @@ LOG = logging.getLogger(__name__)
 COLLECTIONS = ("dict", "list", "set", "tuple")
 COLLECTIONS_NO_DICT = ("list", "set", "tuple")
 SELF_OR_CLS = "SELF_OR_CLS"
-
 RESULT = {}
 MODEL = {
     "module:func_name:func_line": {
@@ -37,7 +36,6 @@ MODEL = {
         "return": set("type"),
     }
 }
-
 # we use `current_folder` to identify local execution dir
 # this will be used to filter out non local / non user packages
 # so that we don't trace them
@@ -180,15 +178,16 @@ def union_types(types: list[str|tuple[str,str]]) -> str:
         # if tuple - ie, complex or nested type complex / simple type
         else:
             outer, inner = x
+            assert outer in ("dict", "tuple", "list", "set", "self", "simple", "class")
             if outer in temp_dict:
-                if outer == 'simple':
+                if outer == 'simple' or outer == 'class':
                     temp_dict[inner].add(inner)
                 elif outer == 'self':
                     temp_dict[SELF_OR_CLS].add()#todo - test this 
                 else:
                     temp_dict[outer].add(inner)
             else:
-                if outer == 'simple':
+                if outer == 'simple' or outer == 'class':
                     temp_dict[inner] = {inner}
                 elif outer == 'self':
                     temp_dict[SELF_OR_CLS] = {} #todo - test this 
@@ -218,17 +217,21 @@ def union_dict_types(types: dict[str,set[tuple[str,str]]]) -> str:
     sorted_set = sorted(temp_set)
     return union_types(sorted_set)
 
-def convert_value_to_type(value: Any) -> tuple[Literal["dict", "tuple", "list", "set", "self", "simple"], str]:
+def convert_value_to_type(value: Any) -> tuple[Literal["dict", "tuple", "list", "set", "self", "simple", "class"], str]:
     input_type = get_value_type(value)
     # base case
     if input_type not in COLLECTIONS:
         # hardcoded - special case - self reference arg in methods
-        if value == SELF_OR_CLS:
-            return ('self', value)
+        if type(value) == str:
+            if value == SELF_OR_CLS:
+                return ('self', value)
+            elif 'USER_CLASS' in value:
+                class_name = value.split('::')[1]
+                return ('class', class_name)
         else:
             if input_type == 'function':
                 return ('simple', 'Callable')
-            return ('simple', input_type)
+        return ('simple', input_type)
     if input_type == "dict":
         temp_dict = {}
         for k, v in value.items():
@@ -467,7 +470,9 @@ if __name__ == "__main__":
         # example_function(1, 2, f)
         # example_function(3, 4, None)
         # example_function('a', 'b', None)
-        int_function(1)
+        f = Foo()
+        takes_class(f)
+        # int_function(1)
     pprint.pprint(data, sort_dicts=False)
 
     print("===== STAGE 2 - ANALYSE TYPES IN DATA =====")

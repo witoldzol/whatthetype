@@ -1,4 +1,4 @@
-# deal with user classes types
+# usedefault in dictionaries to simplyfy logic ( line 190 ... and more )
 # how are we going to add imports if we added new class type ?
 ## edge case - what about multiline function signatures?
 # should we deduplicate inputs from step 1? the data set will grow crazy big, and it will make step 2 work much harder ( although, we do have dedup in step 2...)
@@ -90,3 +90,4 @@ NEW
 def example_function (a :int|str|bool ,b :int|str,foo :str|None):
 ```
 # implement replacement algo
+# deal with user classes types
