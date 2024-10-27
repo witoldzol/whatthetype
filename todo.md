@@ -1,4 +1,3 @@
-# reformat updated function definitions to make it nice
 # new  stage - generate imports
 pass through the stage 2? output
 identify user classes
@@ -107,3 +106,4 @@ def foobar (i :int=)->int :
 ```
 # usedefault in dictionaries to simplyfy logic 
 # generate warnings if arg takes two or more types of data
+# reformat updated function definitions to make it nice

@@ -15,7 +15,8 @@ from typemedaddy.typemedaddy import (
     SELF_OR_CLS,
     update_code_with_types,
     unify_types_in_final_result,
-    union_types
+    union_types,
+    reformat_code
 )
 
 MODULE_PATH = "typemedaddy.foo"
@@ -571,6 +572,11 @@ class TestIntegration():
         expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None )->None :',
                     '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': 'def example_function (a :int|str,b :int|str,foo :Foo|None)->int|str :'}
         assert expected == step_5_output
+        ##### STEP 6 reformat code #####
+        step_6_output = reformat_code(step_5_output)
+        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': 'def __init__(self, bar: None = None) -> None:\n',
+                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': 'def example_function(a: int | str, b: int | str, foo: Foo | None) -> int | str:\n'}
+        assert expected == step_6_output
 
     # TODO this is a nice-to-do feature where we handle *args,**kwargs
     @pytest.mark.skip
@@ -618,3 +624,9 @@ class TestIntegration():
             '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': 'def example_function (a :int,b :int,foo :Foo|None)->int :',
             '/home/w/repos/typemedaddy/typemedaddy/foo.py:takes_func_returns_func:56': 'def takes_func_returns_func (callback :Callable|int)->Callable|int :'}
         assert expected == step_5_output
+        ##### STEP 6 reformat code #####
+        step_6_output = reformat_code(step_5_output)
+        expected = {
+            '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': 'def example_function(a: int, b: int, foo: Foo | None) -> int:\n',
+            '/home/w/repos/typemedaddy/typemedaddy/foo.py:takes_func_returns_func:56': 'def takes_func_returns_func(callback: Callable | int) -> Callable | int:\n'}
+        assert expected == step_6_output
