@@ -236,10 +236,7 @@ def convert_value_to_type(value: Any) -> tuple[Literal["dict", "tuple", "list", 
         temp_dict = {}
         for k, v in value.items():
             key_type = get_value_type(k)
-            if key_type in temp_dict:
-                temp_dict[key_type].add(convert_value_to_type(v))
-            else:
-                temp_dict[key_type] = {convert_value_to_type(v)}
+            temp_dict.setdefault(key_type, set()).add(convert_value_to_type(v))
         if temp_dict:
             union_of_sorted_types = union_dict_types(temp_dict)
             input_type = (input_type, union_of_sorted_types)
