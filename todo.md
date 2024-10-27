@@ -1,4 +1,4 @@
-# fix default value missing when original function has type and default value set
+# fix default value missing when original function has type and default value set to None
 ```python
 # before
 def foobar(i:int = None) -> int:
