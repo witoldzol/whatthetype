@@ -11,6 +11,7 @@ import argparse
 from typemedaddy.foo import example_function_with_third_party_lib, Foo, takes_func_returns_func, int_function, example_function, takes_class, barfoo
 from types import FrameType, FunctionType
 from typing import Literal
+from autopep8 import fix_code
 
 # take logger args, if we are running directly
 # ( this bit was executing when running tests, so I put it in a conditional)
@@ -448,6 +449,12 @@ def unify_types_in_final_result(stage_2_results: dict) -> dict:
         type_info['return'] = '|'.join(sorted_return)
     return stage_2_results
 
+def reformat_code(function_signatures: dict[str,object]) -> dict[str,object]:
+    result = {}
+    for mfl,code in function_signatures.items():
+        result[mfl] = fix_code(code)
+    return result
+
 if __name__ == "__main__":
     print("===== STAGE 1 - RECORD DATA =====")
     f = Foo()
@@ -487,4 +494,6 @@ if __name__ == "__main__":
     print("===== STAGE 5 - UNIFY ALL TYPES =====")
     unified_types_data = unify_types_in_final_result(types_data)
     print("===== STAGE 6 - UPDATE FILE WITH TYPES =====")
-    update_code_with_types(types_data)
+    updated_function_signatures = update_code_with_types(types_data)
+    print("===== STAGE 7 - reformat updated code =====")
+    reformat_code(updated_function_signatures)
