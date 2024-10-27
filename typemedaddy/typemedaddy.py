@@ -8,7 +8,7 @@ import sys
 import os
 from enum import Enum
 import argparse
-from typemedaddy.foo import example_function_with_third_party_lib, Foo, takes_func_returns_func, int_function, example_function, takes_class
+from typemedaddy.foo import example_function_with_third_party_lib, Foo, takes_func_returns_func, int_function, example_function, takes_class, barfoo
 from types import FrameType, FunctionType
 from typing import Literal
 
@@ -470,9 +470,10 @@ if __name__ == "__main__":
         # example_function(1, 2, f)
         # example_function(3, 4, None)
         # example_function('a', 'b', None)
-        f = Foo()
-        takes_class(f)
+        # f = Foo()
+        # takes_class(f)
         # int_function(1)
+        barfoo()
     pprint.pprint(data, sort_dicts=False)
 
     print("===== STAGE 2 - ANALYSE TYPES IN DATA =====")
