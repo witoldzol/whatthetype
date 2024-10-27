@@ -58,3 +58,6 @@ def takes_func_returns_func(callback):
 
 def takes_class(f: Foo):
     return 1
+
+def foobar(i:int = None) -> int:
+    return i
