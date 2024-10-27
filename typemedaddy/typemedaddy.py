@@ -380,7 +380,10 @@ def update_code_with_types(data: dict) -> dict[str, object]:
                         elif in_arguments and token_type == OP and token_val == ':':
                             print(f"TYPE DETECTED, DROPPING COLON")
                             type_detected = True
-                        elif in_arguments and type_detected and token_type == NAME:
+                            # edge case - None is of type NAME, we do not handle default values
+                            # if def value is set to None, it fall through here
+                            # NO, I will not refactor this mess, it works!
+                        elif in_arguments and type_detected and token_type == NAME and token_val != 'None':
                             print(f"DROPPING OLD TYPE")
                         elif in_arguments and type_detected and token_type == OP and token_val == '|':
                             print(f"DROPPING PIPE")
