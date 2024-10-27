@@ -1,13 +1,3 @@
-# fix default value missing when original function has type and default value set to None
-```python
-# before
-def foobar(i:int = None) -> int:
-    return i
-# after tokenizing
-def foobar (i :int=)->int :
-```
-- looks like we need to add additional logic for default values,
-NAME type falls through and gets skipped whereas STRING, NUMBER etc are not
 # usedefault in dictionaries to simplyfy logic ( line 190 ... and more )
 # how are we going to add imports if we added new class type ?
 ## edge case - what about multiline function signatures?
@@ -22,6 +12,9 @@ foo(int|str) : this might be an indication of a bug
 ==============================================================================================
 ======================================== NICE TO DO ? ========================================
 ==============================================================================================
+# refactor update_code_with_types
+maybe use separate passes where we handle args and return types/values
+this would greatly simplyfy the necessary logic
 # handle *args and **kwargs
 - args and kwargs can be called whatever you want, so it's the same issue as with 'self' ref
 - both stand alone functions and class methods can have *args 
@@ -101,3 +94,11 @@ def example_function (a :int|str|bool ,b :int|str,foo :str|None):
 ```
 # implement replacement algo
 # deal with user classes types
+# fix default value missing when original function has type and default value set to None
+```python
+# before
+def foobar(i:int = None) -> int:
+    return i
+# after tokenizing
+def foobar (i :int=)->int :
+```
