@@ -507,6 +507,15 @@ def test_union_types():
     a = union_types(input)
     assert 'Foo' == a
 
+def test_update_code_with_types_when_default_value_is_none():
+    # non None
+    input = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:barfoo:65': {'args': {'i': 'int'}, 'return': 'int'}}
+    a = update_code_with_types(input)
+    assert {'/home/w/repos/typemedaddy/typemedaddy/foo.py:barfoo:65': 'def barfoo (i :int=111 )->int :'} == a
+    # None default
+    input = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:foobar:62': {'args': {'i': 'int'}, 'return': 'int'}}
+    a = update_code_with_types(input)
+    assert {'/home/w/repos/typemedaddy/typemedaddy/foo.py:foobar:62': 'def foobar (i :int=None )->int :'} == a
 
 class TestIntegration():
 
@@ -563,16 +572,6 @@ class TestIntegration():
                     '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': 'def example_function (a :int|str,b :int|str,foo :Foo|None)->int|str :'}
         assert expected == step_5_output
 
-def test_update_code_with_types_when_default_value_is_none():
-    # non None
-    input = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:barfoo:65': {'args': {'i': 'int'}, 'return': 'int'}}
-    a = update_code_with_types(input)
-    assert {'/home/w/repos/typemedaddy/typemedaddy/foo.py:barfoo:65': 'def barfoo (i :int=111 )->int :'} == a
-    # None default
-    input = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:foobar:62': {'args': {'i': 'int'}, 'return': 'int'}}
-    a = update_code_with_types(input)
-    assert {'/home/w/repos/typemedaddy/typemedaddy/foo.py:foobar:62': 'def foobar (i :int=None )->int :'} == a
-
     # TODO this is a nice-to-do feature where we handle *args,**kwargs
     @pytest.mark.skip
     def test_args_kwargs(self):
@@ -608,8 +607,14 @@ def test_update_code_with_types_when_default_value_is_none():
                                                                                                 'return': ['Callable', 'int'], },
                     }
         assert expected == step_2_output
-        ##### STEP 3 #####
-        # step_3_output = update_code_with_types(step_2_output)
-        # print("### integration ### \n"*3)
-        # print(step_3_output)
-        # expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ):\n', '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': "def example_function (a :['int'|'str'],b :['int'|'str'],foo :['str'|'None']):\n"}
+        ##### STEP 3 generate warings #####
+        ##### STEP 4 - final unify #####
+        step_4_output = unify_types_in_final_result(step_2_output)
+        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': {'args': {'a': 'int', 'b': 'int', 'foo': 'Foo|None'}, 'return': 'int'}, '/home/w/repos/typemedaddy/typemedaddy/foo.py:takes_func_returns_func:56': {'args': {'callback': 'Callable|int'}, 'return': 'Callable|int'}} 
+        assert expected == step_4_output
+        ##### STEP 5 #####
+        step_5_output = update_code_with_types(step_2_output)
+        expected = {
+            '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': 'def example_function (a :int,b :int,foo :Foo|None)->int :',
+            '/home/w/repos/typemedaddy/typemedaddy/foo.py:takes_func_returns_func:56': 'def takes_func_returns_func (callback :Callable|int)->Callable|int :'}
+        assert expected == step_5_output
