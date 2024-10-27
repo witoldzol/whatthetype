@@ -564,6 +564,11 @@ class TestIntegration():
         assert expected == step_5_output
 
 def test_update_code_with_types_when_default_value_is_none():
+    # non None
+    input = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:barfoo:65': {'args': {'i': 'int'}, 'return': 'int'}}
+    a = update_code_with_types(input)
+    assert {'/home/w/repos/typemedaddy/typemedaddy/foo.py:barfoo:65': 'def barfoo (i :int=111 )->int :'} == a
+    # None default
     input = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:foobar:62': {'args': {'i': 'int'}, 'return': 'int'}}
     a = update_code_with_types(input)
     assert {'/home/w/repos/typemedaddy/typemedaddy/foo.py:foobar:62': 'def foobar (i :int=None)->int :'} == a

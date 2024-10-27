@@ -61,3 +61,6 @@ def takes_class(f: Foo):
 
 def foobar(i:int = None) -> int:
     return i
+
+def barfoo(i:int = None) -> int:
+    return i
