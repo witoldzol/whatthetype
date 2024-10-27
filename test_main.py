@@ -559,7 +559,7 @@ class TestIntegration():
         assert expected == step_4_output
         #### STEP 5 - update code #####
         step_5_output = update_code_with_types(step_4_output)
-        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None ) -> None:',
+        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None )->None :',
                     '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': 'def example_function (a :int|str,b :int|str,foo :Foo|None)->int|str :'}
         assert expected == step_5_output
 
@@ -571,7 +571,7 @@ def test_update_code_with_types_when_default_value_is_none():
     # None default
     input = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:foobar:62': {'args': {'i': 'int'}, 'return': 'int'}}
     a = update_code_with_types(input)
-    assert {'/home/w/repos/typemedaddy/typemedaddy/foo.py:foobar:62': 'def foobar (i :int=None)->int :'} == a
+    assert {'/home/w/repos/typemedaddy/typemedaddy/foo.py:foobar:62': 'def foobar (i :int=None )->int :'} == a
 
     # TODO this is a nice-to-do feature where we handle *args,**kwargs
     @pytest.mark.skip
