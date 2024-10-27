@@ -1,3 +1,5 @@
+# update actual files with the new code
+eithe save to file or create .alt files or update in place?
 # new  stage - generate imports
 pass through the stage 2? output
 identify user classes
