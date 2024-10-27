@@ -1,3 +1,11 @@
+# fix default value missing when original function has type and default value set
+```python
+# before
+def foobar(i:int = None) -> int:
+    return i
+# after tokenizing
+def foobar (i :int=)->int :
+```
 # usedefault in dictionaries to simplyfy logic ( line 190 ... and more )
 # how are we going to add imports if we added new class type ?
 ## edge case - what about multiline function signatures?
