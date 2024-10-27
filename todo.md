@@ -1,5 +1,9 @@
-# usedefault in dictionaries to simplyfy logic ( line 190 ... and more )
-# how are we going to add imports if we added new class type ?
+# new  stage - generate imports
+pass through the stage 2? output
+identify user classes
+make a list
+go over list
+check file if it contains required import, if not add in place
 ## edge case - what about multiline function signatures?
 # should we deduplicate inputs from step 1? the data set will grow crazy big, and it will make step 2 work much harder ( although, we do have dedup in step 2...)
 # should we use python 3.12 monitoring api?
@@ -102,3 +106,4 @@ def foobar(i:int = None) -> int:
 # after tokenizing
 def foobar (i :int=)->int :
 ```
+# usedefault in dictionaries to simplyfy logic 
