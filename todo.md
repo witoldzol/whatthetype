@@ -1,3 +1,4 @@
+# reformat updated function definitions to make it nice
 # new  stage - generate imports
 pass through the stage 2? output
 identify user classes
@@ -5,17 +6,15 @@ make a list
 go over list
 check file if it contains required import, if not add in place
 ## edge case - what about multiline function signatures?
-# should we deduplicate inputs from step 1? the data set will grow crazy big, and it will make step 2 work much harder ( although, we do have dedup in step 2...)
-# should we use python 3.12 monitoring api?
 # make sure we presever order of arguments! 
-# CLI: add arguments to run step 1 / 2 / 3 ?
-# create a warning if an argument in a function takes two or more different types of input
-foo(int|str) : this might be an indication of a bug
+# CLI: add arguments to run steps?
 # save step 1 output to a file?
 
 ==============================================================================================
 ======================================== NICE TO DO ? ========================================
 ==============================================================================================
+# should we deduplicate inputs from step 1? the data set will grow crazy big, and it will make step 2 work much harder ( although, we do have dedup in step 2...)
+# should we use python 3.12 monitoring api?
 # refactor update_code_with_types
 maybe use separate passes where we handle args and return types/values
 this would greatly simplyfy the necessary logic
@@ -107,3 +106,4 @@ def foobar(i:int = None) -> int:
 def foobar (i :int=)->int :
 ```
 # usedefault in dictionaries to simplyfy logic 
+# generate warnings if arg takes two or more types of data
