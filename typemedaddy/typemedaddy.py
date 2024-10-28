@@ -33,6 +33,7 @@ COLLECTIONS = ("dict", "list", "set", "tuple")
 COLLECTIONS_NO_DICT = ("list", "set", "tuple")
 SELF_OR_CLS = "SELF_OR_CLS"
 RESULT = {}
+IMPORTS = set()
 MODEL = {
     "module:func_name:func_line": {
         "args": {"var_name": set("type")},
@@ -126,6 +127,8 @@ def trace_function(frame, event, arg):
                 LOG.debug(f"--- end ---")
                 # SPECIAL CASE - CLASS
                 if is_class(var):
+                    # update imports global so that we can update the files in the final stage
+                    IMPORTS.add((mod_func_line, var.__module__, var_type))
                     var = f"USER_CLASS|{var.__module__}::{var_type}"
             if arg_name in RESULT[mod_func_line]["args"]:
                 RESULT[mod_func_line]["args"][arg_name].append(var)
@@ -504,8 +507,8 @@ if __name__ == "__main__":
         #     '2',
         # )
         # takes_func_returns_func(int_function)
-        # f = Foo()
-        # example_function(1, 2, f)
+        f = Foo()
+        example_function(1, 2, f)
         # example_function(3, 4, None)
         # example_function('a', 'b', None)
         # f = Foo()
@@ -515,7 +518,6 @@ if __name__ == "__main__":
     pprint.pprint(data, sort_dicts=False)
 
     print("===== STAGE 2 - ANALYSE TYPES IN DATA =====")
-    print(f"DATA AFTER 1st STAGE ----> {data}")
     types_data = convert_results_to_types(data)
     print("===== STAGE 4 - DETECT MULIPLE ARG TYPS =====")
     warnings = detect_multiple_arg_types(types_data)
@@ -532,3 +534,5 @@ if __name__ == "__main__":
     modules = update_files_with_new_signatures(reformatted_function_signatures, backup_file_suffix=None )
     print("===== STAGE 8 - generate imports =====")
     update_files_with_new_imports(modules)
+    print("><"*100)
+    print(IMPORTS)
