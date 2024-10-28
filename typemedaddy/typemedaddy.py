@@ -456,9 +456,14 @@ def reformat_code(function_signatures: dict[str,object]) -> dict[str,object]:
         result[mfl] = fix_code(code)
     return result
 
-def update_files_with_new_signatures(function_signatures: dict[str, object], backup_file_suffix: str | None = 'bak') -> list[str]:
+def update_files_with_new_signatures(function_signatures: dict[str, object], backup_file_suffix: str | None = 'bak') -> None:
+    # {module = [('func_name', 'line', '<CODE>')] [str,str,str]
+    modules = {}
+    # group by module so we update file only once
     for mfl, f_signature in function_signatures.items():
         module, function, line = mfl.split(':')
+        modules.setdefault(module, list()).append((function, line, f_signature))
+    for module in modules:
         # read lines
         with open(module,'r') as f:
             lines = f.readlines()
@@ -466,12 +471,12 @@ def update_files_with_new_signatures(function_signatures: dict[str, object], bac
         if backup_file_suffix:
             shutil.copy(module, f"{module}.{backup_file_suffix}")
             print(f"created backup at location: {module}.{backup_file_suffix}")
-        # update ( 0 indexed )
-        lines[int(line) - 1] = str(f_signature)
+        for function, line, f_signature in modules[module]:
+            # update ( 0 indexed )
+            lines[int(line) - 1] = str(f_signature)
         # write lines
         with open(module,'w') as f:
             f.writelines(lines)
-    return ['']
 
 if __name__ == "__main__":
     print("===== STAGE 1 - RECORD DATA =====")
