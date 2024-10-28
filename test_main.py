@@ -1,4 +1,5 @@
 import pytest
+import shutil
 from typemedaddy.foo import (
     example_function,
     Foo,
@@ -6,7 +7,7 @@ from typemedaddy.foo import (
     int_function,
     returns_a_class,
     func_that_takes_any_args,
-    takes_func_returns_func
+    takes_func_returns_func,
 )
 from typemedaddy.typemedaddy import (
     convert_results_to_types,
@@ -16,7 +17,8 @@ from typemedaddy.typemedaddy import (
     update_code_with_types,
     unify_types_in_final_result,
     union_types,
-    reformat_code
+    reformat_code,
+    update_files_with_new_signatures
 )
 
 MODULE_PATH = "typemedaddy.foo"
@@ -630,3 +632,21 @@ class TestIntegration():
             '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': 'def example_function(a: int, b: int, foo: Foo | None) -> int:\n',
             '/home/w/repos/typemedaddy/typemedaddy/foo.py:takes_func_returns_func:56': 'def takes_func_returns_func(callback: Callable | int) -> Callable | int:\n'}
         assert expected == step_6_output
+
+@pytest.fixture
+def setup_test_file(tmp_path):
+    src = 'test_file_1.py'
+    destination = tmp_path / "out.py"
+    shutil.copy(src, destination)
+    yield destination
+    # tmp_path will auto-delete file when we are done with it
+
+def test_file_update(setup_test_file):
+    from test_file_1 import foo
+    with trace() as data:
+        foo(10)
+    types_data = convert_results_to_types(data)
+    unified_types_data = unify_types_in_final_result(types_data)
+    updated_function_signatures = update_code_with_types(unified_types_data)
+    reformatted_code = reformat_code(updated_function_signatures)
+    update_files_with_new_signatures(reformatted_code, backup_file_suffix='bak' )
