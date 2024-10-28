@@ -464,6 +464,7 @@ def update_files_with_new_signatures(function_signatures: dict[str, object], bac
             lines = f.readlines()
         # create backup
         shutil.copy(module, f"{module}.{backup_file_suffix}")
+        print(f"created backup at location: {module}.{backup_file_suffix}")
         # update ( 0 indexed )
         lines[int(line) - 1] = str(f_signature)
         # write lines
