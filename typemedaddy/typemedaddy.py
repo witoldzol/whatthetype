@@ -1,4 +1,5 @@
 import io
+import shutil
 from tokenize import INDENT, tokenize, untokenize, NUMBER, STRING, NAME, OP, generate_tokens
 import pprint
 import logging
@@ -455,12 +456,14 @@ def reformat_code(function_signatures: dict[str,object]) -> dict[str,object]:
         result[mfl] = fix_code(code)
     return result
 
-def update_files_with_new_signatures(function_signatures: dict[str, object], in_place=False, backup_file_suffix=None) -> list[str]:
+def update_files_with_new_signatures(function_signatures: dict[str, object], backup_file_suffix='bak') -> list[str]:
     for mfl, f_signature in function_signatures.items():
         module, function, line = mfl.split(':')
         # read lines
         with open(module,'r') as f:
             lines = f.readlines()
+        # create backup
+        shutil.copy(module, f"{module}.{backup_file_suffix}")
         # update ( 0 indexed )
         lines[int(line) - 1] = str(f_signature)
         # write lines
