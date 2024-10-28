@@ -456,20 +456,22 @@ def reformat_code(function_signatures: dict[str,object]) -> dict[str,object]:
         result[mfl] = fix_code(code)
     return result
 
-def update_files_with_new_signatures(function_signatures: dict[str, object], backup_file_suffix='bak') -> list[str]:
+def update_files_with_new_signatures(function_signatures: dict[str, object], backup_file_suffix: str | None = 'bak') -> list[str]:
     for mfl, f_signature in function_signatures.items():
         module, function, line = mfl.split(':')
         # read lines
         with open(module,'r') as f:
             lines = f.readlines()
         # create backup
-        shutil.copy(module, f"{module}.{backup_file_suffix}")
-        print(f"created backup at location: {module}.{backup_file_suffix}")
+        if backup_file_suffix:
+            shutil.copy(module, f"{module}.{backup_file_suffix}")
+            print(f"created backup at location: {module}.{backup_file_suffix}")
         # update ( 0 indexed )
         lines[int(line) - 1] = str(f_signature)
         # write lines
         with open(module,'w') as f:
             f.writelines(lines)
+    return ['']
 
 if __name__ == "__main__":
     print("===== STAGE 1 - RECORD DATA =====")
@@ -512,6 +514,6 @@ if __name__ == "__main__":
     print("===== STAGE 6 - UPDATE FILE WITH TYPES =====")
     updated_function_signatures = update_code_with_types(types_data)
     print("===== STAGE 7 - reformat updated code =====")
-    reformat_code(updated_function_signatures)
+    reformatted_function_signatures = reformat_code(updated_function_signatures)
     print("===== STAGE 7 - reformat updated code =====")
-    update_files_with_new_signatures(updated_function_signatures, in_place=True, backup_file_suffix=None )
+    update_files_with_new_signatures(reformatted_function_signatures, backup_file_suffix=None )
