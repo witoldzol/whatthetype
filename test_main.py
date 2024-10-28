@@ -635,6 +635,8 @@ class TestIntegration():
         assert expected == step_6_output
 
 def test_file_update_single_function():
+    test_files_dir = "test_files"
+    module_name = "module_1"
     from test_files.module_1 import foo
     with trace() as data:
         foo(1)
@@ -646,9 +648,12 @@ def test_file_update_single_function():
     reformatted_code = reformat_code(updated_function_signatures)
     update_files_with_new_signatures(reformatted_code, backup_file_suffix='bak')
     # verify backup created
-    backup_file_path = Path("test_files/module_1.py.bak")
+    backup_file_path = Path(f"{test_files_dir}/{module_name}.py.bak")
     assert backup_file_path.is_file()
     # verify updated file matches expected
-    assert filecmp.cmp("test_files/module_1.py", "test_files/module_1_expected.py")
+    assert filecmp.cmp(f"{test_files_dir}/{module_name}.py", f"{test_files_dir}/{module_name}_expected.py")
+    # clean up backup file
+    backup_file_path.unlink()
+
     # clean up backup file
     backup_file_path.unlink()
