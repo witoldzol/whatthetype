@@ -1,3 +1,4 @@
+from collections import namedtuple
 import io
 import shutil
 from tokenize import INDENT, tokenize, untokenize, NUMBER, STRING, NAME, OP, generate_tokens
@@ -456,7 +457,9 @@ def reformat_code(function_signatures: dict[str,object]) -> dict[str,object]:
         result[mfl] = fix_code(code)
     return result
 
-def update_files_with_new_signatures(function_signatures: dict[str, object], backup_file_suffix: str | None = 'bak') -> None:
+FLC = namedtuple("FLC", ["function_name", "line", "function_signature"])
+
+def update_files_with_new_signatures(function_signatures: dict[str, object], backup_file_suffix: str | None = 'bak') -> dict[str, FLC]:
     # {module = [('func_name', 'line', '<CODE>')] [str,str,str]
     modules = {}
     # group by module so we update file only once
@@ -477,6 +480,11 @@ def update_files_with_new_signatures(function_signatures: dict[str, object], bac
         # write lines
         with open(module,'w') as f:
             f.writelines(lines)
+    return modules
+
+def update_files_with_new_imports(modules: dict[str, FLC]) -> None:
+    pass
+
 
 if __name__ == "__main__":
     print("===== STAGE 1 - RECORD DATA =====")
@@ -521,4 +529,6 @@ if __name__ == "__main__":
     print("===== STAGE 7 - reformat updated code =====")
     reformatted_function_signatures = reformat_code(updated_function_signatures)
     print("===== STAGE 7 - reformat updated code =====")
-    update_files_with_new_signatures(reformatted_function_signatures, backup_file_suffix=None )
+    modules = update_files_with_new_signatures(reformatted_function_signatures, backup_file_suffix=None )
+    print("===== STAGE 8 - generate imports =====")
+    update_files_with_new_imports(modules)
