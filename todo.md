@@ -1,4 +1,3 @@
-# when upating files, build a list of modules, and updated them in a batch
 # new  stage - generate imports
 pass through the stage 2? output
 identify user classes
@@ -109,3 +108,4 @@ def foobar (i :int=)->int :
 # generate warnings if arg takes two or more types of data
 # reformat updated function definitions to make it nice
 # update actual files with the new code and create .bak files
+# when upating files, build a list of modules, and updated them in a batch
