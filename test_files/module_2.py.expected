@@ -1,0 +1,5 @@
+def foo(i: int) -> int:
+    return i
+
+def bar(x: str) -> str:
+    return x

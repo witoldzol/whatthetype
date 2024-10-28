@@ -657,3 +657,27 @@ def test_file_update_single_function():
     backup_file_path.unlink()
     # revert original file
     shutil.copy(f"{test_files_dir}/{module_name}.py.orig", f"{test_files_dir}/{module_name}.py")
+
+def test_file_update_two_functions():
+    test_files_dir = "test_files"
+    module_name = "module_2"
+    from test_files.module_2 import foo, bar
+    with trace() as data:
+        foo(1)
+        bar("bob")
+    assert data
+    # rest of steps
+    types_data = convert_results_to_types(data)
+    unified_types_data = unify_types_in_final_result(types_data)
+    updated_function_signatures = update_code_with_types(unified_types_data)
+    reformatted_code = reformat_code(updated_function_signatures)
+    update_files_with_new_signatures(reformatted_code, backup_file_suffix='bak')
+    # verify backup created
+    backup_file_path = Path(f"{test_files_dir}/{module_name}.py.bak")
+    assert backup_file_path.is_file()
+    # verify updated file matches expected
+    assert filecmp.cmp(f"{test_files_dir}/{module_name}.py", f"{test_files_dir}/{module_name}.py.expected")
+    # clean up backup file
+    backup_file_path.unlink()
+    # revert original file
+    shutil.copy(f"{test_files_dir}/{module_name}.py.orig", f"{test_files_dir}/{module_name}.py")
