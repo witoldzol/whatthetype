@@ -1,3 +1,4 @@
+import shutil
 import filecmp
 from pathlib import Path
 import pytest
@@ -651,9 +652,8 @@ def test_file_update_single_function():
     backup_file_path = Path(f"{test_files_dir}/{module_name}.py.bak")
     assert backup_file_path.is_file()
     # verify updated file matches expected
-    assert filecmp.cmp(f"{test_files_dir}/{module_name}.py", f"{test_files_dir}/{module_name}_expected.py")
+    assert filecmp.cmp(f"{test_files_dir}/{module_name}.py", f"{test_files_dir}/{module_name}.py.expected")
     # clean up backup file
     backup_file_path.unlink()
-
-    # clean up backup file
-    backup_file_path.unlink()
+    # revert original file
+    shutil.copy(f"{test_files_dir}/{module_name}.py.orig", f"{test_files_dir}/{module_name}.py")
