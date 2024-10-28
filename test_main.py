@@ -1,5 +1,6 @@
+import filecmp
+from pathlib import Path
 import pytest
-import shutil
 from typemedaddy.foo import (
     example_function,
     Foo,
@@ -633,20 +634,21 @@ class TestIntegration():
             '/home/w/repos/typemedaddy/typemedaddy/foo.py:takes_func_returns_func:56': 'def takes_func_returns_func(callback: Callable | int) -> Callable | int:\n'}
         assert expected == step_6_output
 
-@pytest.fixture
-def setup_test_file(tmp_path):
-    src = 'test_file_1.py'
-    destination = tmp_path / "out.py"
-    shutil.copy(src, destination)
-    yield destination
-    # tmp_path will auto-delete file when we are done with it
-
-def test_file_update(setup_test_file):
-    from test_file_1 import foo
+def test_file_update_single_function():
+    from test_files.module_1 import foo
     with trace() as data:
-        foo(10)
+        foo(1)
+    assert data
+    # rest of steps
     types_data = convert_results_to_types(data)
     unified_types_data = unify_types_in_final_result(types_data)
     updated_function_signatures = update_code_with_types(unified_types_data)
     reformatted_code = reformat_code(updated_function_signatures)
-    update_files_with_new_signatures(reformatted_code, backup_file_suffix='bak' )
+    update_files_with_new_signatures(reformatted_code, backup_file_suffix='bak')
+    # verify backup created
+    backup_file_path = Path("test_files/module_1.py.bak")
+    assert backup_file_path.is_file()
+    # verify updated file matches expected
+    assert filecmp.cmp("test_files/module_1.py", "test_files/module_1_expected.py")
+    # clean up backup file
+    backup_file_path.unlink()
