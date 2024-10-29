@@ -312,7 +312,7 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
         result[mfl]["return"] = sorted(s)
     return result
 
-def update_code_with_types(data: dict) -> dict[str, object]:
+def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
     updated_function_declarations = dict()
     for mfl in data:
         new_module = []
@@ -420,14 +420,15 @@ def update_code_with_types(data: dict) -> dict[str, object]:
                             print('OTHER tokens')
                             result.append((token_type, token_val))
                     updated_function = untokenize(result)
-                    updated_function_with_indentation = ''.join(indentation) + updated_function
+                    # updated_function_with_indentation = ''.join(indentation) + updated_function
                     print(">"*10)
                     print("OLD")
-                    print(line)
+                    # print(line)
                     print(">"*10)
                     print("NEW")
-                    print(updated_function_with_indentation)
-                    updated_function_declarations[mfl] = updated_function_with_indentation
+                    # print(updated_function_with_indentation)
+                    # updated_function_declarations[mfl] = updated_function_with_indentation
+                    updated_function_declarations[mfl] = (''.join(indentation), updated_function)
                     print("DATA ->>>>")
                     print(data)
     return updated_function_declarations
@@ -455,10 +456,11 @@ def unify_types_in_final_result(stage_2_results: dict) -> dict:
         type_info['return'] = '|'.join(sorted_return)
     return stage_2_results
 
-def reformat_code(function_signatures: dict[str,object]) -> dict[str,object]:
+def reformat_code(function_signatures: dict[str,tuple[str,str]]) -> dict[str,object]:
     result = {}
-    for mfl,code in function_signatures.items():
-        result[mfl] = fix_code(code)
+    for mfl,v in function_signatures.items():
+        indentation, code = v
+        result[mfl] = indentation + fix_code(code)
     return result
 
 FLC = namedtuple("FLC", ["function_name", "line", "function_signature"])
@@ -528,30 +530,16 @@ def update_files_with_new_imports(imports: set[tuple[str,str,str]], backup_file_
 
 if __name__ == "__main__":
     print("===== STAGE 1 - RECORD DATA =====")
-    f = Foo()
     with trace() as data:
-        print("-" * 20, " RESULT: ", "-" * 20)
-        # example_function_with_third_party_lib(1,2)
-        # f.arbitrary_self(
-        #     1,
-        # )
-        # f.arbitrary_self(
-        #     1,
-        #     2,
-        # )
-        # f.arbitrary_self(
-        #     '1',
-        #     '2',
-        # )
-        # takes_func_returns_func(int_function)
         f = Foo()
-        example_function(1, 2, f)
+        # example_function(1, 2, f)
+        # f.get_foo('a','b')
         # example_function(3, 4, None)
         # example_function('a', 'b', None)
         # f = Foo()
         # takes_class(f)
         # int_function(1)
-        barfoo()
+        # barfoo()
     pprint.pprint(data, sort_dicts=False)
 
     print("===== STAGE 2 - ANALYSE TYPES IN DATA =====")
