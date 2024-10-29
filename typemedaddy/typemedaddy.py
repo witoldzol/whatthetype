@@ -1,3 +1,4 @@
+import ast
 from collections import namedtuple
 import io
 import shutil
@@ -485,9 +486,45 @@ def update_files_with_new_signatures(function_signatures: dict[str, object], bac
             f.writelines(lines)
     return modules
 
-def update_files_with_new_imports(modules: dict[str, FLC]) -> None:
-    pass
-
+def update_files_with_new_imports(imports: set[tuple[str,str,str]], backup_file_suffix = 'bak') -> None:
+    # group by files, just like in code update stage, but this time we just need module and class name
+    modules = {}
+    for mfl, module, class_name in imports:
+        file_path, _, _ = mfl.split(':')
+        modules.setdefault(file_path, set()).add((module, class_name))
+    for file_path in modules:
+        # read lines
+        missing_imports = set()
+        with open(file_path,'r') as f:
+            tree = ast.parse(f.read(), filename=file_path)
+            # get import nodes
+            imported_names = set()
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom):
+                    for alias in node.names:
+                        imported_names.add(alias.name)
+            # check if class name exists in imported names
+            for module, class_name in modules[file_path]:
+                if class_name not in imported_names:
+                    missing_imports.add((module,class_name))
+            if not missing_imports:
+                continue
+        # if we have mising imports, read all the lines
+        with open(file_path, 'r') as f:
+            original_file = f.readlines()
+        # generate new import lines
+        new_imports = [f"from {module} import {class_name}\n" for module, class_name in missing_imports]
+        file_with_new_imports = new_imports + original_file
+        # # create backup
+        if backup_file_suffix:
+            if os.path.isfile(f"{file_path}.{backup_file_suffix}"):
+                print(f"Backup file at location: {file_path}.{backup_file_suffix} already exits, skipping")
+            else:
+                shutil.copy(file_path, f"{file_path}.{backup_file_suffix}")
+                print(f"Created backup at location: {file_path}.{backup_file_suffix}")
+        # write new file
+        with open(file_path, 'w') as f:
+            f.writelines(file_with_new_imports)
 
 if __name__ == "__main__":
     print("===== STAGE 1 - RECORD DATA =====")
@@ -533,6 +570,4 @@ if __name__ == "__main__":
     print("===== STAGE 7 - reformat updated code =====")
     modules = update_files_with_new_signatures(reformatted_function_signatures, backup_file_suffix=None )
     print("===== STAGE 8 - generate imports =====")
-    update_files_with_new_imports(modules)
-    print("><"*100)
-    print(IMPORTS)
+    update_files_with_new_imports(IMPORTS)
