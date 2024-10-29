@@ -6,6 +6,7 @@ make a list
 go over list
 check file if it contains required import, if not add in place
 ## edge case - what about multiline function signatures?
+- use tokenize to figure out if the func sig is multi line
 # make sure we presever order of arguments! 
 # CLI: add arguments to run steps?
 # save step 1 output to a file?
