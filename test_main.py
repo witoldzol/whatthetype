@@ -578,7 +578,7 @@ class TestIntegration():
         assert expected == step_5_output
         ##### STEP 6 reformat code #####
         step_6_output = reformat_code(step_5_output)
-        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': 'def __init__(self, bar: None = None) -> None:\n',
+        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__(self, bar: None = None) -> None:\n',
                     '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': 'def example_function(a: int | str, b: int | str, foo: Foo | None) -> int | str:\n'}
         assert expected == step_6_output
 
