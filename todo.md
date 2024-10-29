@@ -1,10 +1,4 @@
 # fix indentation issue - __init__ method doesn't get indented properly
-# new  stage - generate imports
-pass through the stage 2? output
-identify user classes
-make a list
-go over list
-check file if it contains required import, if not add in place
 ## edge case - what about multiline function signatures?
 - use tokenize to figure out if the func sig is multi line
 # make sure we presever order of arguments! 
@@ -111,3 +105,4 @@ def foobar (i :int=)->int :
 # reformat updated function definitions to make it nice
 # update actual files with the new code and create .bak files
 # when upating files, build a list of modules, and updated them in a batch
+# new  stage - generate imports
