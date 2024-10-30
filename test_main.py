@@ -516,11 +516,11 @@ def test_update_code_with_types_when_default_value_is_none():
     # non None
     input = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:barfoo:65': {'args': {'i': 'int'}, 'return': 'int'}}
     a = update_code_with_types(input)
-    assert {'/home/w/repos/typemedaddy/typemedaddy/foo.py:barfoo:65': 'def barfoo (i :int=111 )->int :'} == a
+    assert {'/home/w/repos/typemedaddy/typemedaddy/foo.py:barfoo:65': ('', 'def barfoo (i :int=111 )->int :')} == a
     # None default
     input = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:foobar:62': {'args': {'i': 'int'}, 'return': 'int'}}
     a = update_code_with_types(input)
-    assert {'/home/w/repos/typemedaddy/typemedaddy/foo.py:foobar:62': 'def foobar (i :int=None )->int :'} == a
+    assert {'/home/w/repos/typemedaddy/typemedaddy/foo.py:foobar:62': ('', 'def foobar (i :int=None )->int :')} == a
 
 class TestIntegration():
 
@@ -573,8 +573,8 @@ class TestIntegration():
         assert expected == step_4_output
         #### STEP 5 - update code #####
         step_5_output = update_code_with_types(step_4_output)
-        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': '    def __init__ (self ,bar :None=None )->None :',
-                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': 'def example_function (a :int|str,b :int|str,foo :Foo|None)->int|str :'}
+        expected = {'/home/w/repos/typemedaddy/typemedaddy/foo.py:__init__:6': ('    ', 'def __init__ (self ,bar :None=None )->None :'),
+                    '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': ('', 'def example_function (a :int|str,b :int|str,foo :Foo|None)->int|str :')}
         assert expected == step_5_output
         ##### STEP 6 reformat code #####
         step_6_output = reformat_code(step_5_output)
@@ -625,8 +625,8 @@ class TestIntegration():
         ##### STEP 5 #####
         step_5_output = update_code_with_types(step_2_output)
         expected = {
-            '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': 'def example_function (a :int,b :int,foo :Foo|None)->int :',
-            '/home/w/repos/typemedaddy/typemedaddy/foo.py:takes_func_returns_func:56': 'def takes_func_returns_func (callback :Callable|int)->Callable|int :'}
+            '/home/w/repos/typemedaddy/typemedaddy/foo.py:example_function:27': ('', 'def example_function (a :int,b :int,foo :Foo|None)->int :'),
+            '/home/w/repos/typemedaddy/typemedaddy/foo.py:takes_func_returns_func:56': ('', 'def takes_func_returns_func (callback :Callable|int)->Callable|int :')}
         assert expected == step_5_output
         ##### STEP 6 reformat code #####
         step_6_output = reformat_code(step_5_output)
