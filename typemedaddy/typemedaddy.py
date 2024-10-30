@@ -420,17 +420,9 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                             print('OTHER tokens')
                             result.append((token_type, token_val))
                     updated_function = untokenize(result)
-                    # updated_function_with_indentation = ''.join(indentation) + updated_function
-                    print(">"*10)
-                    print("OLD")
-                    # print(line)
-                    print(">"*10)
-                    print("NEW")
-                    # print(updated_function_with_indentation)
-                    # updated_function_declarations[mfl] = updated_function_with_indentation
+                    # we keep indentation separate for now
+                    # next step will reformat code, and we don't want it to remove whitespace
                     updated_function_declarations[mfl] = (''.join(indentation), updated_function)
-                    print("DATA ->>>>")
-                    print(data)
     return updated_function_declarations
 
 def detect_multiple_arg_types(stage_2_results: dict) -> str:
