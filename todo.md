@@ -1,7 +1,9 @@
 # implement python 3.5 <= and => 3.9 union types ( Union[] )
-- detect python version
-- select appropriate function
-- import Union from typing module !!!!
+- add tests for 3.5...3.9 version
+- add IMPORTS 
+when we use Union operator, we have to make sure it's imported as well when updating code !
+    once we have all the types, lets make a pass and detect if 'Union' is present 
+    if yes and version 3.5-9, update IMPORTS so this get's auto handled
 # update readme
 ## edge case - what about multiline function signatures?
 - use tokenize to figure out if the func sig is multi line
