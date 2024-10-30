@@ -30,6 +30,12 @@ if __name__ == "__main__":
 LOG = logging.getLogger(__name__)
 
 # constants
+if not sys.version_info.minor > 5:
+    raise Exception('Python 3.5+ is a minimum required to run this show')
+if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+    UNION_OPERATOR = lambda x: f"Union[{', '.join(x)}]"
+else:
+    UNION_OPERATOR = lambda x: '|'.join(x)
 COLLECTIONS = ("dict", "list", "set", "tuple")
 COLLECTIONS_NO_DICT = ("list", "set", "tuple")
 SELF_OR_CLS = "SELF_OR_CLS"
@@ -174,8 +180,6 @@ def get_value_type(val: Any) -> str:
         return type(val).__name__
 
 def union_types(types: list[str|tuple[str,str]]) -> str:
-    if not sys.version_info.minor > 9:
-        raise Exception('This union is supported only by python 3.10+')
     # we use dict to 'merge' same types into same buckets
     temp_dict = {}
     for x in types:
@@ -206,12 +210,12 @@ def union_types(types: list[str|tuple[str,str]]) -> str:
             result.add(k)
         else:
             # rembmer to sort the set!
-            sorted_joined_types = '|'.join(sorted(v))
+            sorted_joined_types = UNION_OPERATOR(sorted(v))
             if sorted_joined_types:
                 result.add(f"{k}[{sorted_joined_types}]")
             else:
                 result.add(k)
-    return '|'.join(sort_types_none_at_the_end(result))
+    return UNION_OPERATOR(sort_types_none_at_the_end(result))
 
 def union_dict_types(types: dict[str,set[tuple[str,str]]]) -> str:
     if not sys.version_info.minor > 9:
@@ -420,8 +424,7 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                             print('OTHER tokens')
                             result.append((token_type, token_val))
                     updated_function = untokenize(result)
-                    # we keep indentation separate for now
-                    # next step will reformat code, and we don't want it to remove whitespace
+                    # we keep indentation separate for now next step will reformat code, and we don't want it to remove whitespace
                     updated_function_declarations[mfl] = (''.join(indentation), updated_function)
     return updated_function_declarations
 

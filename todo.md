@@ -12,6 +12,7 @@
 ==============================================================================================
 ======================================== NICE TO DO ? ========================================
 ==============================================================================================
+# implement no union operator
 # should we deduplicate inputs from step 1? the data set will grow crazy big, and it will make step 2 work much harder ( although, we do have dedup in step 2...)
 # should we use python 3.12 monitoring api?
 # refactor update_code_with_types
