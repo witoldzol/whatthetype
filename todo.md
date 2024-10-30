@@ -1,4 +1,3 @@
-# fix indentation issue - __init__ method doesn't get indented properly
 ## edge case - what about multiline function signatures?
 - use tokenize to figure out if the func sig is multi line
 # make sure we presever order of arguments! 
@@ -106,3 +105,4 @@ def foobar (i :int=)->int :
 # update actual files with the new code and create .bak files
 # when upating files, build a list of modules, and updated them in a batch
 # new  stage - generate imports
+# fix indentation issue - __init__ method doesn't get indented properly
