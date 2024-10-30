@@ -1,3 +1,8 @@
+# implement python 3.5 <= and => 3.9 union types ( Union[] )
+- detect python version
+- select appropriate function
+- import Union from typing module !!!!
+# update readme
 ## edge case - what about multiline function signatures?
 - use tokenize to figure out if the func sig is multi line
 # make sure we presever order of arguments! 
