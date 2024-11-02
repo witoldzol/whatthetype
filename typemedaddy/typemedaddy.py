@@ -1,3 +1,4 @@
+from typing import Union
 import ast
 from collections import namedtuple
 import io
@@ -11,7 +12,7 @@ import sys
 import os
 from enum import Enum
 import argparse
-from typemedaddy.foo import example_function_with_third_party_lib, Foo, takes_func_returns_func, int_function, example_function, takes_class, barfoo
+# from typemedaddy.foo import example_function_with_third_party_lib, Foo, takes_func_returns_func, int_function, example_function, takes_class, barfoo
 from types import FrameType, FunctionType
 from typing import Literal
 from autopep8 import fix_code
@@ -154,7 +155,7 @@ def trace_function(frame, event, arg):
     return trace_function
 
 
-def sort_types_none_at_the_end(set_of_types: set[str]|list[str]) -> list:
+def sort_types_none_at_the_end(set_of_types: Union[set[str], list[str]]) -> list:
     is_none = False
     temp = set()
     for x in list(set_of_types)[:]:
@@ -179,7 +180,7 @@ def get_value_type(val: Any) -> str:
     else:
         return type(val).__name__
 
-def union_types(types: list[str|tuple[str,str]]) -> str:
+def union_types(types: list[Union[str, tuple[str,str]]]) -> str:
     # we use dict to 'merge' same types into same buckets
     temp_dict = {}
     for x in types:
@@ -201,7 +202,7 @@ def union_types(types: list[str|tuple[str,str]]) -> str:
                 if outer == 'simple' or outer == 'class':
                     temp_dict[inner] = {inner}
                 elif outer == 'self':
-                    temp_dict[SELF_OR_CLS] = {} #todo - test this 
+                    temp_dict[SELF_OR_CLS] = set()
                 else:
                     temp_dict[outer] = {inner}
     result = set()
@@ -444,11 +445,11 @@ def unify_types_in_final_result(stage_2_results: dict) -> dict:
         for arg, arg_types in type_info['args'].items():
             assert type(arg_types) == list
             sorted_args = sort_types_none_at_the_end(arg_types)
-            type_info['args'][arg] = '|'.join(sorted_args)
+            type_info['args'][arg] = UNION_OPERATOR(sorted_args)
         return_types = type_info['return']
         assert type(return_types) == list
         sorted_return = sort_types_none_at_the_end(return_types)
-        type_info['return'] = '|'.join(sorted_return)
+        type_info['return'] = UNION_OPERATOR(sorted_return)
     return stage_2_results
 
 def reformat_code(function_signatures: dict[str,tuple[str,str]]) -> dict[str,object]:
@@ -460,7 +461,7 @@ def reformat_code(function_signatures: dict[str,tuple[str,str]]) -> dict[str,obj
 
 FLC = namedtuple("FLC", ["function_name", "line", "function_signature"])
 
-def update_files_with_new_signatures(function_signatures: dict[str, object], backup_file_suffix: str | None = 'bak') -> dict[str, FLC]:
+def update_files_with_new_signatures(function_signatures: dict[str, object], backup_file_suffix: Union[str, None] = 'bak') -> dict[str, FLC]:
     # {module = [('func_name', 'line', '<CODE>')] [str,str,str]
     modules = {}
     # group by module so we update file only once
@@ -526,15 +527,7 @@ def update_files_with_new_imports(imports: set[tuple[str,str,str]], backup_file_
 if __name__ == "__main__":
     print("===== STAGE 1 - RECORD DATA =====")
     with trace() as data:
-        f = Foo()
-        # example_function(1, 2, f)
-        # f.get_foo('a','b')
-        # example_function(3, 4, None)
-        # example_function('a', 'b', None)
-        # f = Foo()
-        # takes_class(f)
-        # int_function(1)
-        # barfoo()
+        pass
     pprint.pprint(data, sort_dicts=False)
 
     print("===== STAGE 2 - ANALYSE TYPES IN DATA =====")
