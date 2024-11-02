@@ -1,13 +1,8 @@
-# implement python 3.5 <= and => 3.9 union types ( Union[] )
-- add IMPORTS 
-when we use Union operator, we have to make sure it's imported as well when updating code !
-    once we have all the types, lets make a pass and detect if 'Union' is present 
-    if yes and version 3.5-9, update IMPORTS so this get's auto handled
+# CLI: add arguments to run steps?
 # update readme
 ## edge case - what about multiline function signatures?
 - use tokenize to figure out if the func sig is multi line
 # make sure we presever order of arguments! 
-# CLI: add arguments to run steps?
 # save step 1 output to a file?
 
 ==============================================================================================
@@ -113,3 +108,5 @@ def foobar (i :int=)->int :
 # when upating files, build a list of modules, and updated them in a batch
 # new  stage - generate imports
 # fix indentation issue - __init__ method doesn't get indented properly
+# implement python 3.5 <= and => 3.9 union types ( Union[] )
+# add Union imports
