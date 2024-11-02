@@ -12,6 +12,7 @@ import sys
 import os
 from enum import Enum
 import argparse
+
 # from typemedaddy.foo import example_function_with_third_party_lib, Foo, takes_func_returns_func, int_function, example_function, takes_class, barfoo
 from types import FrameType, FunctionType
 from typing import Literal
@@ -32,11 +33,11 @@ LOG = logging.getLogger(__name__)
 
 # constants
 if not sys.version_info.minor > 5:
-    raise Exception('Python 3.5+ is a minimum required to run this show')
+    raise Exception("Python 3.5+ is a minimum required to run this show")
 if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
     UNION_OPERATOR = lambda x: f"Union[{', '.join(x)}]"
 else:
-    UNION_OPERATOR = lambda x: '|'.join(x)
+    UNION_OPERATOR = lambda x: "|".join(x)
 COLLECTIONS = ("dict", "list", "set", "tuple")
 COLLECTIONS_NO_DICT = ("list", "set", "tuple")
 SELF_OR_CLS = "SELF_OR_CLS"
@@ -169,44 +170,46 @@ def sort_types_none_at_the_end(set_of_types: Union[set[str], list[str]]) -> list
     for y in temp:
         sorted_types.append(y)
     if is_none:
-        sorted_types.append('None')
+        sorted_types.append("None")
     return sorted_types
 
+
 def get_value_type(val: Any) -> str:
-    # type(None) -> NoneType, which we don't really want, because type hint 
+    # type(None) -> NoneType, which we don't really want, because type hint
     # system uses None string, not NoneType
-    if val == None:
-        return  'None'
+    if val is None:
+        return "None"
     else:
         return type(val).__name__
 
-def union_types(types: list[Union[str, tuple[str,str]]]) -> str:
+
+def union_types(types: list[Union[str, tuple[str, str]]]) -> str:
     # we use dict to 'merge' same types into same buckets
-    temp_dict = {}
+    temp_dict: dict[str, Union[str, set[str]]] = {}
     for x in types:
         # if simple, shallow type
-        if type(x) == str:
+        if type(x) is str:
             temp_dict[x] = x
         # if tuple - ie, complex or nested type complex / simple type
         else:
             outer, inner = x
             assert outer in ("dict", "tuple", "list", "set", "self", "simple", "class")
             if outer in temp_dict:
-                if outer == 'simple' or outer == 'class':
-                    temp_dict[inner].add(inner)
-                elif outer == 'self':
-                    temp_dict[SELF_OR_CLS].add()#todo - test this 
+                if outer in ("simple", "class"):
+                    temp_dict[inner] = inner
+                elif outer == "self":
+                    temp_dict[SELF_OR_CLS] = SELF_OR_CLS
                 else:
                     temp_dict[outer].add(inner)
             else:
-                if outer == 'simple' or outer == 'class':
+                if outer == "simple" or outer == "class":
                     temp_dict[inner] = {inner}
-                elif outer == 'self':
+                elif outer == "self":
                     temp_dict[SELF_OR_CLS] = set()
                 else:
                     temp_dict[outer] = {inner}
     result = set()
-    for k,v in temp_dict.items():
+    for k, v in temp_dict.items():
         if k not in COLLECTIONS:
             result.add(k)
         else:
@@ -218,32 +221,36 @@ def union_types(types: list[Union[str, tuple[str,str]]]) -> str:
                 result.add(k)
     return UNION_OPERATOR(sort_types_none_at_the_end(result))
 
-def union_dict_types(types: dict[str,set[tuple[str,str]]]) -> str:
+
+def union_dict_types(types: dict[str, set[tuple[str, str]]]) -> str:
     if not sys.version_info.minor > 9:
-        raise Exception('This union is supported only by python 3.10+')
+        raise Exception("This union is supported only by python 3.10+")
     temp_set = set()
-    for k,v in types.items():
+    for k, v in types.items():
         sorted_types = sort_types_none_at_the_end(v)
         union_of_sorted_types = f"{k},{union_types(sorted_types)}"
         temp_set.add(union_of_sorted_types)
     sorted_set = sorted(temp_set)
     return union_types(sorted_set)
 
-def convert_value_to_type(value: Any) -> tuple[Literal["dict", "tuple", "list", "set", "self", "simple", "class"], str]:
+
+def convert_value_to_type(
+    value: Any,
+) -> tuple[Literal["dict", "tuple", "list", "set", "self", "simple", "class"], str]:
     input_type = get_value_type(value)
     # base case
     if input_type not in COLLECTIONS:
         # hardcoded - special case - self reference arg in methods
         if type(value) == str:
             if value == SELF_OR_CLS:
-                return ('self', value)
-            elif 'USER_CLASS' in value:
-                class_name = value.split('::')[1]
-                return ('class', class_name)
+                return ("self", value)
+            elif "USER_CLASS" in value:
+                class_name = value.split("::")[1]
+                return ("class", class_name)
         else:
-            if input_type == 'function':
-                return ('simple', 'Callable')
-        return ('simple', input_type)
+            if input_type == "function":
+                return ("simple", "Callable")
+        return ("simple", input_type)
     if input_type == "dict":
         temp_dict = {}
         for k, v in value.items():
@@ -253,7 +260,7 @@ def convert_value_to_type(value: Any) -> tuple[Literal["dict", "tuple", "list", 
             union_of_sorted_types = union_dict_types(temp_dict)
             input_type = (input_type, union_of_sorted_types)
         else:
-            input_type = (input_type, '')
+            input_type = (input_type, "")
     elif input_type in COLLECTIONS_NO_DICT:
         types_found_in_collection = set()
         for v in value:
@@ -263,10 +270,11 @@ def convert_value_to_type(value: Any) -> tuple[Literal["dict", "tuple", "list", 
             union_of_sorted_types = union_types(sorted_types)
             input_type = (input_type, union_of_sorted_types)
         else:
-            input_type = (input_type, '')
+            input_type = (input_type, "")
     else:
-        raise Exception(f'Unexpected type : {input_type}')
+        raise Exception(f"Unexpected type : {input_type}")
     return input_type
+
 
 # TODO
 # we probably want to throw some warning saying:
@@ -317,6 +325,7 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
         result[mfl]["return"] = sorted(s)
     return result
 
+
 def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
     updated_function_declarations = dict()
     for mfl in data:
@@ -327,9 +336,11 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
         with open(module, "r") as f:
             for idx, line in enumerate(f):
                 # find a line containting the function
-                if idx == int(line_num) - 1: # todo - test multiline function declaration
+                if idx == int(line_num) - 1:  # todo - test multiline function declaration
                     # convert line to StringIO - required by tokenizer
-                    line_io = io.StringIO(line).readline # don't use lambda, generator will be infinite
+                    line_io = io.StringIO(
+                        line
+                    ).readline  # don't use lambda, generator will be infinite
                     # get tokens
                     tokens = generate_tokens(line_io)
                     """ sample tokenizer output [ first line full, rest truncated ]
@@ -354,19 +365,24 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                         # we care only about first 2 values, type is a number mapped in an ENUM
                         token_type, token_val, _, _, _ = t
                         # start of arguments
-                        if token_type == OP and token_val == '(':
+                        if token_type == OP and token_val == "(":
                             in_arguments = True
                             print("ARGUMENTS START ->>>>")
-                            result.append((token_type, token_val,))
+                            result.append(
+                                (
+                                    token_type,
+                                    token_val,
+                                )
+                            )
                         # end of arguments
-                        elif token_type == OP and token_val == ')':
+                        elif token_type == OP and token_val == ")":
                             in_arguments = False
                             print("ARGUMENTS END ->>>>")
                             result.append((token_type, token_val))
                         ##########
                         # ARGUMENT ( we add type if we have one )
                         ##########
-                            # todo - detect if default value ex: def foo(bar='lol)
+                        # todo - detect if default value ex: def foo(bar='lol)
                         elif in_arguments and not type_detected and token_type == NAME:
                             print(f"ARGUMENT ----> {token_val}")
                             updated_arg_tokens = [(token_type, token_val)]
@@ -380,41 +396,52 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                                 if arg_type == SELF_OR_CLS:
                                     pass
                                 else:
-                                    colon_token = (OP, ':')
+                                    colon_token = (OP, ":")
                                     type_token = (STRING, arg_type)
                                     updated_arg_tokens.append(colon_token)
                                     updated_arg_tokens.append(type_token)
                             result.extend(updated_arg_tokens)
                         # in argument, we detected a colon (:) which means we have a type
-                        elif in_arguments and token_type == OP and token_val == ':':
+                        elif in_arguments and token_type == OP and token_val == ":":
                             print(f"TYPE DETECTED, DROPPING COLON")
                             type_detected = True
                             # edge case - None is of type NAME, we do not handle default values
                             # if def value is set to None, it fall through here
                             # NO, I will not refactor this mess, it works!
-                        elif in_arguments and type_detected and token_type == NAME and token_val != 'None':
+                        elif (
+                            in_arguments
+                            and type_detected
+                            and token_type == NAME
+                            and token_val != "None"
+                        ):
                             print(f"DROPPING OLD TYPE")
-                        elif in_arguments and type_detected and token_type == OP and token_val == '|':
+                        elif (
+                            in_arguments and type_detected and token_type == OP and token_val == "|"
+                        ):
                             print(f"DROPPING PIPE")
-                        elif in_arguments and type_detected and token_type == OP and token_val == ',':
+                        elif (
+                            in_arguments and type_detected and token_type == OP and token_val == ","
+                        ):
                             print(f"END of types for argument")
                             type_detected = False
                             result.append((token_type, token_val))
                         # RETURN VALUE
-                        elif in_arguments == False: # specifically False, not None, this means we just finished arguments and start return
+                        elif (
+                            in_arguments == False
+                        ):  # specifically False, not None, this means we just finished arguments and start return
                             if token_type == OP:
-                                if token_val == ':':
+                                if token_val == ":":
                                     # this is a start, so no pre - existing type
-                                    # check if we have a return type for this function 
+                                    # check if we have a return type for this function
                                     if data[mfl]["return"]:
                                         tokens = []
-                                        tokens.append((OP, '->'))
+                                        tokens.append((OP, "->"))
                                         tokens.append((NAME, data[mfl]["return"]))
-                                        tokens.append((OP, ':'))
+                                        tokens.append((OP, ":"))
                                         result.extend(tokens)
-                                        break # we are done, bail
+                                        break  # we are done, bail
                                     else:
-                                        result.append((OP, ":")) # no type found, add : and bail
+                                        result.append((OP, ":"))  # no type found, add : and bail
                                         break
                         # handle indentation
                         elif token_type == INDENT:
@@ -422,55 +449,66 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                             result.append((token_type, token_val))
                             indentation.append(token_val)
                         else:
-                            print('OTHER tokens')
+                            print("OTHER tokens")
                             result.append((token_type, token_val))
                     updated_function = untokenize(result)
                     # we keep indentation separate for now next step will reformat code, and we don't want it to remove whitespace
-                    updated_function_declarations[mfl] = (''.join(indentation), updated_function)
+                    updated_function_declarations[mfl] = ("".join(indentation), updated_function)
     return updated_function_declarations
+
 
 def detect_multiple_arg_types(stage_2_results: dict) -> str:
     warnings = []
     for mfl, type_info in stage_2_results.items():
-        for arg, arg_types in type_info['args'].items():
+        for arg, arg_types in type_info["args"].items():
             if len(arg_types) > 1:
-                warnings.append(f"{mfl} - argument: {arg} - has {len(arg_types)} types: {arg_types}")
-        return_types = type_info['return']
+                warnings.append(
+                    f"{mfl} - argument: {arg} - has {len(arg_types)} types: {arg_types}"
+                )
+        return_types = type_info["return"]
         if len(return_types) > 1:
-            warnings.append(f"{mfl} - return argument has {len(return_types)} types: {return_types}")
-    return '\n'.join(warnings)
+            warnings.append(
+                f"{mfl} - return argument has {len(return_types)} types: {return_types}"
+            )
+    return "\n".join(warnings)
+
 
 def unify_types_in_final_result(stage_2_results: dict) -> dict:
     for _, type_info in stage_2_results.items():
-        for arg, arg_types in type_info['args'].items():
+        for arg, arg_types in type_info["args"].items():
             assert type(arg_types) == list
             sorted_args = sort_types_none_at_the_end(arg_types)
-            type_info['args'][arg] = UNION_OPERATOR(sorted_args)
-        return_types = type_info['return']
+            type_info["args"][arg] = UNION_OPERATOR(sorted_args)
+        return_types = type_info["return"]
         assert type(return_types) == list
         sorted_return = sort_types_none_at_the_end(return_types)
-        type_info['return'] = UNION_OPERATOR(sorted_return)
+        type_info["return"] = UNION_OPERATOR(sorted_return)
     return stage_2_results
 
-def reformat_code(function_signatures: dict[str,tuple[str,str]]) -> dict[str,object]:
+
+def reformat_code(function_signatures: dict[str, tuple[str, str]]) -> dict[str, object]:
     result = {}
-    for mfl,v in function_signatures.items():
+    for mfl, v in function_signatures.items():
         indentation, code = v
         result[mfl] = indentation + fix_code(code)
     return result
 
+
 FLC = namedtuple("FLC", ["function_name", "line", "function_signature"])
 
-def update_files_with_new_signatures(function_signatures: dict[str, object], backup_file_suffix: Union[str, None] = 'bak') -> dict[str, FLC]:
+
+def update_files_with_new_signatures(
+    function_signatures: dict[str, object], backup_file_suffix: Union[str, None] = "bak"
+) -> dict[str, FLC]:
     # {module = [('func_name', 'line', '<CODE>')] [str,str,str]
     modules = {}
     # group by module so we update file only once
     for mfl, f_signature in function_signatures.items():
-        module, function, line = mfl.split(':')
+        module, function, line = mfl.split(":")
         modules.setdefault(module, list()).append((function, line, f_signature))
     for module in modules:
         # read lines
-        with open(module,'r') as f:
+        with open(module, "r") as f:
             lines = f.readlines()
         # create backup
         if backup_file_suffix:
@@ -480,20 +518,23 @@ def update_files_with_new_signatures(function_signatures: dict[str, object], bac
             # update ( 0 indexed )
             lines[int(line) - 1] = str(f_signature)
         # write lines
-        with open(module,'w') as f:
+        with open(module, "w") as f:
             f.writelines(lines)
     return modules
 
-def update_files_with_new_imports(imports: set[tuple[str,str,str]], backup_file_suffix = 'bak') -> None:
+
+def update_files_with_new_imports(
+    imports: set[tuple[str, str, str]], backup_file_suffix="bak"
+) -> None:
     # group by files, just like in code update stage, but this time we just need module and class name
     modules = {}
     for mfl, module, class_name in imports:
-        file_path, _, _ = mfl.split(':')
+        file_path, _, _ = mfl.split(":")
         modules.setdefault(file_path, set()).add((module, class_name))
     for file_path in modules:
         # read lines
         missing_imports = set()
-        with open(file_path,'r') as f:
+        with open(file_path, "r") as f:
             tree = ast.parse(f.read(), filename=file_path)
             # get import nodes
             imported_names = set()
@@ -504,25 +545,30 @@ def update_files_with_new_imports(imports: set[tuple[str,str,str]], backup_file_
             # check if class name exists in imported names
             for module, class_name in modules[file_path]:
                 if class_name not in imported_names:
-                    missing_imports.add((module,class_name))
+                    missing_imports.add((module, class_name))
             if not missing_imports:
                 continue
         # if we have mising imports, read all the lines
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             original_file = f.readlines()
         # generate new import lines
-        new_imports = [f"from {module} import {class_name}\n" for module, class_name in missing_imports]
+        new_imports = [
+            f"from {module} import {class_name}\n" for module, class_name in missing_imports
+        ]
         file_with_new_imports = new_imports + original_file
         # # create backup
         if backup_file_suffix:
             if os.path.isfile(f"{file_path}.{backup_file_suffix}"):
-                print(f"Backup file at location: {file_path}.{backup_file_suffix} already exits, skipping")
+                print(
+                    f"Backup file at location: {file_path}.{backup_file_suffix} already exits, skipping"
+                )
             else:
                 shutil.copy(file_path, f"{file_path}.{backup_file_suffix}")
                 print(f"Created backup at location: {file_path}.{backup_file_suffix}")
         # write new file
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             f.writelines(file_with_new_imports)
+
 
 if __name__ == "__main__":
     print("===== STAGE 1 - RECORD DATA =====")
@@ -544,6 +590,8 @@ if __name__ == "__main__":
     print("===== STAGE 7 - reformat updated code =====")
     reformatted_function_signatures = reformat_code(updated_function_signatures)
     print("===== STAGE 7 - reformat updated code =====")
-    modules = update_files_with_new_signatures(reformatted_function_signatures, backup_file_suffix=None )
+    modules = update_files_with_new_signatures(
+        reformatted_function_signatures, backup_file_suffix=None
+    )
     print("===== STAGE 8 - generate imports =====")
     update_files_with_new_imports(IMPORTS)
