@@ -3,7 +3,7 @@ import ast
 from collections import namedtuple
 import io
 import shutil
-from tokenize import INDENT, tokenize, untokenize, NUMBER, STRING, NAME, OP, generate_tokens
+from tokenize import INDENT, untokenize, STRING, NAME, OP, generate_tokens
 import pprint
 import logging
 import contextlib
@@ -35,7 +35,7 @@ LOG = logging.getLogger(__name__)
 if not sys.version_info.minor > 5:
     raise Exception("Python 3.5+ is a minimum required to run this show")
 if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
-    UNION_OPERATOR = lambda x: f"Union[{', '.join(x)}]"
+    UNION_OPERATOR = lambda x: f"Union[{', '.join(x)}]" if len(x) > 1 else x[0]
 else:
     UNION_OPERATOR = lambda x: "|".join(x)
 COLLECTIONS = ("dict", "list", "set", "tuple")
@@ -133,7 +133,7 @@ def trace_function(frame, event, arg):
                 var = local_vars[arg_name]
                 var_type = type(var).__name__
                 LOG.debug(f"3) Variable type name is  : {var_type}")
-                LOG.debug(f"--- end ---")
+                LOG.debug("--- end ---")
                 # SPECIAL CASE - CLASS
                 if is_class(var):
                     # update imports global so that we can update the files in the final stage
@@ -241,7 +241,7 @@ def convert_value_to_type(
     # base case
     if input_type not in COLLECTIONS:
         # hardcoded - special case - self reference arg in methods
-        if type(value) == str:
+        if type(value) is str:
             if value == SELF_OR_CLS:
                 return ("self", value)
             elif "USER_CLASS" in value:
@@ -329,7 +329,6 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
 def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
     updated_function_declarations = dict()
     for mfl in data:
-        new_module = []
         if mfl.count(":") > 2:
             raise Exception("Detected too many separators! Perhaps function name contains a colon?")
         module, function, line_num = mfl.split(":")
@@ -391,7 +390,7 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                             types_detected_for_agument = data[mfl]["args"]
                             if token_val in types_detected_for_agument:
                                 arg_type = types_detected_for_agument[token_val]
-                                assert type(arg_type) == str
+                                assert type(arg_type) is str
                                 # skip method self or class method ref
                                 if arg_type == SELF_OR_CLS:
                                     pass
@@ -403,7 +402,7 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                             result.extend(updated_arg_tokens)
                         # in argument, we detected a colon (:) which means we have a type
                         elif in_arguments and token_type == OP and token_val == ":":
-                            print(f"TYPE DETECTED, DROPPING COLON")
+                            print("TYPE DETECTED, DROPPING COLON")
                             type_detected = True
                             # edge case - None is of type NAME, we do not handle default values
                             # if def value is set to None, it fall through here
@@ -414,15 +413,14 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                             and token_type == NAME
                             and token_val != "None"
                         ):
-                            print(f"DROPPING OLD TYPE")
+                            print("DROPPING OLD TYPE")
                         elif (
                             in_arguments and type_detected and token_type == OP and token_val == "|"
                         ):
-                            print(f"DROPPING PIPE")
+                            print("DROPPING PIPE")
                         elif (
                             in_arguments and type_detected and token_type == OP and token_val == ","
                         ):
-                            print(f"END of types for argument")
                             type_detected = False
                             result.append((token_type, token_val))
                         # RETURN VALUE
@@ -445,7 +443,7 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                                         break
                         # handle indentation
                         elif token_type == INDENT:
-                            print(f"INDENTATION detected")
+                            print("INDENTATION detected")
                             result.append((token_type, token_val))
                             indentation.append(token_val)
                         else:
@@ -476,11 +474,11 @@ def detect_multiple_arg_types(stage_2_results: dict) -> str:
 def unify_types_in_final_result(stage_2_results: dict) -> dict:
     for _, type_info in stage_2_results.items():
         for arg, arg_types in type_info["args"].items():
-            assert type(arg_types) == list
+            assert type(arg_types) is list
             sorted_args = sort_types_none_at_the_end(arg_types)
             type_info["args"][arg] = UNION_OPERATOR(sorted_args)
         return_types = type_info["return"]
-        assert type(return_types) == list
+        assert type(return_types) is list
         sorted_return = sort_types_none_at_the_end(return_types)
         type_info["return"] = UNION_OPERATOR(sorted_return)
     return stage_2_results
