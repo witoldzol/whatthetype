@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Optional
 import ast
 from collections import namedtuple
 import io
@@ -17,6 +17,7 @@ import argparse
 from types import FrameType, FunctionType
 from typing import Literal
 from autopep8 import fix_code
+from typemedaddy.foo import example_function
 
 # take logger args, if we are running directly
 # ( this bit was executing when running tests, so I put it in a conditional)
@@ -490,6 +491,17 @@ def reformat_code(function_signatures: dict[str, tuple[str, str]]) -> dict[str, 
     return result
 
 
+def get_modules_with_union_types(
+    function_signatures: dict[str, tuple[str, str]],
+) -> set[tuple[str, str, str]]:
+    result: set[tuple[str, str, str]] = set()
+    for mfl, v in function_signatures.items():
+        _, code = v
+        if "Union[" in code:
+            result.add((mfl, "typing", "Union"))
+    return result
+
+
 FLC = namedtuple("FLC", ["function_name", "line", "function_signature"])
 
 
@@ -569,25 +581,19 @@ def update_files_with_new_imports(
 if __name__ == "__main__":
     print("===== STAGE 1 - RECORD DATA =====")
     with trace() as data:
-        pass
+        example_function(1, 2, None)
+        example_function("a", "b", None)
     pprint.pprint(data, sort_dicts=False)
-
-    print("===== STAGE 2 - ANALYSE TYPES IN DATA =====")
     types_data = convert_results_to_types(data)
-    print("===== STAGE 4 - DETECT MULIPLE ARG TYPS =====")
     warnings = detect_multiple_arg_types(types_data)
     if warnings:
         print(warnings)
     pprint.pprint(types_data, sort_dicts=False)
-    print("===== STAGE 5 - UNIFY ALL TYPES =====")
     unified_types_data = unify_types_in_final_result(types_data)
-    print("===== STAGE 6 - UPDATE FILE WITH TYPES =====")
-    updated_function_signatures = update_code_with_types(types_data)
-    print("===== STAGE 7 - reformat updated code =====")
+    updated_function_signatures = update_code_with_types(unified_types_data)
     reformatted_function_signatures = reformat_code(updated_function_signatures)
-    print("===== STAGE 7 - reformat updated code =====")
-    modules = update_files_with_new_signatures(
-        reformatted_function_signatures, backup_file_suffix=None
-    )
-    print("===== STAGE 8 - generate imports =====")
+    modules = update_files_with_new_signatures(reformatted_function_signatures)
     update_files_with_new_imports(IMPORTS)
+    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+        modules_with_unions = get_modules_with_union_types(updated_function_signatures)
+        update_files_with_new_imports(modules_with_unions)
