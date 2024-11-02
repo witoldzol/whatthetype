@@ -223,8 +223,6 @@ def union_types(types: list[Union[str, tuple[str, str]]]) -> str:
 
 
 def union_dict_types(types: dict[str, set[tuple[str, str]]]) -> str:
-    if not sys.version_info.minor > 9:
-        raise Exception("This union is supported only by python 3.10+")
     temp_set = set()
     for k, v in types.items():
         sorted_types = sort_types_none_at_the_end(v)

@@ -1,5 +1,4 @@
 # implement python 3.5 <= and => 3.9 union types ( Union[] )
-- add tests for 3.5...3.9 version
 - add IMPORTS 
 when we use Union operator, we have to make sure it's imported as well when updating code !
     once we have all the types, lets make a pass and detect if 'Union' is present 
