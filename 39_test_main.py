@@ -1,9 +1,7 @@
 from typemedaddy.foo39 import example_function, Foo
 from typemedaddy.typemedaddy import trace, SELF_OR_CLS, convert_value_to_type, unify_types_in_final_result, convert_results_to_types, update_code_with_types, reformat_code, union_types
 
-def old_union_operator(types: list[Union[str, tuple[str,str]]]) -> str:
-    if len(x)
-UNION_OPERATOR = lambda x: f"Union[{', '.join(x)}]" if len(x) > 1 else str(x)
+# UNION_OPERATOR = lambda x: f"Union[{', '.join(x)}]" if len(x) > 1 else str(x)
 
 def test_union_types():
     input = [('class', 'Foo')]
