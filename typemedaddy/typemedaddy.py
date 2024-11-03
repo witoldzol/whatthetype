@@ -578,22 +578,38 @@ def update_files_with_new_imports(
             f.writelines(file_with_new_imports)
 
 
+def print_warnings(warnings: str) -> None:
+    if warnings:
+        LOG.warning("=" * 50)
+        LOG.warning("====================" + " WARNINGS " + "====================")
+        LOG.warning("=" * 50 + "\n\n")
+        LOG.warning(warnings + "\n\n")
+        LOG.warning("=" * 50)
+        LOG.warning("=" * 50)
+
+
+def type_it_like_its_hot(data: dict) -> None:
+    LOG.info("Converting results to types")
+    types_data = convert_results_to_types(data)
+    warnings = detect_multiple_arg_types(types_data)
+    unified_types_data = unify_types_in_final_result(types_data)
+    updated_function_signatures = update_code_with_types(unified_types_data)
+    reformatted_function_signatures = reformat_code(updated_function_signatures)
+    LOG.info("Updating files with new signatures")
+    update_files_with_new_signatures(reformatted_function_signatures)
+    LOG.info("Adding imports fro classes")
+    update_files_with_new_imports(IMPORTS)
+    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+        modules_with_unions = get_modules_with_union_types(updated_function_signatures)
+        LOG.info("Adding imports for Union types")
+        update_files_with_new_imports(modules_with_unions)
+    LOG.info("Finished\n\n")
+    print_warnings(warnings)
+
+
 if __name__ == "__main__":
     print("===== STAGE 1 - RECORD DATA =====")
     with trace() as data:
         example_function(1, 2, None)
         example_function("a", "b", None)
-    pprint.pprint(data, sort_dicts=False)
-    types_data = convert_results_to_types(data)
-    warnings = detect_multiple_arg_types(types_data)
-    if warnings:
-        print(warnings)
-    pprint.pprint(types_data, sort_dicts=False)
-    unified_types_data = unify_types_in_final_result(types_data)
-    updated_function_signatures = update_code_with_types(unified_types_data)
-    reformatted_function_signatures = reformat_code(updated_function_signatures)
-    modules = update_files_with_new_signatures(reformatted_function_signatures)
-    update_files_with_new_imports(IMPORTS)
-    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
-        modules_with_unions = get_modules_with_union_types(updated_function_signatures)
-        update_files_with_new_imports(modules_with_unions)
+    type_it_like_its_hot(data)
