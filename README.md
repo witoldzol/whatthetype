@@ -13,6 +13,10 @@ I maintain a legacy project that has no typing at all.
 It's thousands of lines of code and I have no idea what goes in or out.
 This is my feeble attemt to remedy this problem automagically.
 
+# REQUIREMENTS
+At minimum 3.5 - I haven't tested properly.
+Ideally use 3.9 or higher ( This lib supports both Union and '|' )
+
 # INSTALL
 ```bash
 pip install typemedaddy
@@ -27,6 +31,9 @@ with trace() as trace_data:
 type_it_like_its_hot(trace_data)
 ```
 
-# How to publish to twine (notes to myself)
+# Notes to myself
+## Build
+`python setup.py bdist_wheel && rm -rf build && rm -rf *egg-info`
+## Publish
 `twine dist/*`
 token is defined in `$HOME/.pypirc`
