@@ -83,12 +83,12 @@ def is_class(obj):
 @contextlib.contextmanager
 def trace():
     global RESULT
-    print("========== TRACING ON ==========")
+    LOG.info("========== TRACING ON ==========\n\n")
     sys.settrace(trace_function)
     try:
         yield RESULT
     finally:
-        print("========== TRACING OFF ==========")
+        LOG.info("========== TRACING OFF ==========\n\n")
         sys.settrace(None)
         RESULT = {}
 
@@ -364,8 +364,8 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                         token_type, token_val, _, _, _ = t
                         # start of arguments
                         if token_type == OP and token_val == "(":
+                            """ARGUMENTS START"""
                             in_arguments = True
-                            print("ARGUMENTS START ->>>>")
                             result.append(
                                 (
                                     token_type,
@@ -374,15 +374,14 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                             )
                         # end of arguments
                         elif token_type == OP and token_val == ")":
+                            """ARGUMENTS END"""
                             in_arguments = False
-                            print("ARGUMENTS END ->>>>")
                             result.append((token_type, token_val))
                         ##########
                         # ARGUMENT ( we add type if we have one )
                         ##########
                         # todo - detect if default value ex: def foo(bar='lol)
                         elif in_arguments and not type_detected and token_type == NAME:
-                            print(f"ARGUMENT ----> {token_val}")
                             updated_arg_tokens = [(token_type, token_val)]
                             # check if we have a type for the argument
                             # dont worry about pre existing types, we drop them somewhere else
@@ -401,7 +400,7 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                             result.extend(updated_arg_tokens)
                         # in argument, we detected a colon (:) which means we have a type
                         elif in_arguments and token_type == OP and token_val == ":":
-                            print("TYPE DETECTED, DROPPING COLON")
+                            """TYPE DETECTED, DROPPING COLON"""
                             type_detected = True
                             # edge case - None is of type NAME, we do not handle default values
                             # if def value is set to None, it fall through here
@@ -412,11 +411,11 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                             and token_type == NAME
                             and token_val != "None"
                         ):
-                            print("DROPPING OLD TYPE")
+                            """DROPPING OLD TYPE"""
                         elif (
                             in_arguments and type_detected and token_type == OP and token_val == "|"
                         ):
-                            print("DROPPING PIPE")
+                            """DROPPING PIPE"""
                         elif (
                             in_arguments and type_detected and token_type == OP and token_val == ","
                         ):
@@ -424,7 +423,7 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                             result.append((token_type, token_val))
                         # RETURN VALUE
                         elif (
-                            in_arguments == False
+                            in_arguments is False
                         ):  # specifically False, not None, this means we just finished arguments and start return
                             if token_type == OP:
                                 if token_val == ":":
@@ -442,11 +441,11 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                                         break
                         # handle indentation
                         elif token_type == INDENT:
-                            print("INDENTATION detected")
+                            """INDENTATION detected"""
                             result.append((token_type, token_val))
                             indentation.append(token_val)
                         else:
-                            print("OTHER tokens")
+                            """OTHER tokens"""
                             result.append((token_type, token_val))
                     updated_function = untokenize(result)
                     # we keep indentation separate for now next step will reformat code, and we don't want it to remove whitespace
@@ -608,7 +607,6 @@ def type_it_like_its_hot(data: dict) -> None:
 
 
 if __name__ == "__main__":
-    print("===== STAGE 1 - RECORD DATA =====")
     with trace() as data:
         example_function(1, 2, None)
         example_function("a", "b", None)
