@@ -23,13 +23,13 @@ from typemedaddy.foo import example_function
 # ( this bit was executing when running tests, so I put it in a conditional)
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--log", default="WARNING")
+    parser.add_argument("--log", default="INFO")
     args = parser.parse_args()
     log_level = args.log.upper()
     if log_level in ("DEBUG", "INFO", "WARNING", "ERROR"):
         logging.basicConfig(level=log_level)
     else:
-        logging.basicConfig(level="WARNING")
+        logging.basicConfig(level="INFO")
 LOG = logging.getLogger(__name__)
 
 # constants
@@ -520,7 +520,7 @@ def update_files_with_new_signatures(
         # create backup
         if backup_file_suffix:
             shutil.copy(module, f"{module}.{backup_file_suffix}")
-            print(f"created backup at location: {module}.{backup_file_suffix}")
+            LOG.info(f"created backup at location: {module}.{backup_file_suffix}")
         for function, line, f_signature in modules[module]:
             # update ( 0 indexed )
             lines[int(line) - 1] = str(f_signature)
