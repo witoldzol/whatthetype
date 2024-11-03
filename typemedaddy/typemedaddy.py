@@ -1,10 +1,9 @@
-from typing import Union, Optional
+from typing import Union
 import ast
 from collections import namedtuple
 import io
 import shutil
 from tokenize import INDENT, untokenize, STRING, NAME, OP, generate_tokens
-import pprint
 import logging
 import contextlib
 from typing import Any
@@ -12,12 +11,9 @@ import sys
 import os
 from enum import Enum
 import argparse
-
-# from typemedaddy.foo import example_function_with_third_party_lib, Foo, takes_func_returns_func, int_function, example_function, takes_class, barfoo
 from types import FrameType, FunctionType
 from typing import Literal
 from autopep8 import fix_code
-from typemedaddy.foo import example_function
 
 # take logger args, if we are running directly
 # ( this bit was executing when running tests, so I put it in a conditional)
@@ -275,10 +271,6 @@ def convert_value_to_type(
     return input_type
 
 
-# TODO
-# we probably want to throw some warning saying:
-# HEY,this func gets different types at various types,
-# maybe you should look into this
 # INPUT
 # {
 #   "module_func_line" : {
@@ -309,7 +301,6 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
                 value_type = union_types([convert_value_to_type(value)])
                 s.add(value_type)
             # we sort the output, to get deterministic results -> set has random ordering
-            # TODO this returns array of types, which we will have to collapse again?
             result[mfl]["args"][arg] = sorted(s)
         # ============================
         # ========== RETURN ==========
@@ -380,7 +371,6 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
                         ##########
                         # ARGUMENT ( we add type if we have one )
                         ##########
-                        # todo - detect if default value ex: def foo(bar='lol)
                         elif in_arguments and not type_detected and token_type == NAME:
                             updated_arg_tokens = [(token_type, token_val)]
                             # check if we have a type for the argument
@@ -604,10 +594,3 @@ def type_it_like_its_hot(data: dict) -> None:
         update_files_with_new_imports(modules_with_unions)
     LOG.info("Finished\n\n")
     print_warnings(warnings)
-
-
-if __name__ == "__main__":
-    with trace() as data:
-        example_function(1, 2, None)
-        example_function("a", "b", None)
-    type_it_like_its_hot(data)
