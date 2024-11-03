@@ -1,0 +1,8 @@
+# build
+twine
+wheel
+setuptools
+# util
+autopep8
+pytest
+pudb
