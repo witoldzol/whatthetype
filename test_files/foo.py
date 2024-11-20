@@ -64,3 +64,10 @@ def foobar(i:int = None) -> int:
 
 def barfoo(i:int = 111) -> int:
     return i
+
+class MultiLine():
+    def __init__(self,
+                 a,
+                 b,
+                 c):
+        pass
