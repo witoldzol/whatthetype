@@ -452,6 +452,7 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
             execute_update(mfl, data, updated_function_declarations)
         except Exception:
             LOG.error(f"Function signature update failed -> {mfl}")
+            raise
     return updated_function_declarations
 
 
