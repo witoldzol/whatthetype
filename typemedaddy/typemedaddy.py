@@ -1,4 +1,5 @@
 from typing import Union
+import json
 import ast
 from collections import namedtuple
 import io
@@ -70,6 +71,8 @@ def is_class(obj):
     # we filter non-user calls upstream, so we should only get user defined classes at this stage
     if obj is None:
         return False
+    elif "__module__" not in dir(obj):  # we skip cell objects
+        return False
     return isinstance(obj, object) and not isinstance(
         obj, (int, float, str, list, dict, tuple, set, FunctionType)
     )
@@ -101,7 +104,7 @@ def trace_function(frame, event, arg):
     module_name = frame.f_code.co_filename
     func_name = frame.f_code.co_name
     # fiter out non user defined functions
-    if PROJECT_NAME not in module_name or func_name == "trace":
+    if "venv" in module_name or PROJECT_NAME not in module_name or func_name == "trace":
         return trace_function
     line_number = frame.f_code.co_firstlineno
     mod_func_line = f"{module_name}:{func_name}:{line_number}"
@@ -288,6 +291,9 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
     result = {}
     # mfl => module_function_line
     for mfl in input:
+        _, f, _ = mfl.split(":")
+        if f == "<module>" or f == "<lambda>":
+            continue
         # ==========================
         # ========== ARGS ==========
         # ==========================
