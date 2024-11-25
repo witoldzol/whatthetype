@@ -52,7 +52,7 @@ MODEL = {
 # so that we don't trace them
 # in other words - we don't want to trace functions defined in external libraries, just our own code
 PROJECT_NAME = os.getcwd()
-
+TREES = {}
 
 class TraceEvent(Enum):
     CALL = "call"  #: Triggered when a function is called.
@@ -321,129 +321,142 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
         result[mfl]["return"] = sorted(s)
     return result
 
+def get_size_of_function_sig(module: str, code: str, f_name: str):
+    if module in TREES:
+        tree = TREES[module]
+    else:
+        tree = ast.parse(code)
+        TREES[module] = tree
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name == f_name:
+            start = int(node.lineno) - 1
+            end = int(node.args.args[-1].lineno) # get the line of the last argument
+            return (start, end)
+    raise Exception(f"Failed to find the function in the ast tree. Function name: {f_name}")
+
+def get_tokens(code: str, s: int, e: int):
+    """ sample tokenizer output [ first line full, rest truncated ]
+    TokenInfo(type=5 (INDENT), string='    ', start=(1, 0), end=(1, 4), line="    def arbitrary_self(not_self, name: str = 'default_val', age=10):\n")
+    TokenInfo(type=1 (NAME), string='def', _, _, _ ...
+    TokenInfo(type=1 (NAME), string='arbitrary_self', _, _, _ ...
+    TokenInfo(type=55 (OP), string='(', _, _, _ ...
+    TokenInfo(type=1 (NAME), string='not_self', _, _, _ ...
+    TokenInfo(type=55 (OP), string=',', _, _, _ ...
+    TokenInfo(type=1 (NAME), string='name', _, _, _ ...
+    TokenInfo(type=55 (OP), string=':', _, _, _ ...
+    ...
+    """
+    if s == -1:
+        raise Exception('Invalid input')
+    lines_to_tokenize = "\n".join(code.splitlines()[s:e])
+    lines = io.StringIO(lines_to_tokenize).readline
+    tokens = generate_tokens(lines)
+    return tokens
 
 def execute_update(mfl: str, data: dict, updated_function_declarations: dict) -> None:
     if mfl.count(":") > 2:
         raise Exception("Detected too many separators! Perhaps function name contains a colon?")
     module, function, line_num = mfl.split(":")
     with open(module, "r") as f:
-        for idx, line in enumerate(f):
-            # find a line containting the function
-            if idx == int(line_num) - 1:  # todo - test multiline function declaration
-                # convert line to StringIO - required by tokenizer
-                line_io = io.StringIO(
-                    line
-                ).readline  # don't use lambda, generator will be infinite
-                # get tokens
-                tokens = generate_tokens(line_io)
-                """ sample tokenizer output [ first line full, rest truncated ]
-                TokenInfo(type=5 (INDENT), string='    ', start=(1, 0), end=(1, 4), line="    def arbitrary_self(not_self, name: str = 'default_val', age=10):\n")
-                TokenInfo(type=1 (NAME), string='def', _, _, _ ...
-                TokenInfo(type=1 (NAME), string='arbitrary_self', _, _, _ ...
-                TokenInfo(type=55 (OP), string='(', _, _, _ ...
-                TokenInfo(type=1 (NAME), string='not_self', _, _, _ ...
-                TokenInfo(type=55 (OP), string=',', _, _, _ ...
-                TokenInfo(type=1 (NAME), string='name', _, _, _ ...
-                TokenInfo(type=55 (OP), string=':', _, _, _ ...
-                ...
-                """
-                # do the magic
-                result = []
-                in_arguments = None
-                # untokenize will not handle spacing and indentation if we remove last 3 args
-                # so we have to handle it manually
-                indentation = []
-                type_detected = False
-                for t in tokens:
-                    # we care only about first 2 values, type is a number mapped in an ENUM
-                    token_type, token_val, _, _, _ = t
-                    # start of arguments
-                    if token_type == OP and token_val == "(":
-                        """ARGUMENTS START"""
-                        in_arguments = True
-                        result.append(
-                            (
-                                token_type,
-                                token_val,
-                            )
-                        )
-                    # end of arguments
-                    elif token_type == OP and token_val == ")":
-                        """ARGUMENTS END"""
-                        in_arguments = False
-                        result.append((token_type, token_val))
-                    ##########
-                    # ARGUMENT ( we add type if we have one )
-                    ##########
-                    elif in_arguments and not type_detected and token_type == NAME:
-                        updated_arg_tokens = [(token_type, token_val)]
-                        # check if we have a type for the argument
-                        # dont worry about pre existing types, we drop them somewhere else
-                        types_detected_for_agument = data[mfl]["args"]
-                        if token_val in types_detected_for_agument:
-                            arg_type = types_detected_for_agument[token_val]
-                            assert type(arg_type) is str
-                            # skip method self or class method ref
-                            if arg_type == SELF_OR_CLS:
-                                pass
-                            else:
-                                colon_token = (OP, ":")
-                                type_token = (STRING, arg_type)
-                                updated_arg_tokens.append(colon_token)
-                                updated_arg_tokens.append(type_token)
-                        result.extend(updated_arg_tokens)
-                    # in argument, we detected a colon (:) which means we have a type
-                    elif in_arguments and token_type == OP and token_val == ":":
-                        """TYPE DETECTED, DROPPING COLON"""
-                        type_detected = True
-                        # edge case - None is of type NAME, we do not handle default values
-                        # if def value is set to None, it fall through here
-                        # NO, I will not refactor this mess, it works!
-                    elif (
-                        in_arguments
-                        and type_detected
-                        and token_type == NAME
-                        and token_val != "None"
-                    ):
-                        """DROPPING OLD TYPE"""
-                    elif (
-                        in_arguments and type_detected and token_type == OP and token_val == "|"
-                    ):
-                        """DROPPING PIPE"""
-                    elif (
-                        in_arguments and type_detected and token_type == OP and token_val == ","
-                    ):
-                        type_detected = False
-                        result.append((token_type, token_val))
-                    # RETURN VALUE
-                    elif (
-                        in_arguments is False
-                    ):  # specifically False, not None, this means we just finished arguments and start return
-                        if token_type == OP:
-                            if token_val == ":":
-                                # this is a start, so no pre - existing type
-                                # check if we have a return type for this function
-                                if data[mfl]["return"]:
-                                    tokens = []
-                                    tokens.append((OP, "->"))
-                                    tokens.append((NAME, data[mfl]["return"]))
-                                    tokens.append((OP, ":"))
-                                    result.extend(tokens)
-                                    break  # we are done, bail
-                                else:
-                                    result.append((OP, ":"))  # no type found, add : and bail
-                                    break
-                    # handle indentation
-                    elif token_type == INDENT:
-                        """INDENTATION detected"""
-                        result.append((token_type, token_val))
-                        indentation.append(token_val)
+        code = f.read()
+        f_start, f_end = get_size_of_function_sig(module, code, function)
+        tokens = get_tokens(code, f_start, f_end)
+        result = []
+        in_arguments = None
+        # untokenize will not handle spacing and indentation if we remove last 3 args
+        # so we have to handle it manually
+        indentation = []
+        type_detected = False
+        for t in tokens:
+            # we care only about first 2 values, type is a number mapped in an ENUM
+            token_type, token_val, _, _, _ = t
+            # start of arguments
+            if token_type == OP and token_val == "(":
+                """ARGUMENTS START"""
+                in_arguments = True
+                result.append(
+                    (
+                        token_type,
+                        token_val,
+                    )
+                )
+            # end of arguments
+            elif token_type == OP and token_val == ")":
+                """ARGUMENTS END"""
+                in_arguments = False
+                result.append((token_type, token_val))
+            ##########
+            # ARGUMENT ( we add type if we have one )
+            ##########
+            elif in_arguments and not type_detected and token_type == NAME:
+                updated_arg_tokens = [(token_type, token_val)]
+                # check if we have a type for the argument
+                # dont worry about pre existing types, we drop them somewhere else
+                types_detected_for_agument = data[mfl]["args"]
+                if token_val in types_detected_for_agument:
+                    arg_type = types_detected_for_agument[token_val]
+                    assert type(arg_type) is str
+                    # skip method self or class method ref
+                    if arg_type == SELF_OR_CLS:
+                        pass
                     else:
-                        """OTHER tokens"""
-                        result.append((token_type, token_val))
-                updated_function = untokenize(result)
-                # we keep indentation separate for now next step will reformat code, and we don't want it to remove whitespace
-                updated_function_declarations[mfl] = ("".join(indentation), updated_function)
+                        colon_token = (OP, ":")
+                        type_token = (STRING, arg_type)
+                        updated_arg_tokens.append(colon_token)
+                        updated_arg_tokens.append(type_token)
+                result.extend(updated_arg_tokens)
+            # in argument, we detected a colon (:) which means we have a type
+            elif in_arguments and token_type == OP and token_val == ":":
+                """TYPE DETECTED, DROPPING COLON"""
+                type_detected = True
+                # edge case - None is of type NAME, we do not handle default values
+                # if def value is set to None, it fall through here
+                # NO, I will not refactor this mess, it works!
+            elif (
+                in_arguments
+                and type_detected
+                and token_type == NAME
+                and token_val != "None"
+            ):
+                """DROPPING OLD TYPE"""
+            elif (
+                in_arguments and type_detected and token_type == OP and token_val == "|"
+            ):
+                """DROPPING PIPE"""
+            elif (
+                in_arguments and type_detected and token_type == OP and token_val == ","
+            ):
+                type_detected = False
+                result.append((token_type, token_val))
+            # RETURN VALUE
+            elif (
+                in_arguments is False
+            ):  # specifically False, not None, this means we just finished arguments and start return
+                if token_type == OP:
+                    if token_val == ":":
+                        # this is a start, so no pre - existing type
+                        # check if we have a return type for this function
+                        if data[mfl]["return"]:
+                            tokens = []
+                            tokens.append((OP, "->"))
+                            tokens.append((NAME, data[mfl]["return"]))
+                            tokens.append((OP, ":"))
+                            result.extend(tokens)
+                            break  # we are done, bail
+                        else:
+                            result.append((OP, ":"))  # no type found, add : and bail
+                            break
+            # handle indentation
+            elif token_type == INDENT:
+                """INDENTATION detected"""
+                result.append((token_type, token_val))
+                indentation.append(token_val)
+            else:
+                """OTHER tokens"""
+                result.append((token_type, token_val))
+        updated_function = untokenize(result)
+        # we keep indentation separate for now next step will reformat code, and we don't want it to remove whitespace
+        updated_function_declarations[mfl] = ("".join(indentation), updated_function)
 
 def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
     updated_function_declarations = dict()

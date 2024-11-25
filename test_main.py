@@ -570,7 +570,7 @@ class TestIntegration:
         assert {'/home/w/repos/typemedaddy/test_files/foo.py:__init__:69': 
                 {'args': {'a': 'int', 'b': 'str', 'c': 'list[int]', 'self': 'SELF_OR_CLS'}, 'return': 'None'}} == step_4_output
         step_5_output = update_code_with_types(step_4_output)
-        assert '' == step_5_output
+        assert {'/home/w/repos/typemedaddy/test_files/foo.py:__init__:69': ('    ', 'def __init__ (self ,bar =None )->None :')} == step_5_output
 
         def test_call_with_class_method(self):
             with trace() as step_1_output:
