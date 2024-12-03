@@ -156,6 +156,8 @@ def trace_function(frame, event, arg):
     ##### RETURN #####
     ##################
     elif event == TraceEvent.RETURN:
+        if mod_func_line not in RESULT:
+            LOG.debug(f"Return from a function that wasn't invoked yet! Skipping it: {mod_func_line}")
         if is_class(arg):
             arg = f"USER_CLASS|{arg.__module__}::{type(arg).__name__}"
         if "return" in RESULT[mod_func_line]:
