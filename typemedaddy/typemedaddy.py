@@ -104,7 +104,7 @@ def trace_function(frame, event, arg):
     module_name = frame.f_code.co_filename
     func_name = frame.f_code.co_name
     # fiter out non user defined functions
-    if "venv" in module_name or PROJECT_NAME not in module_name or func_name == "trace":
+    if "venv" in module_name or PROJECT_NAME not in module_name or func_name in ("trace", "<genexpr>"):
         return trace_function
     line_number = frame.f_code.co_firstlineno
     mod_func_line = f"{module_name}:{func_name}:{line_number}"
@@ -330,7 +330,10 @@ def get_size_of_function_sig(module: str, code: str, f_name: str):
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and node.name == f_name:
             start = int(node.lineno) - 1
-            end = int(node.args.args[-1].lineno) # get the line of the last argument
+            try:
+                end = int(node.args.args[-1].lineno) # get the line of the last argument
+            except IndexError:
+                end = start # no args scenario
             return (start, end)
     raise Exception(f"Failed to find the function in the ast tree. Function name: {f_name}")
 
