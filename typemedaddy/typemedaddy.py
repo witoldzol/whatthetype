@@ -1,6 +1,5 @@
 import inspect
 from typing import Union
-import json
 import ast
 from collections import namedtuple
 import io
@@ -479,7 +478,10 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
             execute_update(mfl, data, updated_function_declarations)
         except Exception:
             LOG.error(f"Function signature update failed -> {mfl}")
-            raise
+            if mfl in RESULT:
+                del RESULT[mfl]
+                LOG.warn(f"Deleted {mfl} from RESULT after failed code update")
+            # raise
     return updated_function_declarations
 
 
