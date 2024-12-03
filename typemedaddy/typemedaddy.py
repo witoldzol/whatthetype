@@ -122,8 +122,8 @@ def trace_function(frame, event, arg):
         frame_info = inspect.getframeinfo(frame)
         if frame_info and frame_info.code_context:
             code_context = frame_info.code_context[0]
-            first_chunk_of_executed_code = code_context.split(' ')[0]
-            if first_chunk_of_executed_code == 'class':
+            code_chunks = code_context.split(' ')
+            if 'class' in code_chunks:
                 LOG.debug(f'Code context is executing a class: {mod_func_line}. Skipping')
                 return trace_function
         # we need to figure out if the called function is a 'free' or is a class method
@@ -157,6 +157,7 @@ def trace_function(frame, event, arg):
     elif event == TraceEvent.RETURN:
         if mod_func_line not in RESULT:
             LOG.debug(f"Return from a function that wasn't invoked yet! Skipping it: {mod_func_line}")
+            return trace_function
         if is_class(arg):
             arg = f"USER_CLASS|{arg.__module__}::{type(arg).__name__}"
         if "return" in RESULT[mod_func_line]:
@@ -343,7 +344,7 @@ def get_size_of_function_sig(module: str, code: str, f_name: str):
             try:
                 end = int(node.args.args[-1].lineno) # get the line of the last argument
             except IndexError:
-                end = start # no args scenario
+                end = start # no args scenario # function can still be multiline -> if you write your code like that then FU
             return (start, end)
     raise Exception(f"Failed to find the function in the ast tree. Function name: {f_name}")
 
