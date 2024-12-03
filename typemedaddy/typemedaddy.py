@@ -1,3 +1,4 @@
+import inspect
 from typing import Union
 import json
 import ast
@@ -104,7 +105,7 @@ def trace_function(frame, event, arg):
     module_name = frame.f_code.co_filename
     func_name = frame.f_code.co_name
     # fiter out non user defined functions
-    if "venv" in module_name or PROJECT_NAME not in module_name or func_name in ("trace", "<genexpr>"):
+    if "venv" in module_name or PROJECT_NAME not in module_name or func_name in ("trace", "<genexpr>", "<lambda>", "<module>"):
         return trace_function
     line_number = frame.f_code.co_firstlineno
     mod_func_line = f"{module_name}:{func_name}:{line_number}"
@@ -118,6 +119,14 @@ def trace_function(frame, event, arg):
     ##### CALL #####
     ################
     if event == TraceEvent.CALL:
+        # check if current frame is executing a class code -> I don't really understand in what situation this can happen, but it does
+        frame_info = inspect.getframeinfo(frame)
+        if frame_info and frame_info.code_context:
+            code_context = frame_info.code_context[0]
+            first_chunk_of_executed_code = code_context.split(' ')[0]
+            if first_chunk_of_executed_code == 'class':
+                LOG.debug(f'Code context is executing a class: {mod_func_line}. Skipping')
+                return trace_function
         # we need to figure out if the called function is a 'free' or is a class method
         # why?
         #   because if it's a class method, first arg will be 'self' or 'cls' ->
