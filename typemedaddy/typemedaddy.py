@@ -1,3 +1,4 @@
+import json
 import inspect
 from typing import Union
 import ast
@@ -620,20 +621,26 @@ def print_warnings(warnings: str) -> None:
         LOG.warning("=" * 50)
 
 
-def type_it_like_its_hot(data: dict) -> None:
+def type_it_like_its_hot(data: dict, update_files = False, backup_file_suffix = "bak") -> None:
     LOG.info("Converting results to types")
     types_data = convert_results_to_types(data)
     warnings = detect_multiple_arg_types(types_data)
     unified_types_data = unify_types_in_final_result(types_data)
     updated_function_signatures = update_code_with_types(unified_types_data)
     reformatted_function_signatures = reformat_code(updated_function_signatures)
+    if not update_files:
+        file_for_signatures = 'updated_function_signatures'
+        with open(file_for_signatures, 'w') as f:
+            f.write(json.dumps(reformatted_function_signatures))
+            LOG.info(f'Skipping updating files, saving new signatures to {file_for_signatures}')
+        return
     LOG.info("Updating files with new signatures")
-    update_files_with_new_signatures(reformatted_function_signatures)
-    LOG.info("Adding imports fro classes")
-    update_files_with_new_imports(IMPORTS)
+    update_files_with_new_signatures(reformatted_function_signatures, backup_file_suffix = backup_file_suffix)
+    LOG.info("Adding imports for classes")
+    update_files_with_new_imports(IMPORTS, backup_file_suffix = backup_file_suffix)
     if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
         modules_with_unions = get_modules_with_union_types(updated_function_signatures)
         LOG.info("Adding imports for Union types")
-        update_files_with_new_imports(modules_with_unions)
+        update_files_with_new_imports(modules_with_unions, backup_file_suffix = backup_file_suffix)
     LOG.info("Finished\n\n")
     print_warnings(warnings)

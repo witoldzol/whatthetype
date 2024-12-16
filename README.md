@@ -28,7 +28,7 @@ from typemedaddy.typemedaddy import trace, type_it_like_its_hot
 
 with trace() as trace_data:
     your_script()
-type_it_like_its_hot(trace_data)
+type_it_like_its_hot(trace_data, update_files = True, backup_file_suffix = "bak")
 ```
 
 # Notes to myself
