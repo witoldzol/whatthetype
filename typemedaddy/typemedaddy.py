@@ -565,7 +565,7 @@ def update_files_with_new_signatures(
 
 
 def update_files_with_new_imports(
-    imports: set[tuple[str, str, str]], backup_file_suffix="bak"
+    imports: set[tuple[str, str, str]], backup_file_suffix: Union[str,None] = "bak"
 ) -> None:
     # group by files, just like in code update stage, but this time we just need module and class name
     modules = {}
@@ -621,7 +621,7 @@ def print_warnings(warnings: str) -> None:
         LOG.warning("=" * 50)
 
 
-def type_it_like_its_hot(data: dict, update_files = False, backup_file_suffix = "bak") -> None:
+def type_it_like_its_hot(data: dict, update_files = False, backup_file_suffix: Union[str, None] = "bak") -> None:
     LOG.info("Converting results to types")
     types_data = convert_results_to_types(data)
     warnings = detect_multiple_arg_types(types_data)
