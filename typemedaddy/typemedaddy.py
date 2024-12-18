@@ -341,12 +341,14 @@ def get_size_of_function_signature(module: str, code: str, f_name: str):
         TREES[module] = tree
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and node.name == f_name:
+            number_of_decorators = len(node.decorator_list)
+            LOG.info(f"{f_name} has {number_of_decorators} decorators")
             start = int(node.lineno) - 1
             try:
                 end = int(node.args.args[-1].lineno) # get the line of the last argument
             except IndexError:
                 end = start # no args scenario # function can still be multiline -> if you write your code like that then FU
-            return (start, end)
+            return (start, end, number_of_decorators)
     raise Exception(f"Failed to find the function in the ast tree. Function name: {f_name}")
 
 def get_tokens(code: str, s: int, e: int):
@@ -374,7 +376,7 @@ def execute_update(mfl: str, data: dict, updated_function_declarations: dict) ->
     module, function, line_num = mfl.split(":")
     with open(module, "r") as f:
         code = f.read()
-        f_start, f_end = get_size_of_function_signature(module, code, function)
+        f_start, f_end, number_of_decorators = get_size_of_function_signature(module, code, function)
         tokens = get_tokens(code, f_start, f_end)
         result = []
         in_arguments = None
@@ -471,6 +473,11 @@ def execute_update(mfl: str, data: dict, updated_function_declarations: dict) ->
                 result.append((token_type, token_val))
         updated_function = untokenize(result)
         # we keep indentation separate for now next step will reformat code, and we don't want it to remove whitespace
+        # detect decorators, and adjust the function line number if any detected!!
+        if number_of_decorators:
+            updated_line = int(line_num) + number_of_decorators
+            mfl = f"{module}:{function}:{updated_line}"
+            LOG.warning(f"Updating from line {(line_num)} to {updated_line}), new mfl is {mfl}")
         updated_function_declarations[mfl] = ("".join(indentation), updated_function)
 
 def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
@@ -479,10 +486,10 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
         try:
             execute_update(mfl, data, updated_function_declarations)
         except Exception as e:
-            LOG.error(f"Function signature update failed -> {mfl}\n{e}")
+            LOG.error(f"Function signature update failed -> {mfl}\nerror: {e}")
             if mfl in RESULT:
                 del RESULT[mfl]
-                LOG.warn(f"Deleted {mfl} from RESULT after failed code update")
+                LOG.warning(f"Deleted {mfl} from RESULT after failed code update")
             # raise
     return updated_function_declarations
 
