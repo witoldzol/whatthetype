@@ -333,7 +333,7 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
         result[mfl]["return"] = sorted(s)
     return result
 
-def get_size_of_function_sig(module: str, code: str, f_name: str):
+def get_size_of_function_signature(module: str, code: str, f_name: str):
     if module in TREES:
         tree = TREES[module]
     else:
@@ -374,7 +374,7 @@ def execute_update(mfl: str, data: dict, updated_function_declarations: dict) ->
     module, function, line_num = mfl.split(":")
     with open(module, "r") as f:
         code = f.read()
-        f_start, f_end = get_size_of_function_sig(module, code, function)
+        f_start, f_end = get_size_of_function_signature(module, code, function)
         tokens = get_tokens(code, f_start, f_end)
         result = []
         in_arguments = None
@@ -478,8 +478,8 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
     for mfl in data:
         try:
             execute_update(mfl, data, updated_function_declarations)
-        except Exception:
-            LOG.error(f"Function signature update failed -> {mfl}")
+        except Exception as e:
+            LOG.error(f"Function signature update failed -> {mfl}\n{e}")
             if mfl in RESULT:
                 del RESULT[mfl]
                 LOG.warn(f"Deleted {mfl} from RESULT after failed code update")
