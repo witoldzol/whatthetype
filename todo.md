@@ -1,30 +1,28 @@
-# if only None was detected for the param, dont add this type
-it makes no sense to have a None only para ex:
-def foo(a: None) -> str:
-...
-# handle multi line function signatures
-# CLI: add arguments to run steps?
-# update readme
-## edge case - what about multiline function signatures?
-- use tokenize to figure out if the func sig is multi line
-# make sure we presever order of arguments! 
-# save step 1 output to a file?
-
-==============================================================================================
-======================================== NICE TO DO ? ========================================
-==============================================================================================
-# implement no union operator
-# should we deduplicate inputs from step 1? the data set will grow crazy big, and it will make step 2 work much harder ( although, we do have dedup in step 2...)
-# should we use python 3.12 monitoring api?
-# refactor update_code_with_types
-maybe use separate passes where we handle args and return types/values
-this would greatly simplyfy the necessary logic
 # handle *args and **kwargs
 - args and kwargs can be called whatever you want, so it's the same issue as with 'self' ref
 - both stand alone functions and class methods can have *args 
 - do we care? Not yet!
 looks like tracing *args results in args that have no name...which makes sense
 how will we handle that?
+# if only None was detected for the param, dont add this type
+it makes no sense to have a None only para ex:
+def foo(a: None) -> str:
+...
+# function parsing fails if final brace is on a different line then last argument
+def bob(a,
+        b
+        ) <- this will fail, because we detect last line of function to == line of the last argument
+# save intermediate steps to a file?
+pass in file pointer to type_it_like_its_hot ?
+
+==============================================================================================
+======================================== NICE TO DO ? ========================================
+==============================================================================================
+# implement no union operator
+# should we deduplicate inputs from step 1? the data set will grow crazy big, and it will make step 2 work much harder ( although, we do have dedup in step 2...)
+# refactor update_code_with_types
+maybe use separate passes where we handle args and return types/values
+this would greatly simplyfy the necessary logic
 
 
 ############################################################
@@ -119,3 +117,4 @@ def foobar (i :int=)->int :
 dunder functions will match first instance in a file, ex. __init__ 
 so, if this is a dunder method, we need to identify the 'owner' class first, or jump to line and then walk?
 # fix multiline multiple decorators 
+# handle multi line function signatures
