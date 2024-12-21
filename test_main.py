@@ -22,6 +22,7 @@ from typemedaddy.typemedaddy import (
     union_types,
     reformat_code,
     update_files_with_new_signatures,
+    get_size_of_function_signature
 )
 
 MODULE_PATH = "test_files.foo"
@@ -774,3 +775,44 @@ def test_file_update_two_functions():
     backup_file_path.unlink()
     # revert original file
     shutil.copy(f"{test_files_dir}/{module_name}.py.orig", f"{test_files_dir}/{module_name}.py")
+
+def test_get_size_of_function_signature():
+    code="""
+import logging
+from typemedaddy.typemedaddy import trace, type_it_like_its_hot
+
+
+logging.basicConfig(level=logging.DEBUG)
+
+def decorator_one(f):
+    def wrapper(i, x):
+        print('im other wrapper')
+        f(i, x)
+    return wrapper
+
+def decorator_two(f):
+    def wrapper(i, x):
+        print('im a wrapper')
+        f(i, x)
+    return wrapper
+
+
+def bar(i, x ):
+    return i
+
+@decorator_two
+@decorator_one
+def foo(i, 
+        x = 'x'):
+    return i
+
+def kfoo(*args):
+    return (*args,)
+"""
+    module = "foo"
+    function = "kfoo"
+    line_num = "29"
+    f_start, f_end, number_of_decorators = get_size_of_function_signature(module, code, function, line_num)
+    assert f_start == 29
+    assert f_end == 29
+    assert number_of_decorators == 0
