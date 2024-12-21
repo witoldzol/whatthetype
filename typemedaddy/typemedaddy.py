@@ -1,3 +1,4 @@
+import time
 import json
 import inspect
 from typing import Union
@@ -639,32 +640,43 @@ def print_warnings(warnings: str) -> None:
         LOG.warning("=" * 50)
 
 
-def type_it_like_its_hot(data: dict, update_files = False, backup_file_suffix: Union[str, None] = "bak") -> None:
-    with open('step_1_raw_data', 'w') as f:
-        LOG.info("Converting results to types")
-        types_data = convert_results_to_types(data)
-        json.dump(types_data, f)
-    warnings = detect_multiple_arg_types(types_data)
-    with open('step_2_unified_types', 'w') as f:
-        unified_types_data = unify_types_in_final_result(types_data)
-        json.dump(unified_types_data, f)
+def type_it_like_its_hot(data: dict,
+                         update_files = False,
+                         backup_file_suffix: Union[str, None] = "bak",
+                         dump_intermediate_data = False) -> None:
+    unix_time = int(time.time())
+    # STEP 1 - get types from data # 
+    LOG.info("Converting results to types")
+    types_data = convert_results_to_types(data)
+    if dump_intermediate_data:
+        with open(f'step_1_raw_data-{unix_time}', 'w') as f:
+            json.dump(types_data, f)
+    # STEP 2 - unify & dedupe types # 
+    unified_types_data = unify_types_in_final_result(types_data)
+    if dump_intermediate_data:
+        with open(f'step_2_unified_types-{unix_time}', 'w') as f:
+                json.dump(unified_types_data, f)
+    # STEP 3 - generate new code with types #
     updated_function_signatures = update_code_with_types(unified_types_data)
-    with open('step_3_updated_code', 'w') as f:
-        reformatted_function_signatures = reformat_code(updated_function_signatures)
-        json.dump(reformatted_function_signatures, f)
-    if not update_files:
-        file_for_signatures = 'updated_function_signatures'
-        with open(file_for_signatures, 'w') as f:
-            f.write(json.dumps(reformatted_function_signatures))
-            LOG.info(f'Skipping updating files, saving new signatures to {file_for_signatures}')
-        return
+    reformatted_function_signatures = reformat_code(updated_function_signatures)
+    if dump_intermediate_data or not update_files:
+        result_file = f"typed-function-signatures-{unix_time}"
+        with open(result_file, 'w') as f:
+                json.dump(reformatted_function_signatures, f)
+        if not update_files:
+            LOG.info(f'Skipping updating files, results saved to a file: {result_file}')
+            return
+    # STEP 4a - update files with types #
     LOG.info("Updating files with new signatures")
     update_files_with_new_signatures(reformatted_function_signatures, backup_file_suffix = backup_file_suffix)
     LOG.info("Adding imports for classes")
+    # STEP 4b - update files with missing imports #
     update_files_with_new_imports(IMPORTS, backup_file_suffix = backup_file_suffix)
     if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
         modules_with_unions = get_modules_with_union_types(updated_function_signatures)
         LOG.info("Adding imports for Union types")
         update_files_with_new_imports(modules_with_unions, backup_file_suffix = backup_file_suffix)
     LOG.info("Finished\n\n")
+    # Print warnings # 
+    warnings = detect_multiple_arg_types(types_data)
     print_warnings(warnings)
