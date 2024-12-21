@@ -7,10 +7,10 @@ long_description = (current_directory / "README.md").read_text()
 
 setup(
     name="typemedaddy",
-    version="0.6",
+    version="0.7",
     packages=["typemedaddy"],
     author="Witold Zolnowski",
-    description="Derives type hints from data captured during runtime. Updates source files with type hints. USE SOURCE CONTROL before running!!!!",
+    description="Derives type hints from data captured during runtime. Updates source files with type hints. USE SOURCE CONTROL before upating in-place!!!!",
     long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=["autopep8>=2.0.0"],
