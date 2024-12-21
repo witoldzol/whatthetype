@@ -2,16 +2,13 @@
 This lib will OVERWRITE YOUR SOURCE FILES! ( It creates backup files before it does )
 Use SOURCE CONTROL before running this !!!!
 
-This is a hobby project, not a production ready stuff.
-I'm not a 'good' programmer - no classes or clean code over here, just procedural spaghetti.
-
 # WHAT?
 This lib can inspect the data passed to your functions, figure out types from that data and update your function signatures with type info.
 
 # WHY?
-I maintain a legacy project that has no typing at all. 
+I maintain a legacy project that has no type hints at all. 
 It's thousands of lines of code and I have no idea what goes in or out.
-This is my feeble attemt to remedy this problem automagically.
+This lib can create type hints on the fly.
 
 # REQUIREMENTS
 At minimum 3.5 - I haven't tested properly.
@@ -42,7 +39,7 @@ backup_file_suffix: creates backup files and adds suffix to them.
 dump_intermediate_data: will create 3 files with intermediate data used to derive final results. 
             Default = False
 """
-type_it_like_its_hot(data, update_files=True, backup_file_suffix=None, dump_intermediate_data=True)
+type_it_like_its_hot(data, update_files=True, backup_file_suffix="bak", dump_intermediate_data=False)
 ```
 
 # Notes to myself
