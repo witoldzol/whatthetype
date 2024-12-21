@@ -26,9 +26,23 @@ pip install typemedaddy
 ```python
 from typemedaddy.typemedaddy import trace, type_it_like_its_hot
 
-with trace() as trace_data:
-    your_script()
-type_it_like_its_hot(trace_data, update_files = True, backup_file_suffix = "bak")
+def foo(i, x):
+    return i + x
+
+with trace() as data:
+    foo(1, 2)
+
+"""
+update_files: updates source files in place with new types, this is a destructive action! 
+            If False, results json will be saved to a file with unix timestamp. 
+            Default = False.
+backup_file_suffix: creates backup files and adds suffix to them.
+            Example: backup_file_suffix="bak" will create `foo.py.bak`. 
+            Default = "bak"
+dump_intermediate_data: will create 3 files with intermediate data used to derive final results. 
+            Default = False
+"""
+type_it_like_its_hot(data, update_files=True, backup_file_suffix=None, dump_intermediate_data=True)
 ```
 
 # Notes to myself
