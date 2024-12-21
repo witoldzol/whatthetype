@@ -7,7 +7,7 @@ long_description = (current_directory / "README.md").read_text()
 
 setup(
     name="typemedaddy",
-    version="0.7",
+    version="0.8",
     packages=["typemedaddy"],
     author="Witold Zolnowski",
     description="Derives type hints from data captured during runtime. Updates source files with type hints. USE SOURCE CONTROL before upating in-place!!!!",
