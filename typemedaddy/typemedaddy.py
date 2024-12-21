@@ -638,12 +638,18 @@ def print_warnings(warnings: str) -> None:
 
 
 def type_it_like_its_hot(data: dict, update_files = False, backup_file_suffix: Union[str, None] = "bak") -> None:
-    LOG.info("Converting results to types")
-    types_data = convert_results_to_types(data)
+    with open('step_1_raw_data', 'w') as f:
+        LOG.info("Converting results to types")
+        types_data = convert_results_to_types(data)
+        json.dump(types_data, f)
     warnings = detect_multiple_arg_types(types_data)
-    unified_types_data = unify_types_in_final_result(types_data)
+    with open('step_2_unified_types', 'w') as f:
+        unified_types_data = unify_types_in_final_result(types_data)
+        json.dump(unified_types_data, f)
     updated_function_signatures = update_code_with_types(unified_types_data)
-    reformatted_function_signatures = reformat_code(updated_function_signatures)
+    with open('step_3_updated_code', 'w') as f:
+        reformatted_function_signatures = reformat_code(updated_function_signatures)
+        json.dump(reformatted_function_signatures, f)
     if not update_files:
         file_for_signatures = 'updated_function_signatures'
         with open(file_for_signatures, 'w') as f:
