@@ -491,11 +491,12 @@ def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
         try:
             execute_update(mfl, data, updated_function_declarations)
         except Exception as e:
+            import traceback
             LOG.error(f"Function signature update failed -> {mfl}\nerror: {e}")
+            LOG.error(traceback.print_exc())
             if mfl in RESULT:
                 del RESULT[mfl]
                 LOG.warning(f"Deleted {mfl} from RESULT after failed code update")
-            # raise
     return updated_function_declarations
 
 
@@ -568,9 +569,12 @@ def update_files_with_new_signatures(
             shutil.copy(module, f"{module}.{backup_file_suffix}")
             LOG.info(f"created backup at location: {module}.{backup_file_suffix}")
         for function, f_start, f_end, f_signature in modules[module]:
-            # update ( 0 indexed )
-            lines[(int(f_start) - 1):(int(f_end) - 1)] = str(f_signature)
-        # write lines
+            # update first line with new code ( 0 indexed )
+            lines[int(f_start) - 1] = str(f_signature)
+            # remove remaining lines ( if multiline signature )
+            if int(f_end) - int(f_start):
+                lines[int(f_start):int(f_end)] = ''
+        # write lines back to file
         with open(module, "w") as f:
             f.writelines(lines)
     return modules
