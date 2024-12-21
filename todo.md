@@ -1,4 +1,3 @@
-# fix multiline multiple decorators 
 # if only None was detected for the param, dont add this type
 it makes no sense to have a None only para ex:
 def foo(a: None) -> str:
@@ -116,3 +115,7 @@ def foobar (i :int=)->int :
 # fix indentation issue - __init__ method doesn't get indented properly
 # implement python 3.5 <= and => 3.9 union types ( Union[] )
 # add Union imports
+# when walking the ast, make sure that you correctly identify function
+dunder functions will match first instance in a file, ex. __init__ 
+so, if this is a dunder method, we need to identify the 'owner' class first, or jump to line and then walk?
+# fix multiline multiple decorators 
