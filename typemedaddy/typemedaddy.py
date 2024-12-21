@@ -478,7 +478,8 @@ def execute_update(mfl: str, data: dict, updated_function_declarations: dict) ->
             updated_line = int(line_num) + number_of_decorators
             mfl = f"{module}:{function}:{updated_line}"
             LOG.warning(f"Updating from line {(line_num)} to {updated_line}), new mfl is {mfl}")
-        updated_function_declarations[mfl] = ("".join(indentation), updated_function)
+        mfll = f"{mfl}:{f_end}"
+        updated_function_declarations[mfll] = ("".join(indentation), updated_function)
 
 def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
     updated_function_declarations = dict()
@@ -552,8 +553,8 @@ def update_files_with_new_signatures(
     modules = {}
     # group by module so we update file only once
     for mfl, f_signature in function_signatures.items():
-        module, function, line = mfl.split(":")
-        modules.setdefault(module, list()).append((function, line, f_signature))
+        module, function, f_start, f_end = mfl.split(":")
+        modules.setdefault(module, list()).append((function, f_start, f_end, f_signature))
     for module in modules:
         # read lines
         with open(module, "r") as f:
@@ -562,9 +563,9 @@ def update_files_with_new_signatures(
         if backup_file_suffix:
             shutil.copy(module, f"{module}.{backup_file_suffix}")
             LOG.info(f"created backup at location: {module}.{backup_file_suffix}")
-        for function, line, f_signature in modules[module]:
+        for function, f_start, f_end, f_signature in modules[module]:
             # update ( 0 indexed )
-            lines[int(line) - 1] = str(f_signature)
+            lines[(int(f_start) - 1):(int(f_end) - 1)] = str(f_signature)
         # write lines
         with open(module, "w") as f:
             f.writelines(lines)
