@@ -1,9 +1,3 @@
-# handle *args and **kwargs
-- args and kwargs can be called whatever you want, so it's the same issue as with 'self' ref
-- both stand alone functions and class methods can have *args 
-- do we care? Not yet!
-looks like tracing *args results in args that have no name...which makes sense
-how will we handle that?
 # if only None was detected for the param, dont add this type
 it makes no sense to have a None only para ex:
 def foo(a: None) -> str:
@@ -118,3 +112,6 @@ dunder functions will match first instance in a file, ex. __init__
 so, if this is a dunder method, we need to identify the 'owner' class first, or jump to line and then walk?
 # fix multiline multiple decorators 
 # handle multi line function signatures
+# handle *args and **kwargs
+looks like tracing *args results in args that have no name...which makes sense
+im happy with just return types
