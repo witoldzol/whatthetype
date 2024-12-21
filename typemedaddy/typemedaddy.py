@@ -53,7 +53,7 @@ MODEL = {
 # so that we don't trace them
 # in other words - we don't want to trace functions defined in external libraries, just our own code
 PROJECT_NAME = os.getcwd()
-TREES = {}
+AST_TREES = {}
 
 class TraceEvent(Enum):
     CALL = "call"  #: Triggered when a function is called.
@@ -333,21 +333,25 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
         result[mfl]["return"] = sorted(s)
     return result
 
-def get_size_of_function_signature(module: str, code: str, f_name: str):
-    if module in TREES:
-        tree = TREES[module]
+def get_size_of_function_signature(module: str, code: str, f_name: str, f_start: str):
+    if module in AST_TREES:
+        tree = AST_TREES[module]
     else:
         tree = ast.parse(code)
-        TREES[module] = tree
+        AST_TREES[module] = tree
     for node in ast.walk(tree):
+        # dunder functions can occurr multiple times in the same module
+        # iterate over the tree until you get to the correct line
+        if hasattr(node, "lineno") and int(node.lineno) < int(f_start):
+            continue
         if isinstance(node, ast.FunctionDef) and node.name == f_name:
             number_of_decorators = len(node.decorator_list)
             LOG.info(f"{f_name} has {number_of_decorators} decorators")
-            start = int(node.lineno) - 1
+            start = int(node.lineno) - 1 # todo why -1???
             try:
                 end = int(node.args.args[-1].lineno) # get the line of the last argument
             except IndexError:
-                end = start # no args scenario # function can still be multiline -> if you write your code like that then FU
+                end = start
             return (start, end, number_of_decorators)
     raise Exception(f"Failed to find the function in the ast tree. Function name: {f_name}")
 
@@ -376,7 +380,7 @@ def execute_update(mfl: str, data: dict, updated_function_declarations: dict) ->
     module, function, line_num = mfl.split(":")
     with open(module, "r") as f:
         code = f.read()
-        f_start, f_end, number_of_decorators = get_size_of_function_signature(module, code, function)
+        f_start, f_end, number_of_decorators = get_size_of_function_signature(module, code, function, line_num)
         tokens = get_tokens(code, f_start, f_end)
         result = []
         in_arguments = None
