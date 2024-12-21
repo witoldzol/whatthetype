@@ -29,7 +29,15 @@ def foo(i,
 def kfoo(*args):
     return (*args,)
 
+def kwfoo(*args, **kwargs):
+    return {k for k in kwargs}
+
+
+def all_at_once(name, age = 69, *args, **kwargs) -> set:
+    return {k for k in kwargs}
 
 with trace() as data:
     kfoo(11, 'a', None)
+    kwfoo(1, 'a', {'a': 1, 'b': 2})
+    all_at_once('bob', 66, 1, 'a', {'a': 1, 'b': 2})
 type_it_like_its_hot(data, update_files=True, backup_file_suffix=None)
