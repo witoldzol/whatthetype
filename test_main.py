@@ -813,6 +813,6 @@ def kfoo(*args):
     function = "kfoo"
     line_num = "29"
     f_start, f_end, number_of_decorators = get_size_of_function_signature(module, code, function, line_num)
-    assert f_start == 29
-    assert f_end == 29
+    assert f_start == 30
+    assert f_end == 30
     assert number_of_decorators == 0

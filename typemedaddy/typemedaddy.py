@@ -346,8 +346,8 @@ def get_size_of_function_signature(module: str, code: str, f_name: str, f_start:
             continue
         if isinstance(node, ast.FunctionDef) and node.name == f_name:
             number_of_decorators = len(node.decorator_list)
-            LOG.info(f"{f_name} has {number_of_decorators} decorators")
-            start = int(node.lineno) - 1 # todo why -1???
+            LOG.debug(f"{f_name} has {number_of_decorators} decorators")
+            start = int(node.lineno)
             try:
                 end = int(node.args.args[-1].lineno) # get the line of the last argument
             except IndexError:
@@ -355,7 +355,7 @@ def get_size_of_function_signature(module: str, code: str, f_name: str, f_start:
             return (start, end, number_of_decorators)
     raise Exception(f"Failed to find the function in the ast tree. Function name: {f_name}")
 
-def get_tokens(code: str, s: int, e: int):
+def get_tokens(code: str, start: int, end: int):
     """ sample tokenizer output [ first line full, rest truncated ]
     TokenInfo(type=5 (INDENT), string='    ', start=(1, 0), end=(1, 4), line="    def arbitrary_self(not_self, name: str = 'default_val', age=10):\n")
     TokenInfo(type=1 (NAME), string='def', _, _, _ ...
@@ -367,9 +367,11 @@ def get_tokens(code: str, s: int, e: int):
     TokenInfo(type=55 (OP), string=':', _, _, _ ...
     ...
     """
-    if s == -1:
+    if start == -1:
         raise Exception('Invalid input')
-    lines_to_tokenize = "\n".join(code.splitlines()[s:e])
+    # list is 0 based, normal code (and ast) has no line 0, we don't modify end, because we want to include it, so it's a -1 && + 1 operation
+    zero_based_start = start - 1
+    lines_to_tokenize = "\n".join(code.splitlines()[zero_based_start:end])
     lines = io.StringIO(lines_to_tokenize).readline
     tokens = generate_tokens(lines)
     return tokens
