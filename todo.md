@@ -1,11 +1,12 @@
+# function parsing fails if final brace is on a different line then last argument
+def bob(a,
+        b,
+) <- this will fail, because we detect last line of function to == line of the last argument
+# investigate why 'type' is being imported (pymongo.mongo_client)
 # if only None was detected for the param, dont add this type
 it makes no sense to have a None only para ex:
 def foo(a: None) -> str:
 ...
-# function parsing fails if final brace is on a different line then last argument
-def bob(a,
-        b
-        ) <- this will fail, because we detect last line of function to == line of the last argument
 # save intermediate steps to a file?
 pass in file pointer to type_it_like_its_hot ?
 
@@ -115,3 +116,5 @@ so, if this is a dunder method, we need to identify the 'owner' class first, or 
 # handle *args and **kwargs
 looks like tracing *args results in args that have no name...which makes sense
 im happy with just return types
+# check if step_1 output is actuall raw data
+# fix warnings
