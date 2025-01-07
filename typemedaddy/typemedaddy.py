@@ -589,7 +589,7 @@ def update_files_with_new_imports(
     # group by files, just like in code update stage, but this time we just need module and class name
     modules = {}
     for mfl, module, class_name in imports:
-        file_path, _, _ = mfl.split(":")
+        file_path = mfl.split(":")[0]
         modules.setdefault(file_path, set()).add((module, class_name))
     for file_path in modules:
         # read lines
@@ -645,17 +645,20 @@ def type_it_like_its_hot(data: dict,
                          backup_file_suffix: Union[str, None] = "bak",
                          dump_intermediate_data = False) -> None:
     unix_time = int(time.time())
+    if dump_intermediate_data:
+        with open(f'step_1_raw_data-{unix_time}', 'w') as f:
+            json.dump(data, f)
     # STEP 1 - get types from data # 
     LOG.info("Converting results to types")
     types_data = convert_results_to_types(data)
-    if dump_intermediate_data:
-        with open(f'step_1_raw_data-{unix_time}', 'w') as f:
-            json.dump(types_data, f)
     # STEP 2 - unify & dedupe types # 
     unified_types_data = unify_types_in_final_result(types_data)
     if dump_intermediate_data:
         with open(f'step_2_unified_types-{unix_time}', 'w') as f:
                 json.dump(unified_types_data, f)
+    # Print warnings # 
+    warnings = detect_multiple_arg_types(unified_types_data)
+    print_warnings(warnings)
     # STEP 3 - generate new code with types #
     updated_function_signatures = update_code_with_types(unified_types_data)
     reformatted_function_signatures = reformat_code(updated_function_signatures)
@@ -677,6 +680,3 @@ def type_it_like_its_hot(data: dict,
         LOG.info("Adding imports for Union types")
         update_files_with_new_imports(modules_with_unions, backup_file_suffix = backup_file_suffix)
     LOG.info("Finished\n\n")
-    # Print warnings # 
-    warnings = detect_multiple_arg_types(types_data)
-    print_warnings(warnings)
