@@ -1,5 +1,5 @@
 from random import choice
-from typing import Callable
+from typing import Union
 from test_files.nested.inner.bar import Bar
 
 class Foo:
@@ -24,12 +24,12 @@ def example_function_with_third_party_lib(a, b):
 def int_function(i) -> int:
     return i
 
-def example_function(a: float|bool, b, foo) -> int:
+def example_function(a, b, foo):
     if type(a) is str and type(b) is int:
         a = int(a)
     return a + b
 
-def func_that_takes_any_args(*args, **kwargs) -> int:
+def func_that_takes_any_args(*args, **kwargs):
     return len(args) + len(kwargs)
 
 def function_returning_dict():
@@ -41,7 +41,7 @@ def function_returning_dict():
     }
 
 
-def function_taking_nested_class(bar: Bar):
+def function_taking_nested_class(bar):
     return bar.name
 
 
@@ -70,4 +70,12 @@ class MultiLine():
                  a,
                  b,
                  c):
+        pass
+
+class MultiLineSeparateBracket():
+    def __init__(self,
+                 a,
+                 b,
+                 c
+                 ):
         pass

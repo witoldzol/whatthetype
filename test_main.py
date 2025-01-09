@@ -1,3 +1,4 @@
+import sys
 import shutil
 import filecmp
 from pathlib import Path
@@ -349,19 +350,31 @@ def test_convert_value_to_type():
 
     value = [1, None]
     actual = convert_value_to_type(value)
-    assert ("list", "int|None") == actual
+    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+        assert ("list", "Union[int, None]") == actual
+    else:
+        assert ("list", "int|None") == actual
 
     value = [1, "a"]
     actual = convert_value_to_type(value)
-    assert ("list", "int|str") == actual
+    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+        assert ("list", "Union[int, str]") == actual
+    else:
+        assert ("list", "int|str") == actual
 
     value = [1, ""]
     actual = convert_value_to_type(value)
-    assert ("list", "int|str") == actual
+    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+        assert ("list", "Union[int, str]") == actual
+    else:
+        assert ("list", "int|str") == actual
 
     value = [1, "a", 1.0]
     actual = convert_value_to_type(value)
-    assert ("list", "float|int|str") == actual
+    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+        assert ("list", "Union[float, int, str]") == actual
+    else:
+        assert ("list", "float|int|str") == actual
 
     value = [[]]
     actual = convert_value_to_type(value)
@@ -373,7 +386,10 @@ def test_convert_value_to_type():
 
     value = [1, [1]]
     actual = convert_value_to_type(value)
-    assert ("list", "int|list[int]") == actual
+    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+        assert ("list", "Union[int, list[int]]") == actual
+    else:
+        assert ("list", "int|list[int]") == actual
 
     value = [{1}, {2}]
     actual = convert_value_to_type(value)
@@ -381,7 +397,10 @@ def test_convert_value_to_type():
 
     value = [{1}, {"a"}]
     actual = convert_value_to_type(value)
-    assert ("list", "set[int|str]") == actual
+    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+        assert ("list", "set[Union[int, str]]") == actual
+    else:
+        assert ("list", "set[int|str]") == actual
 
     value = SELF_OR_CLS
     actual = convert_value_to_type(value)
@@ -389,11 +408,17 @@ def test_convert_value_to_type():
 
     value = [1, None]
     actual = convert_value_to_type(value)
-    assert ("list", "int|None") == actual
+    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+        assert ("list", "Union[int, None]") == actual
+    else:
+        assert ("list", "int|None") == actual
 
     value = [None, [{1, "a"}]]
     actual = convert_value_to_type(value)
-    assert ("list", "list[set[int|str]]|None") == actual
+    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+        assert ("list", "Union[list[set[Union[int, str]]], None]") == actual
+    else:
+        assert ("list", "list[set[int|str]]|None") == actual
 
     # set
     value = set()
@@ -406,11 +431,17 @@ def test_convert_value_to_type():
 
     value = {1, "a"}
     actual = convert_value_to_type(value)
-    assert ("set", "int|str") == actual
+    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+        assert ("set", "Union[int, str]") == actual
+    else:
+        assert ("set", "int|str") == actual
 
     value = {None, 1, "a"}
     actual = convert_value_to_type(value)
-    assert ("set", "int|str|None") == actual
+    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+        assert ("set", "Union[int, str, None]") == actual
+    else:
+        assert ("set", "int|str|None") == actual
 
     # dict
     value = {}
@@ -431,11 +462,17 @@ def test_convert_value_to_type():
 
     value = {"a": [1], "b": ["a"]}
     actual = convert_value_to_type(value)
-    assert ("dict", "str,list[int|str]") == actual
+    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+        assert ("dict", "str,list[Union[int, str]]") == actual
+    else:
+        assert ("dict", "str,list[int|str]") == actual
 
     value = {"a": [None, [1]]}
     actual = convert_value_to_type(value)
-    assert ("dict", "str,list[list[int]|None]") == actual
+    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+        assert ("dict", "str,list[Union[list[int], None]]") == actual
+    else:
+        assert ("dict", "str,list[list[int]|None]") == actual
 
     value = {"a": {1}}
     actual = convert_value_to_type(value)
@@ -447,7 +484,10 @@ def test_convert_value_to_type():
 
     value = {None: {None, 1}, "b": {"a"}}
     actual = convert_value_to_type(value)
-    assert ("dict", "str,set[str]|None,set[int|None]") == actual
+    if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+        assert ("dict", "None,set[Union[int, None]], None],set[Union[int, None]]") == actual
+    else:
+        assert ("dict", "str,set[str]|None,set[int|None]") == actual
 
     value = {"a": {"b": 1}}
     actual = convert_value_to_type(value)
@@ -615,36 +655,67 @@ class TestIntegration:
         # we generate warnings, no changes to the output data
         ##### STEP 4 - final unify #####
         step_4_output = unify_types_in_final_result(step_2_output)
-        expected = {
-            "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6": {
-                "args": {"self": "SELF_OR_CLS", "bar": "None"},
-                "return": "None",
-            },
-            "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27": {
-                "args": {"a": "int|str", "b": "int|str", "foo": "Foo|None"},
-                "return": "int|str",
-            },
-        }
+        if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+            expected = {
+                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6": {
+                    "args": {"self": "SELF_OR_CLS", "bar": "None"},
+                    "return": "None",
+                },
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27": {
+                    "args": {"a": "Union[int, str]", "b": "Union[int, str]", "foo": "Union[Foo, None]"},
+                    "return": "Union[int, str]",
+                },
+            }
+        else:
+            expected = {
+                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6": {
+                    "args": {"self": "SELF_OR_CLS", "bar": "None"},
+                    "return": "None",
+                },
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27": {
+                    "args": {"a": "int|str", "b": "int|str", "foo": "Foo|None"},
+                    "return": "int|str",
+                },
+            }
+
         assert expected == step_4_output
         #### STEP 5 - update code #####
         step_5_output = update_code_with_types(step_4_output)
-        expected = {
-            "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6:6": (
-                "    ",
-                "def __init__ (self ,bar :None=None )->None :",
-            ),
-            "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": (
-                "",
-                "def example_function (a :int|str,b :int|str,foo :Foo|None)->int|str :",
-            ),
-        }
+        if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+            expected = {
+                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6:6": (
+                    "    ",
+                    "def __init__ (self ,bar :None=None )->None :",
+                ),
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": (
+                    "",
+                    "def example_function (a :Union[int, str],b :Union[int, str],foo :Union[Foo, None])->Union[int, str] :",
+                ),
+            }
+        else:
+            expected = {
+                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6:6": (
+                    "    ",
+                    "def __init__ (self ,bar :None=None )->None :",
+                ),
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": (
+                    "",
+                    "def example_function (a :int|str,b :int|str,foo :Foo|None)->int|str :",
+                ),
+            }
         assert expected == step_5_output
         ##### STEP 6 reformat code #####
         step_6_output = reformat_code(step_5_output)
-        expected = {
-            "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6:6": "    def __init__(self, bar: None = None) -> None:\n",
-            "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": "def example_function(a: int | str, b: int | str, foo: Foo | None) -> int | str:\n",
-        }
+        if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+            expected = {
+                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6:6": "    def __init__(self, bar: None = None) -> None:\n",
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": "def example_function(a: Union[int, str], b: Union[int, str], foo: Union[Foo, None]) -> Union[int, str]:\n",
+            }
+        else:
+            expected = {
+                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6:6": "    def __init__(self, bar: None = None) -> None:\n",
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": "def example_function(a: int | str, b: int | str, foo: Foo | None) -> int | str:\n",
+            }
         assert expected == step_6_output
 
     # TODO this is a nice-to-do feature where we handle *args,**kwargs
@@ -689,36 +760,68 @@ class TestIntegration:
         ##### STEP 3 generate warings #####
         ##### STEP 4 - final unify #####
         step_4_output = unify_types_in_final_result(step_2_output)
-        expected = {
-            "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27": {
-                "args": {"a": "int", "b": "int", "foo": "Foo|None"},
-                "return": "int",
-            },
-            "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56": {
-                "args": {"callback": "Callable|int"},
-                "return": "Callable|int",
-            },
-        }
+        if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+            expected = {
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27": {
+                    "args": {"a": "int", "b": "int", "foo": "Union[Foo, None]"},
+                    "return": "int",
+                },
+                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56": {
+                    "args": {"callback": "Union[Callable, int]"},
+                    "return": "Union[Callable, int]",
+                },
+            }
+        else:
+            expected = {
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27": {
+                    "args": {"a": "int", "b": "int", "foo": "Foo|None"},
+                    "return": "int",
+                },
+                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56": {
+                    "args": {"callback": "Callable|int"},
+                    "return": "Callable|int",
+                },
+            }
+
         assert expected == step_4_output
         ##### STEP 5 #####
         step_5_output = update_code_with_types(step_2_output)
-        expected = {
-            "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": (
-                "",
-                "def example_function (a :int,b :int,foo :Foo|None)->int :",
-            ),
-            "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56": (
-                "",
-                "def takes_func_returns_func (callback :Callable|int)->Callable|int :",
-            ),
-        }
+        if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+            expected = {
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": (
+                    "",
+                    "def example_function (a :int,b :int,foo :Union[Foo, None])->int :",
+                ),
+                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56": (
+                    "",
+                    "def takes_func_returns_func (callback :Union[Callable, int])->Union[Callable, int] :",
+                ),
+            }
+        else:
+            expected = {
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": (
+                    "",
+                    "def example_function (a :int,b :int,foo :Foo|None)->int :",
+                ),
+                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56": (
+                    "",
+                    "def takes_func_returns_func (callback :Callable|int)->Callable|int :",
+                ),
+            }
+
         assert expected == step_5_output
         ##### STEP 6 reformat code #####
         step_6_output = reformat_code(step_5_output)
-        expected = {
-            "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": "def example_function(a: int, b: int, foo: Foo | None) -> int:\n",
-            "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56": "def takes_func_returns_func(callback: Callable | int) -> Callable | int:\n",
-        }
+        if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
+            expected = {
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": "def example_function(a: int, b: int, foo: Union[Foo, None]) -> int:\n",
+                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56": "def takes_func_returns_func(callback: Union[Callable, int]) -> Union[Callable, int]:\n",
+            }
+        else:
+            expected = {
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": "def example_function(a: int, b: int, foo: Foo | None) -> int:\n",
+                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56": "def takes_func_returns_func(callback: Callable | int) -> Callable | int:\n",
+            }
         assert expected == step_6_output
 
 
