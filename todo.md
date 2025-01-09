@@ -2,6 +2,11 @@
 def bob(a,
         b,
 ) <- this will fail, because we detect last line of function to == line of the last argument
+# fix bug where typed dictionary with key as 'None' is skipped ( only python 3.9 )
+value = {None: {None, 1}, "b": {"a"}}
+Actual             -     'Union[...
+Expected           +     'None,set[..
+
 # investigate why 'type' is being imported (pymongo.mongo_client)
 # if only None was detected for the param, dont add this type
 it makes no sense to have a None only para ex:
