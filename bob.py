@@ -29,11 +29,16 @@ def foo(i,
 def kfoo(*args):
     return (*args,)
 
-def kwfoo(*args, **kwargs):
+def kwfoo(*args, 
+          **kwargs):
     return {k for k in kwargs}
 
 
-def all_at_once(name, age = 69, *args, **kwargs) -> set:
+def all_at_once(name, 
+                age = 69, 
+                *args, 
+                **kwargs
+                ) -> set:
     return {k for k in kwargs}
 
 with trace() as data:
