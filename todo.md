@@ -1,7 +1,11 @@
-# function parsing fails if final brace is on a different line then last argument
-def bob(a,
-        b,
-) <- this will fail, because we detect last line of function to == line of the last argument
+# run tests for both 3.9 and 3.10 python at the same time ( use tox ? )
+# create a big 'integration' test with documentation on how to run it / how it works -> so that when i forget, i know what's going on
+this test will run against one big block of code with all the possible stuff,
+ multilines,
+ weird formatting,
+ context managers,
+ lambdas,
+...
 # fix bug where typed dictionary with key as 'None' is skipped ( only python 3.9 )
 value = {None: {None, 1}, "b": {"a"}}
 Actual             -     'Union[...
@@ -123,3 +127,8 @@ looks like tracing *args results in args that have no name...which makes sense
 im happy with just return types
 # check if step_1 output is actuall raw data
 # fix warnings
+# function parsing fails if final brace is on a different line then last argument
+def bob(a,
+        b,
+) <- this will fail, because we detect last line of function to == line of the last argument
+-> actual solution was to fix bad implementation of signature end detection and bad implementation of line replacement in file
