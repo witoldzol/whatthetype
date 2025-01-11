@@ -348,9 +348,13 @@ def get_size_of_function_signature(module: str, code: str, f_name: str, f_start:
         if isinstance(node, ast.FunctionDef) and node.name == f_name:
             number_of_decorators = len(node.decorator_list)
             LOG.debug(f"{f_name} has {number_of_decorators} decorators")
-            start = int(node.lineno)
-            end = int(node.body[0].lineno)  - 1 # get the first line of the body and go back one
-            return (start, end, number_of_decorators)
+            sig_start = int(node.lineno)
+            body_start = int(node.body[0].lineno)
+            if sig_start == body_start: # this covers the case of one line functions
+                sig_end = body_start
+            else:
+                sig_end =  body_start - 1 # get the first line of the body and go back one
+            return (sig_start, sig_end, number_of_decorators)
     raise Exception(f"Failed to find the function in the ast tree. Function name: {f_name}")
 
 def get_tokens(code: str, start: int, end: int):
