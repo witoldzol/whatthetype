@@ -2,7 +2,7 @@ import logging
 from typemedaddy.typemedaddy import trace, type_it_like_its_hot
 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 def decorator_one(f):
     def wrapper(i, x):
@@ -30,16 +30,22 @@ def kfoo(*args):
     return (*args,)
 
 def kwfoo(*args, 
-          **kwargs):
-    return {k for k in kwargs}
+          **kwargs
+          ):
+    print('a')
+    return 'kwfoo'
 
 
 def all_at_once(name, 
                 age = 69, 
                 *args, 
                 **kwargs
-                ) -> set:
-    return {k for k in kwargs}
+                ):
+    print(name)
+    print(age)
+    print(args)
+    print(kwargs)
+    return {'all_at_once'}
 
 with trace() as data:
     kfoo(11, 'a', None)
