@@ -350,7 +350,7 @@ def get_size_of_function_signature(module: str, code: str, f_name: str, f_start:
             LOG.debug(f"{f_name} has {number_of_decorators} decorators")
             start = int(node.lineno)
             try:
-                end = int(node.args.args[-1].lineno) # get the line of the last argument
+                end = int(node.body[0].lineno)  - 1 # get the first line of the body and go back one
             except IndexError:
                 end = start
             return (start, end, number_of_decorators)
