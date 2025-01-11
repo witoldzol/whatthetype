@@ -349,10 +349,7 @@ def get_size_of_function_signature(module: str, code: str, f_name: str, f_start:
             number_of_decorators = len(node.decorator_list)
             LOG.debug(f"{f_name} has {number_of_decorators} decorators")
             start = int(node.lineno)
-            try:
-                end = int(node.body[0].lineno)  - 1 # get the first line of the body and go back one
-            except IndexError:
-                end = start
+            end = int(node.body[0].lineno)  - 1 # get the first line of the body and go back one
             return (start, end, number_of_decorators)
     raise Exception(f"Failed to find the function in the ast tree. Function name: {f_name}")
 
@@ -572,11 +569,11 @@ def update_files_with_new_signatures(
             shutil.copy(module, f"{module}.{backup_file_suffix}")
             LOG.info(f"created backup at location: {module}.{backup_file_suffix}")
         for function, f_start, f_end, f_signature in modules[module]:
-            # update first line with new code ( 0 indexed )
+            # insert entire signature into first line ->if it's multiline it will get expanded when file is read again, we remove rest of the signature below
             lines[int(f_start) - 1] = str(f_signature)
-            # remove remaining lines ( if multiline signature )
-            if int(f_end) - int(f_start):
-                lines[int(f_start):int(f_end)] = ''
+            # mark remaining lines as empty ( lines marked as '' will be removed )
+            for line_num in range(int(f_start), int(f_end) ): # skip first line, right range is not inclusive so we skip -1 as well
+                lines[line_num] = ''
         # write lines back to file
         with open(module, "w") as f:
             f.writelines(lines)
