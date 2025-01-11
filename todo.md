@@ -1,3 +1,7 @@
+# acomodate one line functions 
+edge detection
+file update
+- at the moment function get's simply removed
 # run tests for both 3.9 and 3.10 python at the same time ( use tox ? )
 # create a big 'integration' test with documentation on how to run it / how it works -> so that when i forget, i know what's going on
 this test will run against one big block of code with all the possible stuff,
