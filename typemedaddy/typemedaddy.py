@@ -1,7 +1,8 @@
+from dataclasses import dataclass
 import time
 import json
 import inspect
-from typing import Union
+from typing import Union, TypedDict
 import ast
 from collections import namedtuple
 import io
@@ -334,7 +335,23 @@ def convert_results_to_types(input: dict[str, dict]) -> dict:
         result[mfl]["return"] = sorted(s)
     return result
 
-def get_size_of_function_signature(module: str, code: str, f_name: str, f_start: str):
+class FunctionDetails(TypedDict):
+    sig_start_line: int
+    sig_end_line: int
+    body_start_line: int
+    body_start_column: int
+    number_of_decorators: int
+
+class FunctionCodeAndDetails(TypedDict):
+    code: str
+    indentation: str
+    function_details: FunctionDetails
+
+class FormattedFunctionCodeAndDetails(TypedDict):
+    code: str
+    function_details: FunctionDetails
+
+def get_size_of_function_signature(module: str, code: str, f_name: str, f_start: str) -> FunctionDetails:
     if module in AST_TREES:
         tree = AST_TREES[module]
     else:
@@ -348,14 +365,18 @@ def get_size_of_function_signature(module: str, code: str, f_name: str, f_start:
         if isinstance(node, ast.FunctionDef) and node.name == f_name:
             number_of_decorators = len(node.decorator_list)
             LOG.debug(f"{f_name} has {number_of_decorators} decorators")
-            sig_start = int(node.lineno)
-            body_start = int(node.body[0].lineno)
-            if sig_start == body_start: # this covers the case of one line functions
-                sig_end = body_start
+            sig_start_line = int(node.lineno)
+            body_start_line = int(node.body[0].lineno)
+            body_start_column = int(node.body[0].col_offset)
+            if sig_start_line == body_start_line: # this covers the case of one line functions
+                sig_end_line = body_start_line
             else:
-                sig_end =  body_start - 1 # get the first line of the body and go back one
-            # return {"sig_start": sig_start, "sig_end": sig_end, "body_start": body_start, "number_of_decorators": number_of_decorators}
-            return (sig_start, sig_end, body_start, number_of_decorators)
+                sig_end_line =  body_start_line - 1 # get the first line of the body and go back one
+            return {"sig_start_line": sig_start_line,
+                    "sig_end_line": sig_end_line,
+                    "body_start_line": body_start_line,
+                    "body_start_column": body_start_column,
+                    "number_of_decorators": number_of_decorators}
     raise Exception(f"Failed to find the function in the ast tree. Function name: {f_name}")
 
 def get_tokens(code: str, start: int, end: int):
@@ -385,8 +406,11 @@ def execute_update(mfl: str, data: dict, updated_function_declarations: dict) ->
     module, function, line_num = mfl.split(":")
     with open(module, "r") as f:
         code = f.read()
-        f_start, f_end, body_start, number_of_decorators = get_size_of_function_signature(module, code, function, line_num)
-        tokens = get_tokens(code, f_start, f_end)
+        function_details = get_size_of_function_signature(module, code, function, line_num)
+        f_end = function_details["sig_end_line"] # todo - remove
+        body_start = function_details["body_start_line"] # todo
+        number_of_decorators = function_details["number_of_decorators"]
+        tokens = get_tokens(code, function_details["sig_start_line"], function_details["sig_end_line"])
         result = []
         in_arguments = None
         # untokenize will not handle spacing and indentation if we remove last 3 args
@@ -488,9 +512,9 @@ def execute_update(mfl: str, data: dict, updated_function_declarations: dict) ->
             mfl = f"{module}:{function}:{updated_line}"
             LOG.warning(f"Updating from line {(line_num)} to {updated_line}), new mfl is {mfl}")
         mfll = f"{mfl}:{f_end}:{body_start}"
-        updated_function_declarations[mfll] = ("".join(indentation), updated_function)
+        updated_function_declarations[mfll] = {"indentation": "".join(indentation), "code": updated_function, "function_details": function_details}
 
-def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
+def update_code_with_types(data: dict) -> dict[str, FunctionCodeAndDetails]:
     updated_function_declarations = dict()
     for mfl in data:
         try:
@@ -534,11 +558,14 @@ def unify_types_in_final_result(stage_2_results: dict) -> dict:
     return stage_2_results
 
 
-def reformat_code(function_signatures: dict[str, tuple[str, str]]) -> dict[str, object]:
+def reformat_code(function_signatures: dict[str, FunctionCodeAndDetails]) -> dict[str, FormattedFunctionCodeAndDetails]:
     result = {}
     for mfl, v in function_signatures.items():
-        indentation, code = v
-        result[mfl] = indentation + fix_code(code)
+        # result[mfl] = v["indentation"] + fix_code(v["code"])
+        result[mfl] = {
+                "code": v["indentation"] + fix_code(v["code"]),
+                "function_details": v["function_details"],
+        }
     return result
 
 
@@ -557,14 +584,16 @@ FLC = namedtuple("FLC", ["function_name", "line", "function_signature"])
 
 
 def update_files_with_new_signatures(
-    function_signatures: dict[str, object], backup_file_suffix: Union[str, None] = "bak"
+    formattedFunctionCodeAndDetails: dict[str, FormattedFunctionCodeAndDetails], backup_file_suffix: Union[str, None] = "bak"
 ) -> dict[str, FLC]:
     # {module = [('func_name', 'line', '<CODE>')] [str,str,str]
     modules = {}
     # group by module so we update file only once
-    for mfl, f_signature in function_signatures.items():
+    for mfl, v in formattedFunctionCodeAndDetails.items():
+        f_signature = v["code"]
+        f_details = v["function_details"]
         module, function, f_start, f_end, body_start = mfl.split(":")
-        modules.setdefault(module, list()).append((function, f_start, f_end, f_signature))
+        modules.setdefault(module, list()).append((function, f_start, f_end, f_signature, f_details))
     for module in modules:
         # read lines
         with open(module, "r") as f:
@@ -573,14 +602,20 @@ def update_files_with_new_signatures(
         if backup_file_suffix:
             shutil.copy(module, f"{module}.{backup_file_suffix}")
             LOG.info(f"created backup at location: {module}.{backup_file_suffix}")
-        for function, f_start, f_end, f_signature in modules[module]:
+        for function, f_start, f_end, f_signature, f_details in modules[module]:
+            # check for one line function edgecase
+            if f_details["sig_start_line"] == f_details["body_start_line"]:
+                end_of_fun_signature_offset = f_details["body_start_column"]
+                function_body = lines[int(f_start) - 1][end_of_fun_signature_offset:]
+                lines[int(f_start) - 1] = fix_code(f_signature.rstrip() + function_body)
+            else:
             # insert entire signature into first line ->if it's multiline it will get expanded when file is read again, we remove rest of the signature below
-            lines[int(f_start) - 1] = str(f_signature)
-            # mark remaining lines as empty ( lines marked as '' will be removed )
-            for line_num in range(int(f_start), int(f_end) ): # skip first line, right range is not inclusive so we skip -1 as well
-                if int(f_end) == int(body_start):
-                    raise Exception('One line function')
-                lines[line_num] = ''
+                lines[int(f_start) - 1] = str(f_signature)
+                # mark remaining lines as empty ( lines marked as '' will be removed )
+                for line_num in range(int(f_start), int(f_end) ): # skip first line, right range is not inclusive so we skip -1 as well
+                    if int(f_end) == int(body_start):
+                        raise Exception('One line function')
+                    lines[line_num] = ''
         # write lines back to file
         with open(module, "w") as f:
             f.writelines(lines)
