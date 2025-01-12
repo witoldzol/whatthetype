@@ -6,3 +6,4 @@ setuptools
 autopep8
 pytest
 pudb
+mypy
