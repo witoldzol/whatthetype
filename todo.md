@@ -1,7 +1,8 @@
 # acomodate one line functions 
-edge detection
-file update
-- at the moment function get's simply removed
+we will need to include the signature or body offset -> this way we know where the sig ends
+## refactor the code to move f_end, body_start and sig/body offset to the data
+# resolve mypy issues
+# install ruff and resolve ruff issues
 # run tests for both 3.9 and 3.10 python at the same time ( use tox ? )
 # create a big 'integration' test with documentation on how to run it / how it works -> so that when i forget, i know what's going on
 this test will run against one big block of code with all the possible stuff,
@@ -26,6 +27,7 @@ pass in file pointer to type_it_like_its_hot ?
 ==============================================================================================
 ======================================== NICE TO DO ? ========================================
 ==============================================================================================
+# implement field validation of the inputs
 # implement no union operator
 # should we deduplicate inputs from step 1? the data set will grow crazy big, and it will make step 2 work much harder ( although, we do have dedup in step 2...)
 # refactor update_code_with_types
