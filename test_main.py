@@ -569,7 +569,7 @@ def test_update_code_with_types_when_default_value_is_none():
     }
     a = update_code_with_types(input)
     assert {
-        "/home/w/repos/typemedaddy/test_files/foo.py:barfoo:65:65": (
+        "/home/w/repos/typemedaddy/test_files/foo.py:barfoo:65:65:66": (
             "",
             "def barfoo (i :int=111 )->int :",
         )
@@ -583,7 +583,7 @@ def test_update_code_with_types_when_default_value_is_none():
     }
     a = update_code_with_types(input)
     assert {
-        "/home/w/repos/typemedaddy/test_files/foo.py:foobar:62:62": (
+        "/home/w/repos/typemedaddy/test_files/foo.py:foobar:62:62:63": (
             "",
             "def foobar (i :int=None )->int :",
         )
@@ -610,7 +610,7 @@ class TestIntegration:
         assert {'/home/w/repos/typemedaddy/test_files/foo.py:__init__:69': 
                 {'args': {'a': 'int', 'b': 'str', 'c': 'list[int]', 'self': 'SELF_OR_CLS'}, 'return': 'None'}} == step_4_output
         step_5_output = update_code_with_types(step_4_output)
-        assert {'/home/w/repos/typemedaddy/test_files/foo.py:__init__:69:72': ('    ', 'def __init__ (self ,\n    a :int,\n    b :str,\n    c :list[int])->None :')} == step_5_output
+        assert {'/home/w/repos/typemedaddy/test_files/foo.py:__init__:69:72:73': ('    ', 'def __init__ (self ,\n    a :int,\n    b :str,\n    c :list[int])->None :')} == step_5_output
 
     def test_call_with_class_method(self):
         with trace() as step_1_output:
@@ -683,22 +683,22 @@ class TestIntegration:
         step_5_output = update_code_with_types(step_4_output)
         if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
             expected = {
-                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6:6": (
+                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6:6:7": (
                     "    ",
                     "def __init__ (self ,bar :None=None )->None :",
                 ),
-                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": (
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27:28": (
                     "",
                     "def example_function (a :Union[int, str],b :Union[int, str],foo :Union[Foo, None])->Union[int, str] :",
                 ),
             }
         else:
             expected = {
-                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6:6": (
+                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6:6:7": (
                     "    ",
                     "def __init__ (self ,bar :None=None )->None :",
                 ),
-                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": (
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27:28": (
                     "",
                     "def example_function (a :int|str,b :int|str,foo :Foo|None)->int|str :",
                 ),
@@ -708,13 +708,13 @@ class TestIntegration:
         step_6_output = reformat_code(step_5_output)
         if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
             expected = {
-                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6:6": "    def __init__(self, bar: None = None) -> None:\n",
-                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": "def example_function(a: Union[int, str], b: Union[int, str], foo: Union[Foo, None]) -> Union[int, str]:\n",
+                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6:6:7": "    def __init__(self, bar: None = None) -> None:\n",
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27:28": "def example_function(a: Union[int, str], b: Union[int, str], foo: Union[Foo, None]) -> Union[int, str]:\n",
             }
         else:
             expected = {
-                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6:6": "    def __init__(self, bar: None = None) -> None:\n",
-                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": "def example_function(a: int | str, b: int | str, foo: Foo | None) -> int | str:\n",
+                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6:6:7": "    def __init__(self, bar: None = None) -> None:\n",
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27:28": "def example_function(a: int | str, b: int | str, foo: Foo | None) -> int | str:\n",
             }
         assert expected == step_6_output
 
@@ -788,22 +788,22 @@ class TestIntegration:
         step_5_output = update_code_with_types(step_2_output)
         if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
             expected = {
-                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": (
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27:28": (
                     "",
                     "def example_function (a :int,b :int,foo :Union[Foo, None])->int :",
                 ),
-                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56": (
+                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56:57": (
                     "",
                     "def takes_func_returns_func (callback :Union[Callable, int])->Union[Callable, int] :",
                 ),
             }
         else:
             expected = {
-                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": (
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27:28": (
                     "",
                     "def example_function (a :int,b :int,foo :Foo|None)->int :",
                 ),
-                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56": (
+                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56:57": (
                     "",
                     "def takes_func_returns_func (callback :Callable|int)->Callable|int :",
                 ),
@@ -814,13 +814,13 @@ class TestIntegration:
         step_6_output = reformat_code(step_5_output)
         if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
             expected = {
-                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": "def example_function(a: int, b: int, foo: Union[Foo, None]) -> int:\n",
-                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56": "def takes_func_returns_func(callback: Union[Callable, int]) -> Union[Callable, int]:\n",
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27:28": "def example_function(a: int, b: int, foo: Union[Foo, None]) -> int:\n",
+                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56:57": "def takes_func_returns_func(callback: Union[Callable, int]) -> Union[Callable, int]:\n",
             }
         else:
             expected = {
-                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27": "def example_function(a: int, b: int, foo: Foo | None) -> int:\n",
-                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56": "def takes_func_returns_func(callback: Callable | int) -> Callable | int:\n",
+                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27:28": "def example_function(a: int, b: int, foo: Foo | None) -> int:\n",
+                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56:57": "def takes_func_returns_func(callback: Callable | int) -> Callable | int:\n",
             }
         assert expected == step_6_output
 
@@ -915,7 +915,7 @@ def kfoo(*args):
     module = "foo"
     function = "kfoo"
     line_num = "29"
-    f_start, f_end, number_of_decorators = get_size_of_function_signature(module, code, function, line_num)
+    f_start, f_end, body_start, number_of_decorators = get_size_of_function_signature(module, code, function, line_num)
     assert f_start == 30
     assert f_end == 30
     assert number_of_decorators == 0

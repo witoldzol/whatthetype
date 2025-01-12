@@ -354,7 +354,8 @@ def get_size_of_function_signature(module: str, code: str, f_name: str, f_start:
                 sig_end = body_start
             else:
                 sig_end =  body_start - 1 # get the first line of the body and go back one
-            return (sig_start, sig_end, number_of_decorators)
+            # return {"sig_start": sig_start, "sig_end": sig_end, "body_start": body_start, "number_of_decorators": number_of_decorators}
+            return (sig_start, sig_end, body_start, number_of_decorators)
     raise Exception(f"Failed to find the function in the ast tree. Function name: {f_name}")
 
 def get_tokens(code: str, start: int, end: int):
@@ -384,7 +385,7 @@ def execute_update(mfl: str, data: dict, updated_function_declarations: dict) ->
     module, function, line_num = mfl.split(":")
     with open(module, "r") as f:
         code = f.read()
-        f_start, f_end, number_of_decorators = get_size_of_function_signature(module, code, function, line_num)
+        f_start, f_end, body_start, number_of_decorators = get_size_of_function_signature(module, code, function, line_num)
         tokens = get_tokens(code, f_start, f_end)
         result = []
         in_arguments = None
@@ -486,7 +487,7 @@ def execute_update(mfl: str, data: dict, updated_function_declarations: dict) ->
             updated_line = int(line_num) + number_of_decorators
             mfl = f"{module}:{function}:{updated_line}"
             LOG.warning(f"Updating from line {(line_num)} to {updated_line}), new mfl is {mfl}")
-        mfll = f"{mfl}:{f_end}"
+        mfll = f"{mfl}:{f_end}:{body_start}"
         updated_function_declarations[mfll] = ("".join(indentation), updated_function)
 
 def update_code_with_types(data: dict) -> dict[str, tuple[str, str]]:
@@ -562,7 +563,7 @@ def update_files_with_new_signatures(
     modules = {}
     # group by module so we update file only once
     for mfl, f_signature in function_signatures.items():
-        module, function, f_start, f_end = mfl.split(":")
+        module, function, f_start, f_end, body_start = mfl.split(":")
         modules.setdefault(module, list()).append((function, f_start, f_end, f_signature))
     for module in modules:
         # read lines
@@ -577,6 +578,8 @@ def update_files_with_new_signatures(
             lines[int(f_start) - 1] = str(f_signature)
             # mark remaining lines as empty ( lines marked as '' will be removed )
             for line_num in range(int(f_start), int(f_end) ): # skip first line, right range is not inclusive so we skip -1 as well
+                if int(f_end) == int(body_start):
+                    raise Exception('One line function')
                 lines[line_num] = ''
         # write lines back to file
         with open(module, "w") as f:
