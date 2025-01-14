@@ -595,7 +595,7 @@ def update_files_with_new_signatures(
         module, function, f_start, f_end, body_start = mfl.split(":")
         modules.setdefault(module, list()).append((function, f_start, f_end, f_signature, f_details))
     for module in modules:
-        # read lines
+        # read lines from a file
         with open(module, "r") as f:
             lines = f.readlines()
         # create backup
@@ -605,9 +605,9 @@ def update_files_with_new_signatures(
         for function, f_start, f_end, f_signature, f_details in modules[module]:
             # check for one line function edgecase
             if f_details["sig_start_line"] == f_details["body_start_line"]:
-                end_of_fun_signature_offset = f_details["body_start_column"]
-                function_body = lines[int(f_start) - 1][end_of_fun_signature_offset:]
-                lines[int(f_start) - 1] = fix_code(f_signature.rstrip() + function_body)
+                body_start_column = f_details["body_start_column"]
+                f_body = lines[int(f_start) - 1][body_start_column:]
+                lines[int(f_start) - 1] = fix_code(f_signature.rstrip() + f_body)
             else:
             # insert entire signature into first line ->if it's multiline it will get expanded when file is read again, we remove rest of the signature below
                 lines[int(f_start) - 1] = str(f_signature)
