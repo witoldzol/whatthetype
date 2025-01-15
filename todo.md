@@ -1,6 +1,7 @@
 # acomodate one line functions 
 we will need to include the signature or body offset -> this way we know where the sig ends
 ## refactor the code to move f_end, body_start and sig/body offset to the data
+# refactor typed dicts to use typed tuples - better experience and supported by 3.5 python
 # resolve mypy issues
 # install ruff and resolve ruff issues
 # run tests for both 3.9 and 3.10 python at the same time ( use tox ? )
@@ -27,6 +28,7 @@ pass in file pointer to type_it_like_its_hot ?
 ==============================================================================================
 ======================================== NICE TO DO ? ========================================
 ==============================================================================================
+# implement generic group by field function - update_files_with_new_signatures
 # implement field validation of the inputs
 # implement no union operator
 # should we deduplicate inputs from step 1? the data set will grow crazy big, and it will make step 2 work much harder ( although, we do have dedup in step 2...)
