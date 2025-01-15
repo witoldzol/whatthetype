@@ -1,4 +1,4 @@
-from typemedaddy.typemedaddy import trace
+from whatthetype.whatthetype import trace
 
 def print_stuff(input):
     print(input)

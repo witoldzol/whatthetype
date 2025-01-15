@@ -1,9 +1,9 @@
 from a import foo 
 from b import gives_c
-import typemedaddy
-from typemedaddy import convert_results_to_types,unify_types_in_final_result,update_code_with_types,reformat_code,update_files_with_new_signatures,update_files_with_new_imports, IMPORTS
+import whatthetype
+from whatthetype import convert_results_to_types,unify_types_in_final_result,update_code_with_types,reformat_code,update_files_with_new_signatures,update_files_with_new_imports, IMPORTS
 
-with typemedaddy.trace() as data:
+with whatthetype.trace() as data:
     c = gives_c()
     foo(c)
 print("><"*100)

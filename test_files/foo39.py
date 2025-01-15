@@ -1,4 +1,4 @@
-from typemedaddy.nested.inner.bar import Bar
+from whatthetype.nested.inner.bar import Bar
 
 class Foo:
     def __init__(self, bar: Bar=None):

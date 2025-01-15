@@ -13,7 +13,7 @@ from test_files.foo import (
     takes_func_returns_func,
     MultiLine,
 )
-from typemedaddy.typemedaddy import (
+from whatthetype.whatthetype import (
     convert_results_to_types,
     convert_value_to_type,
     trace,
@@ -166,7 +166,7 @@ def test_multiple_functions():
             "args": {"a": [1], "b": [2], "c": [3], "d": ["4"]},
             "return": [1],
         },
-        "/home/w/repos/typemedaddy/bar.py:bar_function:69": {
+        "/home/w/repos/whatthetype/bar.py:bar_function:69": {
             "args": {"a": [1]},
             "return": [1],
         },
@@ -177,7 +177,7 @@ def test_multiple_functions():
             "args": {"a": ["int"], "b": ["int"], "c": ["int"], "d": ["str"]},
             "return": ["int"],
         },
-        "/home/w/repos/typemedaddy/bar.py:bar_function:69": {
+        "/home/w/repos/whatthetype/bar.py:bar_function:69": {
             "args": {"a": ["int"]},
             "return": ["int"],
         },
@@ -191,7 +191,7 @@ def test_multiple_type_inputs_for_the_same_param():
             "args": {"a": [1, "1"]},
             "return": [1, "1"],
         },
-        "/home/w/repos/typemedaddy/bar.py:bar_function:69": {
+        "/home/w/repos/whatthetype/bar.py:bar_function:69": {
             "args": {"a": [1, "1"]},
             "return": [1, "1"],
         },
@@ -202,7 +202,7 @@ def test_multiple_type_inputs_for_the_same_param():
     #         "args": {"a": ["int", "str"]},
     #         "return": ["int", "str"],
     #     },
-    #     "/home/w/repos/typemedaddy/bar.py:bar_function:69": {
+    #     "/home/w/repos/whatthetype/bar.py:bar_function:69": {
     #         "args": {"a": ["int", "str"]},
     #         "return": ["int", "str"],
     #     },
@@ -214,23 +214,23 @@ def test_multiple_type_inputs_for_the_same_param():
         ["str", "int"]
     )
     assert sorted(
-        actual["/home/w/repos/typemedaddy/bar.py:bar_function:69"]["args"]["a"]
+        actual["/home/w/repos/whatthetype/bar.py:bar_function:69"]["args"]["a"]
     ) == sorted(["str", "int"])
-    assert sorted(actual["/home/w/repos/typemedaddy/bar.py:bar_function:69"]["return"]) == sorted(
+    assert sorted(actual["/home/w/repos/whatthetype/bar.py:bar_function:69"]["return"]) == sorted(
         ["str", "int"]
     )
 
 
 def test_conver_self_ref_val_to_self_ref_type():
     step_1_result = {
-        "/home/w/repos/typemedaddy/test_files/foo.py:arbitrary_self:12": {
+        "/home/w/repos/whatthetype/test_files/foo.py:arbitrary_self:12": {
             "args": {"not_self": ["SELF_OR_CLS"], "name": [1], "age": [2]},
             "return": ["1,2"],
         },
     }
     actual = convert_results_to_types(step_1_result)
     expected = {
-        "/home/w/repos/typemedaddy/test_files/foo.py:arbitrary_self:12": {
+        "/home/w/repos/whatthetype/test_files/foo.py:arbitrary_self:12": {
             "args": {"not_self": ["SELF_OR_CLS"], "name": ["int"], "age": ["int"]},
             "return": ["str"],
         }
@@ -562,19 +562,19 @@ def test_union_types():
 def test_update_code_with_types_when_default_value_is_none():
     # non None
     input = {
-        "/home/w/repos/typemedaddy/test_files/foo.py:barfoo:65": {
+        "/home/w/repos/whatthetype/test_files/foo.py:barfoo:65": {
             "args": {"i": "int"},
             "return": "int",
         }
     }
     a = update_code_with_types(input)
-    expected = {'/home/w/repos/typemedaddy/test_files/foo.py:barfoo:65': 
+    expected = {'/home/w/repos/whatthetype/test_files/foo.py:barfoo:65': 
                 {'indentation': '',
                  'code': 'def barfoo (i :int=111 )->int :',
                  'function_details': {'sig_start_line': 65, 'sig_end_line': 65, 'body_start_line': 66, 'body_start_column': 4, 'number_of_decorators': 0}}}
     assert expected == a
     expected = {
-        '/home/w/repos/typemedaddy/test_files/foo.py:barfoo:65': {
+        '/home/w/repos/whatthetype/test_files/foo.py:barfoo:65': {
             'indentation': '',
             'code': 'def barfoo (i :int=111 )->int :',
             'function_details': {'sig_start_line': 65,
@@ -587,14 +587,14 @@ def test_update_code_with_types_when_default_value_is_none():
     assert expected == a
     # None default
     input = {
-        "/home/w/repos/typemedaddy/test_files/foo.py:foobar:62": {
+        "/home/w/repos/whatthetype/test_files/foo.py:foobar:62": {
             "args": {"i": "int"},
             "return": "int",
         }
     }
     a = update_code_with_types(input)
     expected = {
-        '/home/w/repos/typemedaddy/test_files/foo.py:foobar:62':
+        '/home/w/repos/whatthetype/test_files/foo.py:foobar:62':
         { 'indentation': '',
          'code': 'def foobar (i :int=None )->int :',
          'function_details': {'sig_start_line': 62, 'sig_end_line': 62, 'body_start_line': 63, 'body_start_column': 4, 'number_of_decorators': 0}}}
@@ -615,14 +615,14 @@ class TestIntegration:
                                              }
                 assert step_1_output[k]["return"] == [None]
         step_2_output = convert_results_to_types(step_1_output)
-        assert {'/home/w/repos/typemedaddy/test_files/foo.py:__init__:69': 
+        assert {'/home/w/repos/whatthetype/test_files/foo.py:__init__:69': 
                 {'args': {'a': ['int'], 'b': ['str'], 'c': ['list[int]'], 'self': ['SELF_OR_CLS']}, 'return': ['None']}} == step_2_output
         step_4_output = unify_types_in_final_result(step_2_output)
-        assert {'/home/w/repos/typemedaddy/test_files/foo.py:__init__:69': 
+        assert {'/home/w/repos/whatthetype/test_files/foo.py:__init__:69': 
                 {'args': {'a': 'int', 'b': 'str', 'c': 'list[int]', 'self': 'SELF_OR_CLS'}, 'return': 'None'}} == step_4_output
         step_5_output = update_code_with_types(step_4_output)
         expected = {
-            '/home/w/repos/typemedaddy/test_files/foo.py:__init__:69':
+            '/home/w/repos/whatthetype/test_files/foo.py:__init__:69':
             {'indentation': '    ',
              'code': 'def __init__ (self ,\n    a :int,\n    b :str,\n    c :list[int])->None :',
              'function_details': {'sig_start_line': 69, 'sig_end_line': 72, 'body_start_line': 73, 'body_start_column': 8, 'number_of_decorators': 0}}}
@@ -648,20 +648,20 @@ class TestIntegration:
         print("### out ### \n" * 3)
         print(step_1_output)
         # step_1_output = {
-        #     '/home/w/repos/typemedaddy/test_files/foo.py:__init__:6':
+        #     '/home/w/repos/whatthetype/test_files/foo.py:__init__:6':
         #         {'args': {'self': ['SELF_OR_CLS'], 'bar': [None]},
         #          'return': [None]},
-        #     '/home/w/repos/typemedaddy/test_files/foo.py:example_function:27':
-        #         {'args': {'a': [1, 3, 'a'], 'b': [2, 4, 'b'], 'foo': ['USER_CLASS|typemedaddy.foo::Foo', None, None]},
+        #     '/home/w/repos/whatthetype/test_files/foo.py:example_function:27':
+        #         {'args': {'a': [1, 3, 'a'], 'b': [2, 4, 'b'], 'foo': ['USER_CLASS|whatthetype.foo::Foo', None, None]},
         #          'return': [3, 7, 'ab']}}
         ##### STEP 2 #####
         step_2_output = convert_results_to_types(step_1_output)
         expected = {
-            "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6": {
+            "/home/w/repos/whatthetype/test_files/foo.py:__init__:6": {
                 "args": {"self": ["SELF_OR_CLS"], "bar": ["None"]},
                 "return": ["None"],
             },
-            "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27": {
+            "/home/w/repos/whatthetype/test_files/foo.py:example_function:27": {
                 "args": {"a": ["int", "str"], "b": ["int", "str"], "foo": ["Foo", "None"]},
                 "return": ["int", "str"],
             },
@@ -673,22 +673,22 @@ class TestIntegration:
         step_4_output = unify_types_in_final_result(step_2_output)
         if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
             expected = {
-                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6": {
+                "/home/w/repos/whatthetype/test_files/foo.py:__init__:6": {
                     "args": {"self": "SELF_OR_CLS", "bar": "None"},
                     "return": "None",
                 },
-                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27": {
+                "/home/w/repos/whatthetype/test_files/foo.py:example_function:27": {
                     "args": {"a": "Union[int, str]", "b": "Union[int, str]", "foo": "Union[Foo, None]"},
                     "return": "Union[int, str]",
                 },
             }
         else:
             expected = {
-                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6": {
+                "/home/w/repos/whatthetype/test_files/foo.py:__init__:6": {
                     "args": {"self": "SELF_OR_CLS", "bar": "None"},
                     "return": "None",
                 },
-                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27": {
+                "/home/w/repos/whatthetype/test_files/foo.py:example_function:27": {
                     "args": {"a": "int|str", "b": "int|str", "foo": "Foo|None"},
                     "return": "int|str",
                 },
@@ -699,18 +699,18 @@ class TestIntegration:
         step_5_output = update_code_with_types(step_4_output)
         if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
             expected = {
-                '/home/w/repos/typemedaddy/test_files/foo.py:__init__:6': 
+                '/home/w/repos/whatthetype/test_files/foo.py:__init__:6': 
                     {'indentation': '    ', 'code': 'def __init__ (self ,bar :None=None )->None :', 'function_details': {'sig_start_line': 6, 'sig_end_line': 6, 'body_start_line': 7, 'body_start_column': 8, 'number_of_decorators': 0}}, 
-                '/home/w/repos/typemedaddy/test_files/foo.py:example_function:27': 
+                '/home/w/repos/whatthetype/test_files/foo.py:example_function:27': 
                     {'indentation': '', 'code': 'def example_function (a :Union[int, str],b :Union[int, str],foo :Union[Foo, None])->Union[int, str] :', 'function_details': {'sig_start_line': 27, 'sig_end_line': 27, 'body_start_line': 28, 'body_start_column': 4, 'number_of_decorators': 0}}}
         else:
             expected = {
-                '/home/w/repos/typemedaddy/test_files/foo.py:__init__:6': 
+                '/home/w/repos/whatthetype/test_files/foo.py:__init__:6': 
                 {
                     'indentation': '    ',
                     'code': 'def __init__ (self ,bar :None=None )->None :',
                     'function_details': {'sig_start_line': 6, 'sig_end_line': 6, 'body_start_line': 7, 'body_start_column': 8, 'number_of_decorators': 0}},
-                '/home/w/repos/typemedaddy/test_files/foo.py:example_function:27': 
+                '/home/w/repos/whatthetype/test_files/foo.py:example_function:27': 
                 {
                     'indentation': '',
                     'code': 'def example_function (a :int|str,b :int|str,foo :Foo|None)->int|str :',
@@ -720,15 +720,15 @@ class TestIntegration:
         step_6_output = reformat_code(step_5_output)
         if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
             expected = {
-                '/home/w/repos/typemedaddy/test_files/foo.py:__init__:6': 
+                '/home/w/repos/whatthetype/test_files/foo.py:__init__:6': 
                     {'code': '    def __init__(self, bar: None = None) -> None:\n', 'function_details': {'sig_start_line': 6, 'sig_end_line': 6, 'body_start_line': 7, 'body_start_column': 8, 'number_of_decorators': 0}},
-                '/home/w/repos/typemedaddy/test_files/foo.py:example_function:27': 
+                '/home/w/repos/whatthetype/test_files/foo.py:example_function:27': 
                     {'code': 'def example_function(a: Union[int, str], b: Union[int, str], foo: Union[Foo, None]) -> Union[int, str]:\n', 'function_details': {'sig_start_line': 27, 'sig_end_line': 27, 'body_start_line': 28, 'body_start_column': 4, 'number_of_decorators': 0}}}
         else:
             expected = {
-                '/home/w/repos/typemedaddy/test_files/foo.py:__init__:6': 
+                '/home/w/repos/whatthetype/test_files/foo.py:__init__:6': 
                     {'code': '    def __init__(self, bar: None = None) -> None:\n', 'function_details': {'sig_start_line': 6, 'sig_end_line': 6, 'body_start_line': 7, 'body_start_column': 8, 'number_of_decorators': 0}},
-                '/home/w/repos/typemedaddy/test_files/foo.py:example_function:27': 
+                '/home/w/repos/whatthetype/test_files/foo.py:example_function:27': 
                     {'code': 'def example_function(a: int | str, b: int | str, foo: Foo | None) -> int | str:\n', 'function_details': {'sig_start_line': 27, 'sig_end_line': 27, 'body_start_line': 28, 'body_start_column': 4, 'number_of_decorators': 0}}}
         assert expected == step_6_output
 
@@ -759,11 +759,11 @@ class TestIntegration:
         ##### STEP 2 #####
         step_2_output = convert_results_to_types(step_1_output)
         expected = {
-            "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27": {
+            "/home/w/repos/whatthetype/test_files/foo.py:example_function:27": {
                 "args": {"a": ["int"], "b": ["int"], "foo": ["Foo", "None"]},
                 "return": ["int"],
             },
-            "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56": {
+            "/home/w/repos/whatthetype/test_files/foo.py:takes_func_returns_func:56": {
                 "args": {
                     "callback": ["Callable", "int"],
                 },
@@ -776,22 +776,22 @@ class TestIntegration:
         step_4_output = unify_types_in_final_result(step_2_output)
         if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
             expected = {
-                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27": {
+                "/home/w/repos/whatthetype/test_files/foo.py:example_function:27": {
                     "args": {"a": "int", "b": "int", "foo": "Union[Foo, None]"},
                     "return": "int",
                 },
-                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56": {
+                "/home/w/repos/whatthetype/test_files/foo.py:takes_func_returns_func:56": {
                     "args": {"callback": "Union[Callable, int]"},
                     "return": "Union[Callable, int]",
                 },
             }
         else:
             expected = {
-                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27": {
+                "/home/w/repos/whatthetype/test_files/foo.py:example_function:27": {
                     "args": {"a": "int", "b": "int", "foo": "Foo|None"},
                     "return": "int",
                 },
-                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56": {
+                "/home/w/repos/whatthetype/test_files/foo.py:takes_func_returns_func:56": {
                     "args": {"callback": "Callable|int"},
                     "return": "Callable|int",
                 },
@@ -802,29 +802,29 @@ class TestIntegration:
         step_5_output = update_code_with_types(step_2_output)
         if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
             expected = {
-                '/home/w/repos/typemedaddy/test_files/foo.py:example_function:27': 
+                '/home/w/repos/whatthetype/test_files/foo.py:example_function:27': 
                     {'indentation': '', 'code': 'def example_function (a :int,b :int,foo :Union[Foo, None])->int :', 'function_details': {'sig_start_line': 27, 'sig_end_line': 27, 'body_start_line': 28, 'body_start_column': 4, 'number_of_decorators': 0}},
-                '/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56': 
+                '/home/w/repos/whatthetype/test_files/foo.py:takes_func_returns_func:56': 
                     {'indentation': '', 'code': 'def takes_func_returns_func (callback :Union[Callable, int])->Union[Callable, int] :', 'function_details': {'sig_start_line': 56, 'sig_end_line': 56, 'body_start_line': 57, 'body_start_column': 4, 'number_of_decorators': 0}}}
         else:
-            expected = {'/home/w/repos/typemedaddy/test_files/foo.py:example_function:27':
+            expected = {'/home/w/repos/whatthetype/test_files/foo.py:example_function:27':
                             {'indentation': '', 'code': 'def example_function (a :int,b :int,foo :Foo|None)->int :', 'function_details': {'sig_start_line': 27, 'sig_end_line': 27, 'body_start_line': 28, 'body_start_column': 4, 'number_of_decorators': 0}},
-                        '/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56': 
+                        '/home/w/repos/whatthetype/test_files/foo.py:takes_func_returns_func:56': 
                             {'indentation': '', 'code': 'def takes_func_returns_func (callback :Callable|int)->Callable|int :', 'function_details': {'sig_start_line': 56, 'sig_end_line': 56, 'body_start_line': 57, 'body_start_column': 4, 'number_of_decorators': 0}}}
         assert expected == step_5_output
         ##### STEP 6 reformat code #####
         step_6_output = reformat_code(step_5_output)
         if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
             expected = {
-                '/home/w/repos/typemedaddy/test_files/foo.py:example_function:27': 
+                '/home/w/repos/whatthetype/test_files/foo.py:example_function:27': 
                     {'code': 'def example_function(a: int, b: int, foo: Union[Foo, None]) -> int:\n', 'function_details': {'sig_start_line': 27, 'sig_end_line': 27, 'body_start_line': 28, 'body_start_column': 4, 'number_of_decorators': 0}},
-                '/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56': 
+                '/home/w/repos/whatthetype/test_files/foo.py:takes_func_returns_func:56': 
                     {'code': 'def takes_func_returns_func(callback: Union[Callable, int]) -> Union[Callable, int]:\n', 'function_details': {'sig_start_line': 56, 'sig_end_line': 56, 'body_start_line': 57, 'body_start_column': 4, 'number_of_decorators': 0}}}
         else:
             expected = {
-                '/home/w/repos/typemedaddy/test_files/foo.py:example_function:27': 
+                '/home/w/repos/whatthetype/test_files/foo.py:example_function:27': 
                     {'code': 'def example_function(a: int, b: int, foo: Foo | None) -> int:\n', 'function_details': {'sig_start_line': 27, 'sig_end_line': 27, 'body_start_line': 28, 'body_start_column': 4, 'number_of_decorators': 0}},
-                '/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56': 
+                '/home/w/repos/whatthetype/test_files/foo.py:takes_func_returns_func:56': 
                     {'code': 'def takes_func_returns_func(callback: Callable | int) -> Callable | int:\n', 'function_details': {'sig_start_line': 56, 'sig_end_line': 56, 'body_start_line': 57, 'body_start_column': 4, 'number_of_decorators': 0}}}
         assert expected == step_6_output
 
@@ -886,7 +886,7 @@ def test_file_update_two_functions():
 def test_get_size_of_function_signature():
     code="""
 import logging
-from typemedaddy.typemedaddy import trace, type_it_like_its_hot
+from whatthetype.whatthetype import trace, type_it_like_its_hot
 
 
 logging.basicConfig(level=logging.DEBUG)

@@ -1,6 +1,6 @@
 # How to use
 ```python
-from typemedaddy.typemedaddy import trace, type_it_like_its_hot
+from whatthetype.whatthetype import trace, type_it_like_its_hot
 
 def foo(i,
         x):
@@ -13,7 +13,7 @@ type_it_like_its_hot(data, update_files=True, backup_file_suffix=None, dump_inte
 
 # Result
 ```python
-from typemedaddy.typemedaddy import trace, type_it_like_its_hot
+from whatthetype.whatthetype import trace, type_it_like_its_hot
 
 def foo(i: int,
         x: int) -> dict[str, list[tuple[int]]]:
@@ -24,10 +24,6 @@ with trace() as data:
 type_it_like_its_hot(data, update_files=True, backup_file_suffix=None, dump_intermediate_data=False)
 ```
 
-# CAUTION!!!
-This lib will OVERWRITE YOUR SOURCE FILES! ( It creates backup files before it does )
-Use SOURCE CONTROL before running this !!!!
-
 # What
 Inspects code at runtime, derives types from arguments and updates in-place source files with detected type hints and required imports.
 
@@ -37,7 +33,7 @@ Ideally use 3.9 or higher ( This lib supports both Union and '|' operators)
 
 # Install
 ```bash
-pip install typemedaddy
+pip install whatthetype
 ```
 
 # Params

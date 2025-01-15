@@ -1,5 +1,5 @@
 import logging
-from typemedaddy.typemedaddy import trace, type_it_like_its_hot
+from whatthetype.whatthetype import trace, type_it_like_its_hot
 
 
 logging.basicConfig(level=logging.INFO)
