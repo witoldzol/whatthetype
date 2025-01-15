@@ -730,10 +730,11 @@ class TestIntegration:
             }
         else:
             expected = {
-                "/home/w/repos/typemedaddy/test_files/foo.py:__init__:6:6:7": "    def __init__(self, bar: None = None) -> None:\n",
-                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27:28": "def example_function(a: int | str, b: int | str, foo: Foo | None) -> int | str:\n",
-            }
-        # assert expected == step_6_output #todo -fix 
+                '/home/w/repos/typemedaddy/test_files/foo.py:__init__:6': 
+                    {'code': '    def __init__(self, bar: None = None) -> None:\n', 'function_details': {'sig_start_line': 6, 'sig_end_line': 6, 'body_start_line': 7, 'body_start_column': 8, 'number_of_decorators': 0}},
+                '/home/w/repos/typemedaddy/test_files/foo.py:example_function:27': 
+                    {'code': 'def example_function(a: int | str, b: int | str, foo: Foo | None) -> int | str:\n', 'function_details': {'sig_start_line': 27, 'sig_end_line': 27, 'body_start_line': 28, 'body_start_column': 4, 'number_of_decorators': 0}}}
+        assert expected == step_6_output
 
     # TODO this is a nice-to-do feature where we handle *args,**kwargs
     @pytest.mark.skip
@@ -815,18 +816,11 @@ class TestIntegration:
                 ),
             }
         else:
-            expected = {
-                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27:28": (
-                    "",
-                    "def example_function (a :int,b :int,foo :Foo|None)->int :",
-                ),
-                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56:57": (
-                    "",
-                    "def takes_func_returns_func (callback :Callable|int)->Callable|int :",
-                ),
-            }
-
-        # assert expected == step_5_output # todo -fix
+            expected = {'/home/w/repos/typemedaddy/test_files/foo.py:example_function:27':
+                            {'indentation': '', 'code': 'def example_function (a :int,b :int,foo :Foo|None)->int :', 'function_details': {'sig_start_line': 27, 'sig_end_line': 27, 'body_start_line': 28, 'body_start_column': 4, 'number_of_decorators': 0}},
+                        '/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56': 
+                            {'indentation': '', 'code': 'def takes_func_returns_func (callback :Callable|int)->Callable|int :', 'function_details': {'sig_start_line': 56, 'sig_end_line': 56, 'body_start_line': 57, 'body_start_column': 4, 'number_of_decorators': 0}}}
+        assert expected == step_5_output
         ##### STEP 6 reformat code #####
         step_6_output = reformat_code(step_5_output)
         if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
@@ -836,10 +830,11 @@ class TestIntegration:
             }
         else:
             expected = {
-                "/home/w/repos/typemedaddy/test_files/foo.py:example_function:27:27:28": "def example_function(a: int, b: int, foo: Foo | None) -> int:\n",
-                "/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56:56:57": "def takes_func_returns_func(callback: Callable | int) -> Callable | int:\n",
-            }
-        # assert expected == step_6_output # todo - fix
+                '/home/w/repos/typemedaddy/test_files/foo.py:example_function:27': 
+                    {'code': 'def example_function(a: int, b: int, foo: Foo | None) -> int:\n', 'function_details': {'sig_start_line': 27, 'sig_end_line': 27, 'body_start_line': 28, 'body_start_column': 4, 'number_of_decorators': 0}},
+                '/home/w/repos/typemedaddy/test_files/foo.py:takes_func_returns_func:56': 
+                    {'code': 'def takes_func_returns_func(callback: Callable | int) -> Callable | int:\n', 'function_details': {'sig_start_line': 56, 'sig_end_line': 56, 'body_start_line': 57, 'body_start_column': 4, 'number_of_decorators': 0}}}
+        assert expected == step_6_output
 
 
 def test_file_update_single_function():
