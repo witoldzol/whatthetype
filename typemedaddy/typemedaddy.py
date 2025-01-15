@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 import time
 import json
 import inspect
@@ -407,8 +406,6 @@ def execute_update(mfl: str, data: dict, updated_function_declarations: dict) ->
     with open(module, "r") as f:
         code = f.read()
         function_details = get_size_of_function_signature(module, code, function, line_num)
-        f_end = function_details["sig_end_line"] # todo - remove
-        body_start = function_details["body_start_line"] # todo
         number_of_decorators = function_details["number_of_decorators"]
         tokens = get_tokens(code, function_details["sig_start_line"], function_details["sig_end_line"])
         result = []
@@ -511,8 +508,7 @@ def execute_update(mfl: str, data: dict, updated_function_declarations: dict) ->
             updated_line = int(line_num) + number_of_decorators
             mfl = f"{module}:{function}:{updated_line}"
             LOG.warning(f"Updating from line {(line_num)} to {updated_line}), new mfl is {mfl}")
-        mfll = f"{mfl}:{f_end}:{body_start}"
-        updated_function_declarations[mfll] = {"indentation": "".join(indentation), "code": updated_function, "function_details": function_details}
+        updated_function_declarations[mfl] = {"indentation": "".join(indentation), "code": updated_function, "function_details": function_details}
 
 def update_code_with_types(data: dict) -> dict[str, FunctionCodeAndDetails]:
     updated_function_declarations = dict()
@@ -584,16 +580,18 @@ FLC = namedtuple("FLC", ["function_name", "line", "function_signature"])
 
 
 def update_files_with_new_signatures(
-    formattedFunctionCodeAndDetails: dict[str, FormattedFunctionCodeAndDetails], backup_file_suffix: Union[str, None] = "bak"
+    formattedFunctionCodeAndDetails: dict[str, FormattedFunctionCodeAndDetails],
+    backup_file_suffix: Union[str, None] = "bak"
 ) -> dict[str, FLC]:
     # {module = [('func_name', 'line', '<CODE>')] [str,str,str]
     modules = {}
     # group by module so we update file only once
+    # todo - can we have a generic function for grouping?
     for mfl, v in formattedFunctionCodeAndDetails.items():
         f_signature = v["code"]
         f_details = v["function_details"]
-        module, function, f_start, f_end, body_start = mfl.split(":")
-        modules.setdefault(module, list()).append((function, f_start, f_end, f_signature, f_details))
+        module, function, _ = mfl.split(":")
+        modules.setdefault(module, list()).append((function, f_signature, f_details))
     for module in modules:
         # read lines from a file
         with open(module, "r") as f:
@@ -602,19 +600,19 @@ def update_files_with_new_signatures(
         if backup_file_suffix:
             shutil.copy(module, f"{module}.{backup_file_suffix}")
             LOG.info(f"created backup at location: {module}.{backup_file_suffix}")
-        for function, f_start, f_end, f_signature, f_details in modules[module]:
+        for function, f_signature, f_details in modules[module]:
+            f_start = f_details["sig_start_line"]
+            f_end = f_details["sig_end_line"]
             # check for one line function edgecase
-            if f_details["sig_start_line"] == f_details["body_start_line"]:
+            if f_start == f_details["body_start_line"]:
                 body_start_column = f_details["body_start_column"]
-                f_body = lines[int(f_start) - 1][body_start_column:]
-                lines[int(f_start) - 1] = fix_code(f_signature.rstrip() + f_body)
+                f_body = lines[f_start - 1][body_start_column:]
+                lines[f_start - 1] = fix_code(f_signature.rstrip() + f_body) # we reformat again to deal with whitespace between sig and body
             else:
             # insert entire signature into first line ->if it's multiline it will get expanded when file is read again, we remove rest of the signature below
-                lines[int(f_start) - 1] = str(f_signature)
+                lines[f_start - 1] = str(f_signature)
                 # mark remaining lines as empty ( lines marked as '' will be removed )
-                for line_num in range(int(f_start), int(f_end) ): # skip first line, right range is not inclusive so we skip -1 as well
-                    if int(f_end) == int(body_start):
-                        raise Exception('One line function')
+                for line_num in range(f_start, f_end): # skip first line, right range is not inclusive so we skip -1 as well
                     lines[line_num] = ''
         # write lines back to file
         with open(module, "w") as f:
