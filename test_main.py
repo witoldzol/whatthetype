@@ -924,3 +924,97 @@ def kfoo(*args):
     assert function_details["sig_end_line"] == 30
     assert function_details["body_start_line"] == 31
     assert function_details["number_of_decorators"] == 0
+
+
+@pytest.mark.skip
+def test_complicated_structure():
+    value = {"workspaces": {"mand": True,
+                            "nonem": False,
+                            "listofsub": {
+                                "Name" : {"m": True, "t": str, "ml": 64, "null": False},
+                                "ShortName" : {"m": True, "t": str, "ml": 64 },
+                                "Descr" : {"m": True, "t": str, "ml": 64 , "nonempty": False},
+                                "Type" : {"m": True, "t": str, "null": False , "one_of": ["system", "shared", "personal"]},
+                                "IsReadOnly" : {"m": True, "t": str, "one_of": [False]},
+                                "Isdeleted" : {"m": True, "t": str, "one_of": [False]},
+                                "CreatedBy" : {"m": True, "t": str, "max_len": 64},
+                                "TagNames" : {"m": True, "t": str, "list_type": str, "nonempty": False}
+                                }
+                            }
+             }
+    actual = union_types([convert_value_to_type(value)])
+    # actual = convert_value_to_type(value)
+    # actual = 'dict', 'str,dict[str,bool|dict[str,dict[str,bool|int|type|str,bool|list[bool]|type|str,bool|list[str]|type|str,bool|type]]]'
+    expected = "dict[str, dict[str, bool | dict[str, dict[str, bool | type[str] | int] | dict[str, bool | type[str] | list[str]] | dict[str, bool | type[str] | list[bool]] | dict[str, bool | type[str]]]]]"
+    expected = "Dict[str, Dict[str, Union[bool, Dict[str, Union[Dict[str, Union[bool, Type[str], int]], Dict[str, Union[bool, Type[str], List[str]]], Dict[str, Union[bool, Type[str], List[bool]]], Dict[str, Union[bool, Type[str]]]]]]]]"
+    assert expected == actual
+
+# def test_comp1():
+#     value = {"workspaces": {"mand": True,
+#                             "nonem": False,
+#                             }}
+#     actual = union_types([convert_value_to_type(value)])
+#     expected = "dict[str,dict[str,bool]]"
+#     assert expected == actual
+#
+# def test_comp2():
+#     value = {"workspaces": {"listofsub": {
+#                                 "Name" : {"m": True, "t": str, "ml": 64, "null": False}}}}
+#     actual = union_types([convert_value_to_type(value)])
+#     expected = "dict[str,dict[str,dict[str,dict[str,bool|int|type]]]]"
+#     assert expected == actual
+#
+# def test_comp3():
+#     value = {"workspaces": {
+#         "listofsub": {
+#             "Type" : {"m": True, "t": str, "null": False , "one_of": ["system", "shared", "personal"]},
+#         }}}
+#     actual = union_types([convert_value_to_type(value)])
+#     expected = "dict[str,dict[str,dict[str,dict[str,bool|list[str]|type]]]]"
+#     assert expected == actual
+#
+# def test_comp4():
+#     value = {"workspaces": {
+#         "listofsub": {
+#             "IsReadOnly" : {"m": True, "t": str, "one_of": [False]},
+#             "Isdeleted" : {"m": True, "t": str, "one_of": [False]}
+#         }}}
+#     actual = union_types([convert_value_to_type(value)])
+#     expected = "dict[str,dict[str,dict[str,dict[str,bool|list[bool]|type]]]]"
+#     assert expected == actual
+#
+# def test_comp5():
+#     value = {"workspaces": {
+#                             "mand": True,
+#                             "nonem": False,
+#                             "listofsub": {
+#                                 "Name" : {"m": True, "t": str, "ml": 64, "null": False}
+#                             }
+#                     }
+#              }
+#     actual = union_types([convert_value_to_type(value)])
+#     expected = "dict[str,dict[str,bool|dict[str,dict[str,bool|int|type]]]]"
+#     assert expected == actual
+#
+# def test_comp6():
+#     value = {"workspaces": {
+#                             "mand": True,
+#                             "nonem": False,
+#                             "listofsub": {
+#                                 "Name" : {"m": True, "t": str, "ml": 64, "null": False},
+#                                 "ShortName" : {"m": True, "t": str, "ml": 64 }
+#                             }
+#                     }
+#              }
+#     actual = union_types([convert_value_to_type(value)])
+#     expected = "dict[str,dict[str,bool|dict[str,dict[str,bool|int|type]]]]"
+#     assert expected == actual
+
+def test_list_in_dict_breaks_union():
+    value = [
+        {"x": 'a'},
+        {"y": []},
+    ]
+    actual = union_types([convert_value_to_type(value)])
+    expected = "list[dict[str,str|list]]"
+    assert expected == actual
