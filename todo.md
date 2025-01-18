@@ -1,6 +1,7 @@
-# acomodate one line functions 
-we will need to include the signature or body offset -> this way we know where the sig ends
-## refactor the code to move f_end, body_start and sig/body offset to the data
+# fix complex data type inference bug - test_complicated_structure
+# type 'type' as Type[]
+ex: str => Type[str], <class type> => Type[figure out what type it is of]
+remember to add import
 # refactor typed dicts to use typed tuples - better experience and supported by 3.5 python
 # resolve mypy issues
 # install ruff and resolve ruff issues
@@ -140,3 +141,6 @@ def bob(a,
         b,
 ) <- this will fail, because we detect last line of function to == line of the last argument
 -> actual solution was to fix bad implementation of signature end detection and bad implementation of line replacement in file
+# acomodate one line functions 
+we will need to include the signature or body offset -> this way we know where the sig ends
+## refactor the code to move f_end, body_start and sig/body offset to the data
