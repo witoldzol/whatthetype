@@ -1,4 +1,3 @@
-# fix complex data type inference bug - test_complicated_structure
 # type 'type' as Type[]
 ex: str => Type[str], <class type> => Type[figure out what type it is of]
 remember to add import
@@ -41,6 +40,7 @@ this would greatly simplyfy the necessary logic
 ############################################################
 ## DONE ##
 ############################################################
+# fix complex data type inference bug - test_complicated_structure
 # identify 'self' & 'cls' aka first arg of class method, and give it 'special' arg,
 so that we can mark it as `SELF_OR_CLS`
 why? so we can skip in further steps, THIS IS NOT STRICTLY NECESSARY, but it's 'best' for completion sake to capture all args, even self refrences
