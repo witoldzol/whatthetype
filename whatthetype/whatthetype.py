@@ -203,7 +203,7 @@ def union_types(types: list[Union[str, tuple[str, str]]]) -> str:
         # if simple, shallow type
         if type(x) is str:
             temp_dict[x] = x
-        # if tuple - ie, complex or nested type complex / simple type
+        # if tuple - ie, complex or nested type
         else:
             outer, inner = x
             assert outer in ("dict", "tuple", "list", "set", "self", "simple", "class")
@@ -225,8 +225,16 @@ def union_types(types: list[Union[str, tuple[str, str]]]) -> str:
     for k, v in temp_dict.items():
         if k not in COLLECTIONS:
             result.add(k)
+        elif k == "dict":
+            # we don't want to have
+            # dict[str,int|str,str] -> this gets hard to read for big collections
+            # lets have dict[str,int]|dict[str,str]
+            new_set = set()
+            for x in v:
+                new_set.add(f"dict[{x}]")
+            result.add(UNION_OPERATOR(sorted(new_set)))
         else:
-            # rembmer to sort the set!
+            # remember to sort the set!
             sorted_joined_types = UNION_OPERATOR(sorted(v))
             if sorted_joined_types:
                 result.add(f"{k}[{sorted_joined_types}]")
@@ -238,8 +246,8 @@ def union_types(types: list[Union[str, tuple[str, str]]]) -> str:
 def union_dict_types(types: dict[str, set[tuple[str, str]]]) -> str:
     temp_set = set()
     for k, v in types.items():
-        sorted_types = sort_types_none_at_the_end(v)
-        union_of_sorted_types = f"{k},{union_types(sorted_types)}"
+        value_to_list = list(v)
+        union_of_sorted_types = f"{k},{union_types(value_to_list)}"
         temp_set.add(union_of_sorted_types)
     sorted_set = sorted(temp_set)
     return union_types(sorted_set)
@@ -248,6 +256,7 @@ def union_dict_types(types: dict[str, set[tuple[str, str]]]) -> str:
 def convert_value_to_type(
     value: Any,
 ) -> tuple[Literal["dict", "tuple", "list", "set", "self", "simple", "class"], str]:
+    # import pudb;pu.db
     input_type = get_value_type(value)
     # base case
     if input_type not in COLLECTIONS:
@@ -265,7 +274,7 @@ def convert_value_to_type(
     if input_type == "dict":
         temp_dict = {}
         for k, v in value.items():
-            key_type = get_value_type(k)
+            key_type = get_value_type(k) # this will overwrite other combination with the same key eg. {'a':1, 'a':'a'} will end up str,str
             temp_dict.setdefault(key_type, set()).add(convert_value_to_type(v))
         if temp_dict:
             union_of_sorted_types = union_dict_types(temp_dict)
