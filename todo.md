@@ -1,6 +1,3 @@
-# type 'type' as Type[]
-ex: str => Type[str], <class type> => Type[figure out what type it is of]
-remember to add import
 # refactor typed dicts to use typed tuples - better experience and supported by 3.5 python
 # resolve mypy issues
 # install ruff and resolve ruff issues
@@ -40,6 +37,9 @@ this would greatly simplyfy the necessary logic
 ############################################################
 ## DONE ##
 ############################################################
+# type 'type' as Type[]
+ex: str => Type[str], <class type> => Type[figure out what type it is of]
+remember to add import
 # fix complex data type inference bug - test_complicated_structure
 # identify 'self' & 'cls' aka first arg of class method, and give it 'special' arg,
 so that we can mark it as `SELF_OR_CLS`
