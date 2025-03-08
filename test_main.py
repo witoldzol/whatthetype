@@ -544,9 +544,9 @@ def test_convert_value_to_type():
     }
     actual = convert_value_to_type(value)
     if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
-        expected=('dict', 'str,Union[bool, dict[str,Union[dict[str,Union[bool, int, type]], dict[str,Union[bool, list[bool], type]], dict[str,Union[bool, list[str], type]], dict[str,Union[bool, type]]]]]')
+        expected = ('dict', 'str,Union[bool, dict[str,Union[dict[str,Union[bool, int, type[str]]], dict[str,Union[bool, list[bool], type[str]]], dict[str,Union[bool, list[str], type[str]]], dict[str,Union[bool, type[str]]]]]]')
     else:
-        expected=('dict', 'str,bool|dict[str,dict[str,bool|int|type]|dict[str,bool|list[bool]|type]|dict[str,bool|list[str]|type]|dict[str,bool|type]]')
+        expected=('dict', 'str,bool|dict[str,dict[str,bool|int|type[str]]|dict[str,bool|list[bool]|type[str]]|dict[str,bool|list[str]|type[str]]|dict[str,bool|type[str]]]')
     assert expected == actual
 
     # tuple
@@ -615,9 +615,9 @@ def test_convert_value_to_type():
     ]
     actual = convert_value_to_type(value)
     if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
-        expected = ('list', 'dict[Union[int,dict[str,Union[bool, int, type]], str,dict[str,Union[bool, int, type]]]]')
+        expected = ('list', 'dict[Union[int,dict[str,Union[bool, int, type[str]]], str,dict[str,Union[bool, int, type[str]]]]]')
     else:
-        expected = ('list', 'dict[int,dict[str,bool|int|type]|str,dict[str,bool|int|type]]')
+        expected = ('list', 'dict[int,dict[str,bool|int|type[str]]|str,dict[str,bool|int|type[str]]]')
     assert expected == actual
 
     # list_of_dict
@@ -649,9 +649,9 @@ def test_union_types():
                                 "Name" : {"m": True, "t": str, "ml": 64, "null": False}}}}
     actual = union_types([convert_value_to_type(value)])
     if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
-        expected = "dict[str,dict[str,dict[str,dict[str,Union[bool, int, type]]]]]"
+        expected = "dict[str,dict[str,dict[str,dict[str,Union[bool, int, type[str]]]]]]"
     else:
-        expected = "dict[str,dict[str,dict[str,dict[str,bool|int|type]]]]"
+        expected = "dict[str,dict[str,dict[str,dict[str,bool|int|type[str]]]]]"
     assert expected == actual
     #
     value = {"workspaces": {
@@ -660,9 +660,9 @@ def test_union_types():
         }}}
     actual = union_types([convert_value_to_type(value)])
     if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
-        expected = "dict[str,dict[str,dict[str,dict[str,Union[bool, list[str], type]]]]]"
+        expected = "dict[str,dict[str,dict[str,dict[str,Union[bool, list[str], type[str]]]]]]"
     else:
-        expected = "dict[str,dict[str,dict[str,dict[str,bool|list[str]|type]]]]"
+        expected = "dict[str,dict[str,dict[str,dict[str,bool|list[str]|type[str]]]]]"
     assert expected == actual
     #
     value = {"workspaces": {
@@ -676,9 +676,9 @@ def test_union_types():
              }
     actual = union_types([convert_value_to_type(value)])
     if sys.version_info.minor >= 5 and sys.version_info.minor <= 9:
-        expected = "dict[str,dict[str,Union[bool, dict[str,dict[str,Union[bool, int, type]]]]]]"
+        expected = "dict[str,dict[str,Union[bool, dict[str,dict[str,Union[bool, int, type[str]]]]]]]"
     else:
-        expected = "dict[str,dict[str,bool|dict[str,dict[str,bool|int|type]]]]"
+        expected = "dict[str,dict[str,bool|dict[str,dict[str,bool|int|type[str]]]]]"
     assert expected == actual
 
 def test_update_code_with_types_when_default_value_is_none():
@@ -1041,3 +1041,15 @@ def kfoo(*args):
     assert function_details["body_start_line"] == 31
     assert function_details["number_of_decorators"] == 0
 
+def test_bob():
+    value = str
+    actual = convert_value_to_type(value)
+    assert ("simple", "type[str]") == actual
+
+    value = int
+    actual = convert_value_to_type(value)
+    assert ("simple", "type[int]") == actual
+
+    value = {'b': int}
+    actual = convert_value_to_type(value)
+    assert ("dict", "str,type[int]") == actual

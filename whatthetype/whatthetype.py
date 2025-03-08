@@ -267,6 +267,10 @@ def convert_value_to_type(
             elif "USER_CLASS" in value:
                 class_name = value.split("::")[1]
                 return ("class", class_name)
+        # another special case -> type is type, eg. str ( we want to get Type[str], instead of just type )
+        elif type(value) is type:
+            name_of_type = value.__name__
+            return ("simple", f"type[{name_of_type}]")
         else:
             if input_type == "function":
                 return ("simple", "Callable")
@@ -274,7 +278,7 @@ def convert_value_to_type(
     if input_type == "dict":
         temp_dict = {}
         for k, v in value.items():
-            key_type = get_value_type(k) # this will overwrite other combination with the same key eg. {'a':1, 'a':'a'} will end up str,str
+            key_type = get_value_type(k)
             temp_dict.setdefault(key_type, set()).add(convert_value_to_type(v))
         if temp_dict:
             union_of_sorted_types = union_dict_types(temp_dict)
