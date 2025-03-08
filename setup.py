@@ -7,7 +7,7 @@ long_description = (current_directory / "README.md").read_text()
 
 setup(
     name="whatthetype",
-    version="1.0",
+    version="1.1",
     packages=["whatthetype"],
     author="Witold Zolnowski",
     description="Derives type hints from data captured during runtime. Updates source files with type hints. USE SOURCE CONTROL before upating in-place!!!!",
